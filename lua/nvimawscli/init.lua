@@ -1,5 +1,15 @@
 local dashboard = {}
 
+dashboard.config = {
+    prefered_services = {
+        "ec2",
+        "s3",
+        "rds",
+        "iam",
+        "vpc",
+    },
+}
+
 function dashboard.setup(config)
     print("Setting up dashboard")
     dashboard.config = config
@@ -17,7 +27,17 @@ function dashboard.launch()
     vim.api.nvim_win_set_buf(cur_win_id, bufnr)
 
     vim.api.nvim_buf_set_option(bufnr, 'modifiable', true)
-    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, {"ec2", "s3"})
+
+    local lines = {
+        "AWS CLI",
+        "========",
+        "",
+        "Services",
+        "--------",
+        unpack(dashboard.config.prefered_services),
+    }
+
+    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
     vim.api.nvim_buf_set_option(bufnr, 'modifiable', false)
 
 end
