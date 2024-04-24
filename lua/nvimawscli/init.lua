@@ -3,6 +3,7 @@ local dashboard = {}
 dashboard.config = {
     prefered_services = {
         "ec2",
+        "codedeply",
         "s3",
         "rds",
         "iam",
@@ -17,33 +18,8 @@ end
 
 function dashboard.launch()
 
-    local bufnr = vim.api.nvim_create_buf(false, true)
-    vim.api.nvim_buf_set_option(bufnr, 'bufhidden', 'wipe')
-    vim.api.nvim_buf_set_option(bufnr, 'buftype', 'nofile')
-    vim.api.nvim_buf_set_option(bufnr, 'swapfile', false)
-    vim.api.nvim_buf_set_option(bufnr, 'modifiable', false)
-
-    local cur_win_id = vim.api.nvim_get_current_win()
-    vim.api.nvim_win_set_buf(cur_win_id, bufnr)
-
-
-    vim.api.nvim_buf_set_keymap(buffer.bufnr, 'n', '<CR>', '', { callback = function()
-        self:on_select(action_names[1])
-    end})
-
-    vim.api.nvim_buf_set_option(bufnr, 'modifiable', true)
-
-    local lines = {
-        "AWS CLI",
-        "========",
-        "",
-        "Services",
-        "--------",
-        unpack(dashboard.config.prefered_services),
-    }
-
-    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
-    vim.api.nvim_buf_set_option(bufnr, 'modifiable', false)
+    local menu = require("nvimawscli.menu")
+    menu:load(dashboard.config)
 
 end
 
