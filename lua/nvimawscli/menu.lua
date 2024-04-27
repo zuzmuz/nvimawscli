@@ -1,55 +1,47 @@
-
-local menu = {}
-
-menu.services = {
-    "ec2",
-    "codedeploy",
-    "s3",
-    "rds",
-    "iam",
-    "vpc",
-}
-
-menu.header = {
-    "AWS CLI",
-    "========",
-}
-
-menu.services_header = {
-    "Services",
-    "--------",
-}
+local utils = require('nvimawscli.utils')
+local services = require('nvimawscli.services')
+local self = {}
 
 
-function menu:load(config)
-    self.bufnr = vim.api.nvim_create_buf(false, true)
+self.header =
+    "AWS CLI\n" ..
+    "========\n"
 
-    vim.api.nvim_buf_set_option(self.bufnr, 'bufhidden', 'wipe')
-    vim.api.nvim_buf_set_option(self.bufnr, 'buftype', 'nofile')
-    vim.api.nvim_buf_set_option(self.bufnr, 'swapfile', false)
-    vim.api.nvim_buf_set_option(self.bufnr, 'modifiable', false)
+self.services_header =
+    "Services\n" ..
+    "--------\n"
 
-    self.winnr = vim.api.nvim_get_current_win()
+self.services = table.concat(services.names, '\n')
 
+function self.load(bufnr, winnr, config)
+
+    self.bufnr = bufnr
+    self.winnr = winnr
+    print("Current buffer: " .. self.bufnr .. " Current window: " .. self.winnr)
     vim.api.nvim_win_set_buf(self.winnr, self.bufnr)
 
     vim.api.nvim_buf_set_keymap(self.bufnr, 'n', '<CR>', '', { callback = function()
         local position = vim.api.nvim_win_get_cursor(self.winnr)
-        print(position[1], position[2])
-        vim.cmd('te aws ec2')
-        local content = vim.api.nvim_buf_get_lines(0, 0, 1, false)
-        print(content[1])
+        local service = utils.get_line(self.bufnr, position[1])
+
+        local new_bufnr = utils.create_buffer()
+
+        vim.api.nvim_open_win(new_bufnr, false, {
+            width=config.services.width,
+            height=config.services.height,
+        })
+        -- local new_winnr = utils.create_window(new_bufnr, config.menu)
+
+        vim.api.nvim_win_set_width(self.winnr, config.menu.width)
+
+
+
+        -- print("Current buffer: " .. new_bufnr .. " Current window: " .. new_winnr)
+        -- services.load(service, new_bufnr, new_winnr, config)
     end})
 
-    vim.api.nvim_buf_set_option(self.bufnr, 'modifiable', true)
-    vim.api.nvim_buf_set_lines(self.bufnr, 0, -1, false, {
-        unpack(self.header),
-        unpack(self.services),
-        unpack(self.services_header),
-    })
-    vim.api.nvim_buf_set_option(self.bufnr, 'modifiable', false)
-
+    utils.write_lines(self.bufnr, self.header .. self.services_header .. self.services)
 end
 
 
-return menu
+return self
