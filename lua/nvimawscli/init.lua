@@ -12,12 +12,12 @@ dashboard.config = {
             "vpc",
         },
         split = "vertical",
-        width = 20,
+        width = 15,
         height = 20,
     },
     services = {
         split = "vertical",
-        width = 20,
+        width = 15,
         height = 20,
     }
 }

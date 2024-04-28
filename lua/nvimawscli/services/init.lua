@@ -9,8 +9,14 @@ self.names = {
     'vpc',
 }
 
-function self.load(service, bufnr, winnr, config)
-    require('nvimawscli.self.' .. service).load(bufnr, winnr, config)
+function self.load(service_name, bufnr, winnr, config)
+    local status, service = pcall(require, 'nvimawscli.services.' .. service_name)
+
+    if status then
+        service.load(bufnr, winnr, config)
+    else
+        print("Service not implemented yet: " .. service_name)
+    end
 end
 
 return self

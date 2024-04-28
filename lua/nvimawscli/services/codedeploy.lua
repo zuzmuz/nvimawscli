@@ -4,12 +4,8 @@ local utils = require('nvimawscli.utils')
 
 
 self.subservices = {
-    'Instances',
-    'Images',
-    'SecurityGroups',
-    'Elastic IPs',
-    'Load Balancers',
-    'Target Groups',
+    'Applications',
+    'Deployments',
 }
 
 function self.load(bufnr, winnr, config)
@@ -17,8 +13,8 @@ function self.load(bufnr, winnr, config)
     self.bufnr = bufnr
     self.winnr = winnr
 
+    -- vim.api.nvim_set_current_buf(self.bufnr)
     vim.api.nvim_set_current_win(self.winnr)
-    vim.api.nvim_set_current_buf(self.bufnr)
 
     utils.write_lines(self.bufnr, self.subservices)
 

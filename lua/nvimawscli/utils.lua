@@ -12,10 +12,9 @@ end
 function utils.create_window(bufnr, config)
     local winnr = 0
     if config.split == "vertical" then
-        winnr = vim.api.nvim_open_win(bufnr, true, {
-            vertical = true,
-            split = "right"
-        })
+        vim.cmd("rightbelow vnew")
+        winnr = vim.api.nvim_get_current_win()
+        vim.api.nvim_win_set_buf(winnr, bufnr)
     end
     return winnr
 end
@@ -28,8 +27,12 @@ function utils.get_line(bufnr, line)
     return nil
 end
 
-function utils.write_lines(bufnr, lines)
+function utils.write_lines_string(bufnr, lines)
     lines = vim.split(lines, "\n")
+    utils.write_lines(bufnr, lines)
+end
+
+function utils.write_lines(bufnr, lines)
     vim.api.nvim_buf_set_option(bufnr, 'modifiable', true)
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
     vim.api.nvim_buf_set_option(bufnr, 'modifiable', false)
