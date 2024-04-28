@@ -38,4 +38,56 @@ function utils.write_lines(bufnr, lines)
     vim.api.nvim_buf_set_option(bufnr, 'modifiable', false)
 end
 
+function utils.create_table_output(lines_table)
+
+    if #lines_table == 0 then
+        return {}
+    end
+
+    local lines = {}
+
+    local widths = {}
+
+    for i, _ in ipairs(lines_table[1]) do
+        widths[i] = 0
+    end
+
+    -- calculating the max width of every column
+    for _, line in ipairs(lines_table) do
+        for i, value in ipairs(line) do
+            if #value > widths[i] then
+                widths[i] = #value
+            end
+        end
+    end
+
+    for _, line in ipairs(lines_table) do
+        local i = #lines + 1
+        lines[i] = '| '
+        for j, value in ipairs(line) do
+            lines[i] = lines[i] .. value
+            lines[i] = lines[i] .. string.rep(' ', widths[j] - #value + 5) .. ' | '
+        end
+
+        if i == 1 then
+            lines[i+1] = '| '
+            for j, _ in ipairs(line) do
+                lines[i+1] = lines[i+1] .. string.rep('-', widths[j] + 5) .. ' | '
+            end
+        end
+    end
+
+    return lines
+end
+
+
+function utils.async_command(command, on_result)
+    vim.fn.jobstart(command, {
+        stdout_buffered = true,
+        on_stdout = function(_, result)
+            on_result(table.concat(result, '\n'))
+        end,
+    })
+end
+
 return utils

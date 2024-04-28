@@ -9,14 +9,20 @@ function self.load(bufnr, winnr, config)
 
     vim.api.nvim_set_current_win(self.winnr)
 
-    local result = vim.fn.system({
-        'aws', 'ec2', 'describe-instances',
-    })
 
+    utils.async_command('aws ec2 describe-instances', function (result)
+        self.handle(result)
+    end)
+
+    utils.write_lines_string(self.bufnr, 'Fetching...')
+end
+
+
+function self.handle(result)
     self.reservations = vim.json.decode(result).Reservations
 
-    self.lines_table= {
-        { 'name', 'instanceID' }
+    self.lines_table = {
+        { 'name', 'instanceID', 'state', 'type', 'privateIP', 'publicIP', }
     }
 
     for i, reservation in ipairs(self.reservations) do
@@ -27,31 +33,25 @@ function self.load(bufnr, winnr, config)
                 name = tag.Value
             end
         end
-        self.lines_table[i+1] = { name, instance.InstanceId }
-    end
+        local public_ip = instance.PublicIpAddress
 
-
-    self.lines = {}
-    self.widths = { 0, 0 }
-
-    for _, line in ipairs(self.lines_table) do
-        for i, value in ipairs(line) do
-            if #value > self.widths[i] then
-                self.widths[i] = #value
-            end
+        if not public_ip then
+            public_ip = ''
         end
+
+        self.lines_table[i + 1] = {
+            name,
+            instance.InstanceId,
+            instance.State.Name,
+            instance.InstanceType,
+            instance.PrivateIpAddress,
+            public_ip,
+        }
     end
 
-    for i, line in ipairs(self.lines_table) do
-        self.lines[i] = ''
-        for j, value in ipairs(line) do
-            self.lines[i] = self.lines[i] .. value
-            self.lines[i] = self.lines[i] .. string.rep(' ', self.widths[j] - #value + 1)
-        end
-    end
+    self.lines = utils.create_table_output(self.lines_table)
 
     utils.write_lines(self.bufnr, self.lines)
-
 end
 
 return self
