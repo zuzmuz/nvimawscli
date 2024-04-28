@@ -47,4 +47,10 @@ function self.load(bufnr, winnr, config)
     utils.write_lines_string(self.bufnr, self.header .. self.services_header .. self.services)
 end
 
+function self.hide()
+end
+
+function self.show()
+end
+
 return self

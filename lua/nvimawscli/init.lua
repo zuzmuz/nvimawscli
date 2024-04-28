@@ -1,7 +1,7 @@
 local utils = require('nvimawscli.utils')
-local dashboard = {}
+local self = {}
 
-dashboard.config = {
+self.config = {
     menu = {
         prefered_services = {
             "ec2",
@@ -22,18 +22,31 @@ dashboard.config = {
     }
 }
 
-function dashboard.setup(config)
-    print("Setting up dashboard")
-    dashboard.config = config
+self.launched = false
+
+function self.setup(config)
+    print("Setting up self")
+    self.config = config
 end
 
-function dashboard.launch()
-    local menu = require("nvimawscli.menu")
+-- should consider windown management
+
+function self.launch()
+    if self.launched then
+        print("Dashboard already launched")
+        return
+    end
+
+    self.launched = true
+
+    -- self.window_manager = {}
+
+    self.menu = require("nvimawscli.menu")
 
     local bufnr = utils.create_buffer()
     local winnr = vim.api.nvim_get_current_win()
 
-    menu.load(bufnr, winnr, dashboard.config)
+    self.menu.load(bufnr, winnr, self.config)
 end
 
-return dashboard
+return self
