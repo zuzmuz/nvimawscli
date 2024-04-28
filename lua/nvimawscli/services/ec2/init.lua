@@ -37,7 +37,7 @@ function self.load(bufnr, winnr, config)
             local status, subservice = pcall(require, 'nvimawscli.services.ec2.' .. subservice_name)
 
             if status then
-                subservice.load(bufnr, winnr, config)
+                subservice.load(self.subservice_bufnr, self.subservice_winnr, config)
             else
                 print('Subservice not found: ' .. subservice_name)
                 return
