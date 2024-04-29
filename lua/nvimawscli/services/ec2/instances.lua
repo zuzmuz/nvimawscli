@@ -35,7 +35,14 @@ function self.load(bufnr, winnr, config)
 
 
             elseif position[1] == 1 then
-                self.sort_lines_table(utils.get_column_index_from_position(position[2], self.widths))
+                local column = utils.get_column_index_from_position(position[2], self.widths)
+                if self.sorted_by == column then
+                    self.sorted_direction = self.sorted_direction * -1
+                else
+                    self.sorted_by = column
+                    self.sorted_direction = 1
+                end
+                self.sort_lines_table(column)
                 self.render(config)
             end
         end
@@ -55,9 +62,12 @@ function self.refresh(config)
     utils.write_lines_string(self.bufnr, 'Fetching...')
 end
 
-function self.sort_lines_table(column)
+function self.sort_lines_table(column, direction)
     table.sort(self.lines_table, function(a, b)
-        return a[column] < b[column]
+        if direction == 1 then
+            return a[column] < b[column]
+        end
+        return a[column] > b[column]
     end)
 end
 
