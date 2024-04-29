@@ -37,7 +37,6 @@ function self.load(config)
                 vim.api.nvim_win_set_width(self.winnr, config.menu.width)
             else
                 print('Subservice not found: ' .. subservice_name)
-                return
             end
         end
     })

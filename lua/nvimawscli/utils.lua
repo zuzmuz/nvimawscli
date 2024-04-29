@@ -1,12 +1,19 @@
 local utils = {}
 
-function utils.create_buffer(name)
+-- these will be modularized for sure at some point
+
+function utils.create_buffer(name, deletable)
     local bufnr = vim.api.nvim_create_buf(false, true)
-    -- vim.api.nvim_buf_set_option(bufnr, 'bufhidden', 'wipe')
+
     vim.api.nvim_buf_set_option(bufnr, 'buftype', 'nofile')
     vim.api.nvim_buf_set_option(bufnr, 'swapfile', false)
     vim.api.nvim_buf_set_option(bufnr, 'modifiable', false)
-    vim.api.nvim_buf_set_name(bufnr, name)
+    if name then
+        vim.api.nvim_buf_set_name(bufnr, name)
+    end
+    if deletable then
+        vim.api.nvim_buf_set_option(bufnr, 'bufhidden', 'delete')
+    end
     return bufnr
 end
 
@@ -24,22 +31,17 @@ function utils.check_if_window_exists(winnr)
     return vim.api.nvim_win_is_valid(winnr)
 end
 
-function utils.create_floating_window(lines, config)
+function utils.create_floating_popup(message, choices, config)
     local winnr = 0
-    local height = #lines
+    local height = 10
 
-    local bufnr = utils.create_buffer()
+    local bufnr = utils.create_buffer(nil, true)
 
-    local width = 0
-    for _, value in ipairs(lines) do
-        if #value > width then
-            width = #value
-        end
-    end
+    local width = vim.strdisplaywidth(message) + 10
 
-    local opts = {
-        relative = 'cursor',
-        row = -1,
+    local options = {
+        relative = 'editor',
+        row = 0,
         col = 0,
         height = height,
         width = width,
@@ -47,12 +49,13 @@ function utils.create_floating_window(lines, config)
         border = 'rounded',
     }
 
-    winnr = vim.api.nvim_open_win(bufnr, true, opts)
+    winnr = vim.api.nvim_open_win(bufnr, true, options)
 
-    utils.write_lines(bufnr, lines)
+    utils.write_lines_string(bufnr, message)
 
     return { winnr = winnr, bufnr = bufnr }
 end
+
 
 function utils.get_line(bufnr, line)
     local lines = vim.api.nvim_buf_get_lines(bufnr, line - 1, line, false)
