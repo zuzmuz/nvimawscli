@@ -12,9 +12,14 @@ self.subservices = {
     'target_groups',
 }
 
-function self.load(bufnr, winnr, config)
-    self.bufnr = bufnr
-    self.winnr = winnr
+function self.load(config)
+    if not self.bufnr then
+        self.bufnr = utils.create_buffer('submenu')
+    end
+
+    if not self.winnr or not utils.check_if_window_exists(self.winnr) then
+        self.winnr = utils.create_window(self.bufnr, config.services)
+    end
 
     vim.api.nvim_set_current_win(self.winnr)
     vim.api.nvim_set_current_buf(self.bufnr)
@@ -25,19 +30,12 @@ function self.load(bufnr, winnr, config)
 
             local subservice_name = utils.get_line(self.bufnr, position[1])
 
-            if not self.subservice_bufnr then
-                self.subservice_bufnr = utils.create_buffer('ec2')
-            end
-
-            if not self.subservice_winnr or not utils.check_if_window_exists(self.subservice_winnr) then
-                self.subservice_winnr = utils.create_window(self.subservice_bufnr, config.services)
-                vim.api.nvim_win_set_width(self.winnr, config.services.width)
-            end
 
             local status, subservice = pcall(require, 'nvimawscli.services.ec2.' .. subservice_name)
 
             if status then
-                subservice.load(self.subservice_bufnr, self.subservice_winnr, config)
+                subservice.load(config)
+                vim.api.nvim_win_set_width(self.winnr, config.menu.width)
             else
                 print('Subservice not found: ' .. subservice_name)
                 return

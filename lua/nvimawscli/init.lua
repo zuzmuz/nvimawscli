@@ -39,24 +39,16 @@ function self.setup(config)
     self.config = config
 end
 
--- should consider windown management
-
 function self.launch()
     if self.launched then
         print("Dashboard already launched")
         return
     end
-
     self.launched = true
-
-    -- self.window_manager = {}
 
     self.menu = require("nvimawscli.menu")
 
-    local bufnr = utils.create_buffer('menu')
-    local winnr = vim.api.nvim_get_current_win()
-
-    self.menu.load(bufnr, winnr, self.config)
+    self.menu.load(self.config)
 end
 
 return self

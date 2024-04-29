@@ -11,10 +11,15 @@ function self.get_instance_functions(state)
     return { "details", "terminate instance" }
 end
 
+function self.load(config)
+    if not self.bufnr then
+        self.bufnr = utils.create_buffer('ec2')
+    end
 
-function self.load(bufnr, winnr, config)
-    self.bufnr = bufnr
-    self.winnr = winnr
+    if not self.winnr or not utils.check_if_window_exists(self.winnr) then
+        self.winnr = utils.create_window(self.bufnr, config.services)
+        vim.api.nvim_win_set_width(self.winnr, config.services.width)
+    end
 
     vim.api.nvim_set_current_win(self.winnr)
 
@@ -43,47 +48,49 @@ function self.load(bufnr, winnr, config)
                         if item_number > 0 and item_number <= #self.get_instance_functions(state) then
                             local function_name = self.get_instance_functions(state)[item_number]
                             if function_name == "details" then
-                                utils.async_command('aws ec2 describe-instances --instance-ids ' .. instance_id, function (result, error)
-                                    if error ~= nil then
-                                        utils.write_lines_string(floating_bufnr, error)
-                                    else
-                                        utils.write_lines_string(floating_bufnr, result)
-                                    end
-                                end)
+                                utils.async_command('aws ec2 describe-instances --instance-ids ' .. instance_id,
+                                    function(result, error)
+                                        if error ~= nil then
+                                            utils.write_lines_string(floating_bufnr, error)
+                                        else
+                                            utils.write_lines_string(floating_bufnr, result)
+                                        end
+                                    end)
                                 utils.write_lines_string(floating_bufnr, 'Fetching...')
                             elseif function_name == "stop instance" then
-                                utils.async_command('aws ec2 stop-instances --instance-ids ' .. instance_id, function (result, error)
-                                    if error ~= nil then
-                                        utils.write_lines_string(floating_bufnr, error)
-                                    else
-                                        utils.write_lines_string(floating_bufnr, result)
-                                    end
-                                end)
+                                utils.async_command('aws ec2 stop-instances --instance-ids ' .. instance_id,
+                                    function(result, error)
+                                        if error ~= nil then
+                                            utils.write_lines_string(floating_bufnr, error)
+                                        else
+                                            utils.write_lines_string(floating_bufnr, result)
+                                        end
+                                    end)
                                 utils.write_lines_string(floating_bufnr, 'Stopping...')
                             elseif function_name == "start instance" then
-                                utils.async_command('aws ec2 start-instances --instance-ids ' .. instance_id, function (result, error)
-                                    if error ~= nil then
-                                        utils.write_lines_string(floating_bufnr, error)
-                                    else
-                                        utils.write_lines_string(floating_bufnr, result)
-                                    end
-                                end)
+                                utils.async_command('aws ec2 start-instances --instance-ids ' .. instance_id,
+                                    function(result, error)
+                                        if error ~= nil then
+                                            utils.write_lines_string(floating_bufnr, error)
+                                        else
+                                            utils.write_lines_string(floating_bufnr, result)
+                                        end
+                                    end)
                                 utils.write_lines_string(floating_bufnr, 'Starting...')
                             elseif function_name == "terminate instance" then
-                                utils.async_command('aws ec2 terminate-instances --instance-ids ' .. instance_id, function (result, error)
-                                    if error ~= nil then
-                                        utils.write_lines_string(floating_bufnr, error)
-                                    else
-                                        utils.write_lines_string(floating_bufnr, result)
-                                    end
-                                end)
+                                utils.async_command('aws ec2 terminate-instances --instance-ids ' .. instance_id,
+                                    function(result, error)
+                                        if error ~= nil then
+                                            utils.write_lines_string(floating_bufnr, error)
+                                        else
+                                            utils.write_lines_string(floating_bufnr, result)
+                                        end
+                                    end)
                                 utils.write_lines_string(floating_bufnr, 'Terminating...')
                             end
                         end
                     end
                 })
-
-
             elseif position[1] == 1 then
                 local column = utils.get_column_index_from_position(position[2], self.widths)
                 if self.sorted_by == column then
@@ -100,7 +107,7 @@ function self.load(bufnr, winnr, config)
 end
 
 function self.refresh(config)
-    utils.async_command('aws ec2 describe-instances', function (result, error)
+    utils.async_command('aws ec2 describe-instances', function(result, error)
         if error ~= nil then
             utils.write_lines_string(self.bufnr, error)
         else
