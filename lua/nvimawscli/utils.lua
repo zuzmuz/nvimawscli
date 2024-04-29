@@ -103,15 +103,15 @@ function utils.create_table_output(headers, lines_table)
     -- calculating the max width of every column
 
     for i, header in ipairs(headers) do
-        if #header > widths[i] then
-            widths[i] = #header
+        if vim.fn.strdisplaywidth(header) > widths[i] then
+            widths[i] = vim.fn.strdisplaywidth(header)
         end
     end
 
     for _, line in ipairs(lines_table) do
         for i, value in ipairs(line) do
-            if #value > widths[i] then
-                widths[i] = #value
+            if vim.fn.strdisplaywidth(value) > widths[i] then
+                widths[i] = vim.fn.strdisplaywidth(value)
             end
         end
     end
@@ -119,7 +119,7 @@ function utils.create_table_output(headers, lines_table)
     lines[1] = '| '
     lines[2] = '| '
     for j, header in ipairs(headers) do
-        lines[1] = lines[1] .. header .. string.rep(' ', widths[j] - #header + 5) .. ' | '
+        lines[1] = lines[1] .. header .. string.rep(' ', widths[j] - vim.fn.strdisplaywidth(header) + 5) .. ' | '
         lines[2] = lines[2] .. string.rep('-', widths[j] + 5) .. ' | '
     end
 
@@ -127,7 +127,7 @@ function utils.create_table_output(headers, lines_table)
         local i = #lines + 1
         lines[i] = '| '
         for j, value in ipairs(line) do
-            lines[i] = lines[i] .. value .. string.rep(' ', widths[j] - #value + 5) .. ' | '
+            lines[i] = lines[i] .. value .. string.rep(' ', widths[j] - vim.fn.strdisplaywidth(value) + 5) .. ' | '
         end
     end
 

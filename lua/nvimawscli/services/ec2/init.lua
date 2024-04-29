@@ -22,7 +22,6 @@ function self.load(config)
     end
 
     vim.api.nvim_set_current_win(self.winnr)
-    vim.api.nvim_set_current_buf(self.bufnr)
 
     vim.api.nvim_buf_set_keymap(self.bufnr, 'n', '<CR>', '', {
         callback = function()
