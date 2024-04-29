@@ -45,10 +45,7 @@ function self.launch()
         return
     end
     self.launched = true
-
-    self.menu = require("nvimawscli.menu")
-
-    self.menu.load(self.config)
+    require("nvimawscli.menu").load(self.config)
 end
 
 return self
