@@ -46,15 +46,6 @@ function self.load(bufnr, winnr, config)
     })
 
     utils.write_lines(self.bufnr, self.subservices)
-
-
-
-    -- local lines = vim.split(result, "\n")
-    -- if #lines > 0 then
-    --     vim.api.nvim_buf_set_option(self.bufnr, 'modifiable', true)
-    --     vim.api.nvim_buf_set_lines(self.bufnr, 0, -1, false, lines)
-    --     vim.api.nvim_buf_set_option(self.bufnr, 'modifiable', false)
-    -- end
 end
 
 return self

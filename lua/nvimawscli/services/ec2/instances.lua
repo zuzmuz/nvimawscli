@@ -9,9 +9,34 @@ function self.load(bufnr, winnr, config)
 
     vim.api.nvim_set_current_win(self.winnr)
 
+    self.refresh()
 
-    utils.async_command('aws ec2 describe-instances', function (result)
-        self.handle(result)
+    vim.api.nvim_buf_set_keymap(self.bufnr, 'n', '<CR>', '', {
+        callback = function()
+            local position = vim.api.nvim_win_get_cursor(self.winnr)
+
+            local item_number = utils.get_item_number_from_row(position[1])
+
+            if item_number > 0 and item_number <= #self.reservations then
+                local instance_id = self.reservations[item_number].Instances[1].InstanceId
+
+                utils.create_floating_window({"start instance", "terminate instance", "connect"}, config)
+
+
+            else
+                print('Invalid selection')
+            end
+        end
+    })
+end
+
+function self.refresh()
+    utils.async_command('aws ec2 describe-instances', function (result, error)
+        if error ~= nil then
+            utils.write_lines_string(self.bufnr, error)
+        else
+            self.handle(result)
+        end
     end)
 
     utils.write_lines_string(self.bufnr, 'Fetching...')

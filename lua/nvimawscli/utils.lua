@@ -19,6 +19,36 @@ function utils.create_window(bufnr, config)
     return winnr
 end
 
+function utils.create_floating_window(lines, config)
+    local winnr = 0
+    local height = #lines
+
+    local bufnr = utils.create_buffer()
+
+    local width = 0
+    for _, value in ipairs(lines) do
+        if #value > width then
+            width = #value
+        end
+    end
+
+    local opts = {
+        relative = 'cursor',
+        row = -1,
+        col = 0,
+        height = height,
+        width = width,
+        style = 'minimal',
+        border = 'rounded',
+    }
+
+    winnr = vim.api.nvim_open_win(bufnr, true, opts)
+
+    utils.write_lines(bufnr, lines)
+
+    return {winnr = winnr, bufnr = bufnr}
+end
+
 function utils.get_line(bufnr, line)
     local lines = vim.api.nvim_buf_get_lines(bufnr, line - 1, line, false)
     if #lines > 0 then
@@ -36,6 +66,10 @@ function utils.write_lines(bufnr, lines)
     vim.api.nvim_buf_set_option(bufnr, 'modifiable', true)
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
     vim.api.nvim_buf_set_option(bufnr, 'modifiable', false)
+end
+
+function utils.get_item_number_from_row(row)
+    return row - 2
 end
 
 function utils.create_table_output(lines_table)
@@ -84,9 +118,19 @@ end
 function utils.async_command(command, on_result)
     vim.fn.jobstart(command, {
         stdout_buffered = true,
-        on_stdout = function(_, result)
-            on_result(table.concat(result, '\n'))
+        stderr_buffered = true,
+        on_stdout = function(_, result, _)
+            if #result == 0 or #result == 1 and result[1] == '' then
+                return
+            end
+            on_result(table.concat(result, '\n'), nil)
         end,
+        on_stderr = function(_, result, _)
+            if #result == 0 or #result == 1 and result[1] == '' then
+                return
+            end
+            on_result(nil, table.concat(result, '\n'))
+        end
     })
 end
 
