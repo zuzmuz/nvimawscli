@@ -26,10 +26,10 @@ function self.load(bufnr, winnr, config)
             local subservice_name = utils.get_line(self.bufnr, position[1])
 
             if not self.subservice_bufnr then
-                self.subservice_bufnr = utils.create_buffer()
+                self.subservice_bufnr = utils.create_buffer('ec2')
             end
 
-            if not self.subservice_winnr then
+            if not self.subservice_winnr or not utils.check_if_window_exists(self.subservice_winnr) then
                 self.subservice_winnr = utils.create_window(self.subservice_bufnr, config.services)
                 vim.api.nvim_win_set_width(self.winnr, config.services.width)
             end

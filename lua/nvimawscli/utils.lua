@@ -1,11 +1,12 @@
 local utils = {}
 
-function utils.create_buffer()
+function utils.create_buffer(name)
     local bufnr = vim.api.nvim_create_buf(false, true)
-    vim.api.nvim_buf_set_option(bufnr, 'bufhidden', 'wipe')
+    -- vim.api.nvim_buf_set_option(bufnr, 'bufhidden', 'wipe')
     vim.api.nvim_buf_set_option(bufnr, 'buftype', 'nofile')
     vim.api.nvim_buf_set_option(bufnr, 'swapfile', false)
     vim.api.nvim_buf_set_option(bufnr, 'modifiable', false)
+    vim.api.nvim_buf_set_name(bufnr, name)
     return bufnr
 end
 
@@ -17,6 +18,10 @@ function utils.create_window(bufnr, config)
         vim.api.nvim_win_set_buf(winnr, bufnr)
     end
     return winnr
+end
+
+function utils.check_if_window_exists(winnr)
+    return vim.api.nvim_win_is_valid(winnr)
 end
 
 function utils.create_floating_window(lines, config)

@@ -92,7 +92,7 @@ function self.load(bufnr, winnr, config)
                     self.sorted_by = column
                     self.sorted_direction = 1
                 end
-                self.sort_lines_table(column)
+                self.sort_lines_table(column, self.sorted_direction)
                 self.render(config)
             end
         end

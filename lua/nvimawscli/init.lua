@@ -28,7 +28,6 @@ self.config = {
             "Type",
             "PrivateIpAddress",
             "PublicIpAddress",
-            -- "StatusCheck",
         },
     }
 }
@@ -54,7 +53,7 @@ function self.launch()
 
     self.menu = require("nvimawscli.menu")
 
-    local bufnr = utils.create_buffer()
+    local bufnr = utils.create_buffer('menu')
     local winnr = vim.api.nvim_get_current_win()
 
     self.menu.load(bufnr, winnr, self.config)

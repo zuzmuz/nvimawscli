@@ -32,10 +32,10 @@ function self.load(bufnr, winnr, config)
             local service = utils.get_line(self.bufnr, position[1])
 
             if not self.service_bufnr then
-                self.service_bufnr = utils.create_buffer()
+                self.service_bufnr = utils.create_buffer('submenu')
             end
 
-            if not self.service_winnr then
+            if not self.service_winnr or not utils.check_if_window_exists(self.service_winnr) then
                 self.service_winnr = utils.create_window(self.service_bufnr, config.services)
                 vim.api.nvim_win_set_width(self.winnr, config.menu.width)
             end
@@ -48,6 +48,7 @@ function self.load(bufnr, winnr, config)
 end
 
 function self.hide()
+    vim.api.nvim_win_hide(self.winnr)
 end
 
 function self.show()
