@@ -31,7 +31,57 @@ function self.load(bufnr, winnr, config)
                 local instance_id = instance.InstanceId
                 local state = instance.State.Name
 
-                utils.create_floating_window({"start instance", "terminate instance", "connect"}, config)
+                local floating_window = utils.create_floating_window(self.get_instance_functions(state), config)
+                local floating_bufnr = floating_window.bufnr
+                local floating_winnr = floating_window.winnr
+
+                vim.api.nvim_buf_set_keymap(floating_bufnr, 'n', '<CR>', '', {
+                    callback = function()
+                        local position = vim.api.nvim_win_get_cursor(floating_winnr)
+                        local item_number = utils.get_item_number_from_row(position[1])
+
+                        if item_number > 0 and item_number <= #self.get_instance_functions(state) then
+                            local function_name = self.get_instance_functions(state)[item_number]
+                            if function_name == "details" then
+                                utils.async_command('aws ec2 describe-instances --instance-ids ' .. instance_id, function (result, error)
+                                    if error ~= nil then
+                                        utils.write_lines_string(floating_bufnr, error)
+                                    else
+                                        utils.write_lines_string(floating_bufnr, result)
+                                    end
+                                end)
+                                utils.write_lines_string(floating_bufnr, 'Fetching...')
+                            elseif function_name == "stop instance" then
+                                utils.async_command('aws ec2 stop-instances --instance-ids ' .. instance_id, function (result, error)
+                                    if error ~= nil then
+                                        utils.write_lines_string(floating_bufnr, error)
+                                    else
+                                        utils.write_lines_string(floating_bufnr, result)
+                                    end
+                                end)
+                                utils.write_lines_string(floating_bufnr, 'Stopping...')
+                            elseif function_name == "start instance" then
+                                utils.async_command('aws ec2 start-instances --instance-ids ' .. instance_id, function (result, error)
+                                    if error ~= nil then
+                                        utils.write_lines_string(floating_bufnr, error)
+                                    else
+                                        utils.write_lines_string(floating_bufnr, result)
+                                    end
+                                end)
+                                utils.write_lines_string(floating_bufnr, 'Starting...')
+                            elseif function_name == "terminate instance" then
+                                utils.async_command('aws ec2 terminate-instances --instance-ids ' .. instance_id, function (result, error)
+                                    if error ~= nil then
+                                        utils.write_lines_string(floating_bufnr, error)
+                                    else
+                                        utils.write_lines_string(floating_bufnr, result)
+                                    end
+                                end)
+                                utils.write_lines_string(floating_bufnr, 'Terminating...')
+                            end
+                        end
+                    end
+                })
 
 
             elseif position[1] == 1 then
