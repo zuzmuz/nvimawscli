@@ -46,7 +46,7 @@ function utils.create_floating_window(lines, config)
 
     utils.write_lines(bufnr, lines)
 
-    return {winnr = winnr, bufnr = bufnr}
+    return { winnr = winnr, bufnr = bufnr }
 end
 
 function utils.get_line(bufnr, line)
@@ -72,8 +72,17 @@ function utils.get_item_number_from_row(row)
     return row - 2
 end
 
-function utils.create_table_output(lines_table)
+function utils.get_column_index_from_position(position, widths)
+    local accumulated_width = 0
+    for i, width in ipairs(widths) do
+        accumulated_width = accumulated_width + width + 5 + 3 -- 3 is the space between columns ' | '
+        if position <= accumulated_width then
+            return i
+        end
+    end
+end
 
+function utils.create_table_output(headers, lines_table)
     if #lines_table == 0 then
         return {}
     end
@@ -87,6 +96,13 @@ function utils.create_table_output(lines_table)
     end
 
     -- calculating the max width of every column
+
+    for i, header in ipairs(headers) do
+        if #header > widths[i] then
+            widths[i] = #header
+        end
+    end
+
     for _, line in ipairs(lines_table) do
         for i, value in ipairs(line) do
             if #value > widths[i] then
@@ -95,25 +111,23 @@ function utils.create_table_output(lines_table)
         end
     end
 
+    lines[1] = '| '
+    lines[2] = '| '
+    for j, header in ipairs(headers) do
+        lines[1] = lines[1] .. header .. string.rep(' ', widths[j] - #header + 5) .. ' | '
+        lines[2] = lines[2] .. string.rep('-', widths[j] + 5) .. ' | '
+    end
+
     for _, line in ipairs(lines_table) do
         local i = #lines + 1
         lines[i] = '| '
         for j, value in ipairs(line) do
-            lines[i] = lines[i] .. value
-            lines[i] = lines[i] .. string.rep(' ', widths[j] - #value + 5) .. ' | '
-        end
-
-        if i == 1 then
-            lines[i+1] = '| '
-            for j, _ in ipairs(line) do
-                lines[i+1] = lines[i+1] .. string.rep('-', widths[j] + 5) .. ' | '
-            end
+            lines[i] = lines[i] .. value .. string.rep(' ', widths[j] - #value + 5) .. ' | '
         end
     end
 
-    return lines
+    return { widths = widths, lines = lines }
 end
-
 
 function utils.async_command(command, on_result)
     vim.fn.jobstart(command, {

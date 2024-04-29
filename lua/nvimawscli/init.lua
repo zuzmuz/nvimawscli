@@ -19,6 +19,17 @@ self.config = {
         split = "vertical",
         width = 15,
         height = 20,
+    },
+    ec2 = {
+        columns = {
+            "Name",
+            "InstanceId",
+            "State",
+            "Type",
+            "PrivateIpAddress",
+            "PublicIpAddress",
+            -- "StatusCheck",
+        },
     }
 }
 
