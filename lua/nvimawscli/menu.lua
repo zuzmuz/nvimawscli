@@ -51,6 +51,14 @@ function self.load()
         table.concat(self.header, '\n') .. '\n' ..
         table.concat(self.services_header, '\n') .. '\n' ..
         table.concat(self.services, '\n'))
+
+
+    local allowed_positions = {}
+
+    for i, _ in ipairs(self.services) do
+        allowed_positions[#allowed_positions+1] = { { #self.header + #self.services_header + i, 1 } }
+    end
+    utils.set_allowed_positions(self.bufnr, allowed_positions)
 end
 
 function self.hide()

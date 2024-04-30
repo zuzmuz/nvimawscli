@@ -56,7 +56,6 @@ function self.get_line(bufnr, line_number)
     return nil
 end
 
-
 ---Overwrite the buffer with the given lines
 ---@param bufnr number: The buffer number
 ---@param lines string: The lines to write, the lines are split by '\n'
@@ -72,6 +71,59 @@ function self.write_lines(bufnr, lines)
     vim.api.nvim_buf_set_option(bufnr, 'modifiable', true)
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
     vim.api.nvim_buf_set_option(bufnr, 'modifiable', false)
+end
+
+---Set the allowed cursor positions of the buffer.
+---The allowed positions are used to restrict the cursor movement to the allowed positions.
+---The hjkl in normal mode will only move the cursor to the allowed positions.
+---@param bufnr number: The buffer number
+---@param allowed_positions table<table<table<number>>>: The allowed positions, a matrix of 2 dimensional points
+function self.set_allowed_positions(bufnr, allowed_positions)
+    local current_position = { 1, 1 }
+    local new_cursor_position = allowed_positions[current_position[1]][current_position[2]]
+    vim.fn.setcursorcharpos(new_cursor_position[1],
+                            new_cursor_position[2])
+
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', 'h', '', {
+        callback = function()
+            if current_position[2] > 1 then
+                current_position[2] = current_position[2] - 1
+            end
+            new_cursor_position = allowed_positions[current_position[1]][current_position[2]]
+            vim.fn.setcursorcharpos(new_cursor_position[1],
+                                    new_cursor_position[2])
+        end
+    })
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', 'j', '', {
+        callback = function()
+            if current_position[1] < #allowed_positions then
+                current_position[1] = current_position[1] + 1
+            end
+            new_cursor_position = allowed_positions[current_position[1]][current_position[2]]
+            vim.fn.setcursorcharpos(new_cursor_position[1],
+                                    new_cursor_position[2])
+        end
+    })
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', 'k', '', {
+        callback = function()
+            if current_position[1] > 1 then
+                current_position[1] = current_position[1] - 1
+            end
+            new_cursor_position = allowed_positions[current_position[1]][current_position[2]]
+            vim.fn.setcursorcharpos(new_cursor_position[1],
+                                    new_cursor_position[2])
+        end
+    })
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', 'l', '', {
+        callback = function()
+            if current_position[2] < #allowed_positions[1] then
+                current_position[2] = current_position[2] + 1
+            end
+            new_cursor_position = allowed_positions[current_position[1]][current_position[2]]
+            vim.fn.setcursorcharpos(new_cursor_position[1],
+                                    new_cursor_position[2])
+        end
+    })
 end
 
 return self

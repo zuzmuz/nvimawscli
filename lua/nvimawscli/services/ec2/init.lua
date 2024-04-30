@@ -42,6 +42,11 @@ function self.load()
     })
 
     utils.write_lines(self.bufnr, self.subservices)
+    local allowed_positions = {}
+    for i, _ in ipairs(self.services) do
+        allowed_positions[#allowed_positions+1] = { { i, 1 } }
+    end
+    utils.set_allowed_positions(self.bufnr, allowed_positions)
 end
 
 return self

@@ -1,13 +1,11 @@
 local self = {}
 
-
 self.launched = false
 
-function self.setup(options)
-    require('nvimawscli.config').setup(options)
+function self.setup(config)
+    require('nvimawscli.config').setup(config)
     self.is_setup = true
 end
-
 
 --- Launch the Dashboard
 function self.launch()
@@ -20,7 +18,7 @@ function self.launch()
         return
     end
     self.launched = true
-    require("nvimawscli.menu").load(self.config)
+    require("nvimawscli.menu").load()
 end
 
 return self
