@@ -17,8 +17,7 @@ function self.load(config)
     end
 
     if not self.winnr or not utils.check_if_window_exists(self.winnr) then
-        self.winnr = utils.create_window(self.bufnr, config.services)
-        vim.api.nvim_win_set_width(self.winnr, config.services.width)
+        self.winnr = utils.create_window(self.bufnr, config.submenu)
     end
 
     vim.api.nvim_set_current_win(self.winnr)
