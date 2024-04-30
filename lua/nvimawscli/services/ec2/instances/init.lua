@@ -170,7 +170,6 @@ function self.render(rows)
 
     self.widths = widths
     utils.write_lines(self.bufnr, lines)
-    print('allowed positions ' .. vim.inspect(allowed_positions))
     utils.set_allowed_positions(self.bufnr, allowed_positions)
 end
 
