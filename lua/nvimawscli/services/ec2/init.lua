@@ -18,7 +18,7 @@ function self.load(config)
     end
 
     if not self.winnr or not utils.check_if_window_exists(self.winnr) then
-        self.winnr = utils.create_window(self.bufnr, config.services)
+        self.winnr = utils.create_window(self.bufnr, config.submenu)
     end
 
     vim.api.nvim_set_current_win(self.winnr)
@@ -34,7 +34,7 @@ function self.load(config)
 
             if status then
                 subservice.load(config)
-                vim.api.nvim_win_set_width(self.winnr, config.menu.width)
+                vim.api.nvim_win_set_width(self.winnr, config.submenu.width)
             else
                 print('Subservice not found: ' .. subservice_name)
             end

@@ -1,7 +1,7 @@
 local utils = require('nvimawscli.utils')
 local self = {}
 
-self.config = {
+local default_config = {
     menu = {
         prefered_services = {
             "ec2",
@@ -15,7 +15,7 @@ self.config = {
         width = 15,
         height = 20,
     },
-    services = {
+    submenu = {
         split = "vertical",
         width = 15,
         height = 20,
@@ -29,14 +29,15 @@ self.config = {
             "PrivateIpAddress",
             "PublicIpAddress",
         },
-    }
+    },
+    test = false,
 }
 
 self.launched = false
 
 function self.setup(config)
-    print("Setting up self")
-    self.config = config
+    self.config = vim.tbl_deep_extend('keep', config or {}, default_config)
+    print(vim.inspect(self.config))
 end
 
 function self.launch()
