@@ -44,7 +44,9 @@ function self.render(headers, rows, sorted_by_column_index, sorted_direction, co
                             (j == #headers and style.top_right or style.top_tee)
 
             local header_suffix = string.rep(' ',
-                                             self.widths[j] - vim.fn.strdisplaywidth(header) - (sorted_by_column_index == j and 2 or 0)) ..
+                                             self.widths[j] -
+                                             vim.fn.strdisplaywidth(header) -
+                                             (sorted_by_column_index == j and 2 or 0)) ..
                                   (sorted_by_column_index == j and (sorted_direction == 1 and '▲ ' or '▼ ') or '')
 
             self.lines[2] = self.lines[2] .. header .. header_suffix .. style.vertical
@@ -91,6 +93,7 @@ function self.get_column_index_from_position(column_number)
             return i
         end
     end
+    return nil
 end
 
 return self

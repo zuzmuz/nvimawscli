@@ -116,16 +116,17 @@ function self.load(config)
             local item_number = table_renderer.get_item_number_from_row(line_number)
 
             if item_number > 0 and item_number <= #self.reservations then -- open floating window for instance functions
-                local instance = self.reservations[item_number].Instances[1]
-                local instance_state = instance.State.Name
-                local instance_name = get_instance_name(instance)
-                local instance_functions = instance_actions.get(instance_state)
+                local instance = self.rows[item_number]
+                local instance_functions = instance_actions.get(instance.State)
 
                 ui.create_floating_select_popup(nil, instance_functions, config,
                     function(selected_action)
                         local action = instance_functions[selected_action]
                         if instance_actions[action].ask_for_confirmation then
-                            ui.create_floating_select_popup(action .. ' instance ' .. instance_name, { 'yes', 'no' }, config,
+                            ui.create_floating_select_popup(
+                                action .. ' instance ' .. instance.Name,
+                                { 'yes', 'no' },
+                                config,
                                 function(confirmation)
                                     if confirmation == 1 then -- yes selected
                                         instance_actions[action].action(instance)
@@ -143,14 +144,17 @@ function self.load(config)
                     self.sorted_by_column_index = column_index
                     self.sorted_direction = 1
                 end
-                self.sort_rows(config.ec2.columns[column_index], self.sorted_direction)
-                self.render(config)
+                if column_index then
+                    self.sort_rows(config.ec2.columns[column_index], self.sorted_direction)
+                    self.render(config)
+                end
             end
         end
     })
 end
 
 function self.fetch(config)
+    self.sorted_by_column_index = nil
     command.async('aws ec2 describe-instances', function(result, error)
         if error then
             utils.write_lines_string(self.bufnr, error)
