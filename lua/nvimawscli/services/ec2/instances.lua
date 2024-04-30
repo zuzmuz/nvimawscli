@@ -30,8 +30,7 @@ instance_actions.details = {
 instance_actions.start = {
     ask_for_confirmation = true,
     action = function(instance)
-        print('starting ' .. instance.InstanceId)
-        -- utils.async_command('aws ec2 describe-instances --instance-ids ' .. instance.InstanceId, function(result, error) end)
+        utils.async_command('aws ec2 describe-instances --instance-ids ' .. instance.InstanceId, function(result, error) end)
     end,
 }
 
@@ -68,8 +67,8 @@ local function get_instance_name(instance)
     return ''
 end
 
-function self.sort_table(column, direction)
-    table.sort(self.table, function(a, b)
+function self.sort_rows(column, direction)
+    table.sort(self.rows, function(a, b)
         if direction == 1 then
             return a[column] < b[column]
         end
@@ -92,9 +91,11 @@ function self.load(config)
 
     vim.api.nvim_buf_set_keymap(self.bufnr, 'n', '<CR>', '', {
         callback = function()
-            local position = vim.api.nvim_win_get_cursor(self.winnr)
+            local position = vim.fn.getcursorcharpos()
+            local line_number = position[2]
+            local column_number = position[3]
 
-            local item_number = table_renderer.get_item_number_from_row(position[1])
+            local item_number = table_renderer.get_item_number_from_row(line_number)
 
             if item_number > 0 and item_number <= #self.reservations then -- open floating window for instance functions
                 local instance = self.reservations[item_number].Instances[1]
@@ -117,14 +118,14 @@ function self.load(config)
                         end
                     end)
             else -- perform sorting based on column selection
-                local column_index = table_renderer.get_column_index_from_position(position[2])
+                local column_index = table_renderer.get_column_index_from_position(column_number)
                 if self.sorted_by_column_index == column_index then
                     self.sorted_direction = self.sorted_direction * -1
                 else
                     self.sorted_by_column_index = column_index
                     self.sorted_direction = 1
                 end
-                self.sort_table(column_index, self.sorted_direction)
+                self.sort_rows(config.ec2.columns[column_index], self.sorted_direction)
                 self.render(config)
             end
         end
@@ -145,48 +146,43 @@ function self.fetch(config)
 end
 
 function self.parse(config)
-    self.table = {}
+    self.rows = {}
     for reservation_index, reservation in ipairs(self.reservations) do
         local instance = reservation.Instances[1]
         local row = {}
 
-        for i, column in ipairs(config.ec2.columns) do
+        for _, column in ipairs(config.ec2.columns) do
             if column == 'Name' then
-                row[i] = get_instance_name(instance)
+                row[column] = get_instance_name(instance)
             elseif column == 'PublicIpAddress' then
                 local public_ip = instance.PublicIpAddress
                 if not public_ip then
                     public_ip = ''
                 end
-                row[i] = public_ip
+                row[column] = public_ip
             elseif column == 'State' then
-                row[i] = instance.State.Name
+                row[column] = instance.State.Name
             elseif column == 'Type' then
-                row[i] = instance.InstanceType
+                row[column] = instance.InstanceType
             else
-                row[i] = instance[column]
-                if not row[i] then
-                    row[i] = ''
+                row[column] = instance[column]
+                if not row[column] then
+                    row[column] = ''
                 end
             end
         end
 
-        self.table[reservation_index] = row
+        self.rows[reservation_index] = row
     end
 end
 
 function self.render(config)
-    local column_names = {}
-    for i, column_name in ipairs(config.ec2.columns) do
-        if self.sorted_by_column_index == i then
-            column_names[i] = column_name .. ' ' .. (self.sorted_direction == 1 and '▲' or '▼')
-        else
-            column_names[i] = column_name
-        end
-    end
 
-    -- this is creating the table_renderer every time, should reconsider
-    local lines = table_renderer.render(column_names, self.table, config)
+    local lines = table_renderer.render(config.ec2.columns,
+                                        self.rows,
+                                        self.sorted_by_column_index,
+                                        self.sorted_direction,
+                                        config)
     utils.write_lines(self.bufnr, lines)
 end
 
