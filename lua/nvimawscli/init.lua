@@ -1,55 +1,24 @@
 local self = {}
 
-local default_config = {
-    menu = {
-        prefered_services = {
-            "ec2",
-            "codedeply",
-            "s3",
-            "rds",
-            "iam",
-            "vpc",
-        },
-        split = "vertical",
-        width = 15,
-        height = 20,
-    },
-    submenu = {
-        split = "vertical",
-        width = 15,
-        height = 20,
-    },
-    ec2 = {
-        columns = {
-            "Name",
-            "InstanceId",
-            "State",
-            "Type",
-            "PrivateIpAddress",
-            -- "PublicIpAddress",
-            "KeyName",
-        },
-    },
-    table = {
-        style = 'rounded',
-        spacing = 5,
-    },
-    test = false,
-}
-
 self.launched = false
 
 function self.setup(config)
-    self.config = vim.tbl_deep_extend('keep', config or {}, default_config)
+    require('nvimawscli.config').setup(config)
+    self.is_setup = true
 end
 
+--- Launch the Dashboard
 function self.launch()
     if self.launched then
         vim.api.nvim_err_writeln("Dashboard already launched")
         return
     end
+    if not self.is_setup then
+        vim.api.nvim_err_writeln("Dashboard not setup")
+        return
+    end
     self.launched = true
-    require("nvimawscli.menu").load(self.config)
+    require("nvimawscli.menu").load()
 end
 
 return self

@@ -1,4 +1,5 @@
 local utils = require('nvimawscli.utils.buffer')
+local config = require('nvimawscli.config')
 local self = {}
 
 
@@ -21,7 +22,9 @@ self.services = {
     'vpc',
 }
 
-function self.load(config)
+---Load the menu
+---The menu is the initial buffer and contain the list of aws services available
+function self.load()
     self.bufnr = utils.create_buffer('menu')
     self.winnr = vim.api.nvim_get_current_win()
 
@@ -37,7 +40,7 @@ function self.load(config)
 
             local status, service = pcall(require, 'nvimawscli.services.' .. service_name)
             if status then
-                service.load(config)
+                service.load()
                 vim.api.nvim_win_set_width(self.winnr, config.menu.width)
             else
                 vim.api.nvim_err_writeln("Service not implemented yet: " .. service_name)
@@ -48,6 +51,14 @@ function self.load(config)
         table.concat(self.header, '\n') .. '\n' ..
         table.concat(self.services_header, '\n') .. '\n' ..
         table.concat(self.services, '\n'))
+
+
+    local allowed_positions = {}
+
+    for i, _ in ipairs(self.services) do
+        allowed_positions[#allowed_positions+1] = { { #self.header + #self.services_header + i, 1 } }
+    end
+    utils.set_allowed_positions(self.bufnr, allowed_positions)
 end
 
 function self.hide()
