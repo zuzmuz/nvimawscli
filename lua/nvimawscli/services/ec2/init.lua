@@ -1,6 +1,7 @@
+local utils = require('nvimawscli.utils.buffer')
+local config = require('nvimawscli.config')
 local self = {}
 
-local utils = require('nvimawscli.utils.buffer')
 
 self.subservices = {
     'instances',
@@ -11,13 +12,13 @@ self.subservices = {
     'target_groups',
 }
 
-function self.load(config)
+function self.load()
     if not self.bufnr then
         self.bufnr = utils.create_buffer('submenu')
     end
 
     if not self.winnr or not utils.check_if_window_exists(self.winnr) then
-        self.winnr = utils.create_window(self.bufnr, config.submenu)
+        self.winnr = utils.create_window(self.bufnr, config.submenu.split)
     end
 
     vim.api.nvim_set_current_win(self.winnr)

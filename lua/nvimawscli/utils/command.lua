@@ -1,5 +1,8 @@
 local self = {}
 
+---Execute a terminal command asynchronously
+---@param command string: The command to execute
+---@param on_result fun(result: string|nil, error: string|nil): nil callback function
 function self.async(command, on_result)
     vim.fn.jobstart(command, {
         stdout_buffered = true,

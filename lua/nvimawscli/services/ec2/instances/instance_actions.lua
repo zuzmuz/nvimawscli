@@ -3,9 +3,9 @@ local command = require('nvimawscli.utils.command')
 local self = {}
 
 function self.get(instance)
-    if instance.state == "running" then
+    if instance.State == "running" then
         return { "details", "stop", "terminate", "connect" }
-    elseif instance.state == "stopped" then
+    elseif instance.State == "stopped" then
         return { "details", "start", "terminate" }
     end
     return { "details", "terminate" }
