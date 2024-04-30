@@ -2,79 +2,9 @@ local utils = require('nvimawscli.utils.buffer')
 local command = require('nvimawscli.utils.command')
 local ui = require('nvimawscli.utils.ui')
 local table_renderer = require('nvimawscli.utils.tables')
+local instance_actions = require('nvimawscli.services.ec2.instances.instance_actions')
 
 local self = {}
-
--- consider making utils for table rendering (with sorting and stuff)
-
-
-
-local instance_actions = {}
-
-function instance_actions.get(state)
-    if state == "running" then
-        return { "details", "stop", "terminate", "connect" }
-    elseif state == "stopped" then
-        return { "details", "start", "terminate" }
-    end
-    return { "details", "terminate" }
-end
-
-instance_actions.details = {
-    ask_for_confirmation = false,
-    action = function(instance)
-        print('showing details ' .. instance.InstanceId)
-    end,
-}
-
-instance_actions.start = {
-    ask_for_confirmation = true,
-    action = function(instance)
-        print('starting ' .. instance.InstanceId)
-        command.async('aws ec2 start-instances --instance-ids ' .. instance.InstanceId,
-            function(result, error)
-                if error then
-                    vim.api.nvim_err_writeln(error)
-                    return
-                end
-                local decoded = vim.json.decode(result)
-                print('instance ' .. instance.InstanceId .. ' is ' .. decoded.StartingInstances[1].CurrentState.Name)
-            end)
-    end,
-}
-
-instance_actions.stop = {
-    ask_for_confirmation = true,
-    action = function(instance)
-        print('stopping ' .. instance.InstanceId)
-        command.async('aws ec2 stop-instances --instance-ids ' .. instance.InstanceId,
-            function(result, error)
-                if error then
-                    vim.api.nvim_err_writeln(error)
-                    return
-                end
-                local decoded = vim.json.decode(result)
-                print('instance ' .. instance.InstanceId .. ' is ' .. decoded.StoppingInstances[1].CurrentState.Name)
-            end)
-    end,
-}
-
-instance_actions.terminate = {
-    ask_for_confirmation = true,
-    action = function(instance)
-        print('terminating ' .. instance.InstanceId)
-    end,
-}
-
-instance_actions.connect = {
-    ask_for_confirmation = true,
-    action = function(instance)
-        print('connecting ' .. instance.InstanceId)
-        vim.cmd("bel new")
-        vim.fn.termopen('aws ec2-instance-connect ssh --instance-id ' .. instance.InstanceId ..
-                        ' --private-key-file ' .. instance.KeyName .. '.pem --os-user ubuntu')
-    end,
-}
 
 local function get_instance_name(instance)
     for _, tag in ipairs(instance.Tags) do
@@ -117,11 +47,11 @@ function self.load(config)
 
             if item_number > 0 and item_number <= #self.reservations then -- open floating window for instance functions
                 local instance = self.rows[item_number]
-                local instance_functions = instance_actions.get(instance.State)
+                local available_actions = instance_actions.get(instance)
 
-                ui.create_floating_select_popup(nil, instance_functions, config,
+                ui.create_floating_select_popup(nil, available_actions, config,
                     function(selected_action)
-                        local action = instance_functions[selected_action]
+                        local action = available_actions[selected_action]
                         if instance_actions[action].ask_for_confirmation then
                             ui.create_floating_select_popup(
                                 action .. ' instance ' .. instance.Name,
