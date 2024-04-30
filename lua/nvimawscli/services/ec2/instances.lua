@@ -30,7 +30,16 @@ instance_actions.details = {
 instance_actions.start = {
     ask_for_confirmation = true,
     action = function(instance)
-        utils.async_command('aws ec2 describe-instances --instance-ids ' .. instance.InstanceId, function(result, error) end)
+        print('starting ' .. instance.InstanceId)
+        command.async('aws ec2 start-instances --instance-ids ' .. instance.InstanceId,
+            function(result, error)
+                if error then
+                    vim.api.nvim_err_writeln(error)
+                    return
+                end
+                local decoded = vim.json.decode(result)
+                print('instance ' .. instance.InstanceId .. ' is ' .. decoded.StartingInstances[1].CurrentState.Name)
+            end)
     end,
 }
 
@@ -38,6 +47,15 @@ instance_actions.stop = {
     ask_for_confirmation = true,
     action = function(instance)
         print('stopping ' .. instance.InstanceId)
+        command.async('aws ec2 stop-instances --instance-ids ' .. instance.InstanceId,
+            function(result, error)
+                if error then
+                    vim.api.nvim_err_writeln(error)
+                    return
+                end
+                local decoded = vim.json.decode(result)
+                print('instance ' .. instance.InstanceId .. ' is ' .. decoded.StoppingInstances[1].CurrentState.Name)
+            end)
     end,
 }
 

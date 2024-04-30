@@ -79,16 +79,15 @@ function self.render(headers, rows, sorted_by_column_index, sorted_direction, co
     return self.lines
 end
 
-function self.get_item_number_from_row(row)
-    return row - 3
+function self.get_item_number_from_row(line_number)
+    return line_number - 3
 end
 
-function self.get_column_index_from_position(position)
-    print(position)
+function self.get_column_index_from_position(column_number)
     local accumulated_width = 0
     for i, width in ipairs(self.widths) do
         accumulated_width = accumulated_width + width + 1
-        if position <= accumulated_width then
+        if column_number <= accumulated_width then
             return i
         end
     end
