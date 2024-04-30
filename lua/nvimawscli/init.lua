@@ -26,7 +26,8 @@ local default_config = {
             "State",
             "Type",
             "PrivateIpAddress",
-            "PublicIpAddress",
+            -- "PublicIpAddress",
+            "KeyName",
         },
     },
     table = {

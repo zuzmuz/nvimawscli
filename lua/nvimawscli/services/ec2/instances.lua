@@ -22,38 +22,40 @@ end
 
 instance_actions.details = {
     ask_for_confirmation = false,
-    action = function(instance_id)
-        print('showing details ' .. instance_id)
+    action = function(instance)
+        print('showing details ' .. instance.InstanceId)
     end,
 }
 
 instance_actions.start = {
     ask_for_confirmation = true,
-    action = function(instance_id)
-        print('starting ' .. instance_id)
-        -- utils.async_command('aws ec2 describe-instances --instance-ids ' .. instance_id, function(result, error) end)
+    action = function(instance)
+        print('starting ' .. instance.InstanceId)
+        -- utils.async_command('aws ec2 describe-instances --instance-ids ' .. instance.InstanceId, function(result, error) end)
     end,
 }
 
 instance_actions.stop = {
     ask_for_confirmation = true,
-    action = function(instance_id)
-        print('stopping ' .. instance_id)
+    action = function(instance)
+        print('stopping ' .. instance.InstanceId)
     end,
 }
 
-
 instance_actions.terminate = {
-    ask_for_confirmation = false,
-    action = function(instance_id)
-        print('terminating ' .. instance_id)
+    ask_for_confirmation = true,
+    action = function(instance)
+        print('terminating ' .. instance.InstanceId)
     end,
 }
 
 instance_actions.connect = {
-    ask_for_confirmation = false,
-    action = function(instance_id)
-        print('connecting ' .. instance_id)
+    ask_for_confirmation = true,
+    action = function(instance)
+        print('connecting ' .. instance.InstanceId)
+        vim.cmd("bel new")
+        vim.fn.termopen('aws ec2-instance-connect ssh --instance-id ' .. instance.InstanceId ..
+                        ' --private-key-file ' .. instance.KeyName .. '.pem --os-user ubuntu')
     end,
 }
 
@@ -103,12 +105,16 @@ function self.load(config)
                 ui.create_floating_select_popup(nil, instance_functions, config,
                     function(selected_action)
                         local action = instance_functions[selected_action]
-                        ui.create_floating_select_popup(action .. ' instance ' .. instance_name, { 'yes', 'no' }, config,
-                            function(confirmation)
-                                if confirmation == 1 then -- yes selected
-                                    instance_actions[action].action(instance.InstanceId)
-                                end
-                            end)
+                        if instance_actions[action].ask_for_confirmation then
+                            ui.create_floating_select_popup(action .. ' instance ' .. instance_name, { 'yes', 'no' }, config,
+                                function(confirmation)
+                                    if confirmation == 1 then -- yes selected
+                                        instance_actions[action].action(instance)
+                                    end
+                                end)
+                        else
+                            instance_actions[action].action(instance)
+                        end
                     end)
             else -- perform sorting based on column selection
                 local column_index = table_renderer.get_column_index_from_position(position[2])
