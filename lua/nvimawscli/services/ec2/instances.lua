@@ -1,5 +1,7 @@
-local utils = require('nvimawscli.utils')
-local ui = require('nvimawscli.ui')
+local utils = require('nvimawscli.utils.buffer')
+local command = require('nvimawscli.utils.command')
+local ui = require('nvimawscli.utils.ui')
+local table_renderer = require('nvimawscli.utils.tables')
 
 local self = {}
 
@@ -90,7 +92,7 @@ function self.load(config)
         callback = function()
             local position = vim.api.nvim_win_get_cursor(self.winnr)
 
-            local item_number = utils.get_item_number_from_row(position[1])
+            local item_number = table_renderer.get_item_number_from_row(position[1])
 
             if item_number > 0 and item_number <= #self.reservations then -- open floating window for instance functions
                 local instance = self.reservations[item_number].Instances[1]
@@ -108,8 +110,8 @@ function self.load(config)
                                 end
                             end)
                     end)
-            elseif position[1] == 1 then -- perform sorting based on column selection
-                local column_index = utils.get_column_index_from_position(position[2], self.widths)
+            else -- perform sorting based on column selection
+                local column_index = table_renderer.get_column_index_from_position(position[2])
                 if self.sorted_by_column_index == column_index then
                     self.sorted_direction = self.sorted_direction * -1
                 else
@@ -124,7 +126,7 @@ function self.load(config)
 end
 
 function self.fetch(config)
-    utils.async_command('aws ec2 describe-instances', function(result, error)
+    command.async('aws ec2 describe-instances', function(result, error)
         if error then
             utils.write_lines_string(self.bufnr, error)
         else
@@ -177,11 +179,9 @@ function self.render(config)
         end
     end
 
-    local output = utils.create_table_output(column_names, self.table)
-    self.lines = output.lines
-    self.widths = output.widths
-
-    utils.write_lines(self.bufnr, self.lines)
+    -- this is creating the table_renderer every time, should reconsider
+    local lines = table_renderer.render(column_names, self.table, config)
+    utils.write_lines(self.bufnr, lines)
 end
 
 return self

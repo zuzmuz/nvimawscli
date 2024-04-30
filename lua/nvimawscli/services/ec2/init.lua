@@ -1,7 +1,6 @@
 local self = {}
 
-local utils = require('nvimawscli.utils')
-
+local utils = require('nvimawscli.utils.buffer')
 
 self.subservices = {
     'instances',
@@ -36,7 +35,7 @@ function self.load(config)
                 subservice.load(config)
                 vim.api.nvim_win_set_width(self.winnr, config.submenu.width)
             else
-                print('Subservice not found: ' .. subservice_name)
+                vim.api.nvim_err_writeln('Subservice not found: ' .. subservice_name)
             end
         end
     })

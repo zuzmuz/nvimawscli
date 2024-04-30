@@ -1,8 +1,6 @@
-local utils = require('nvimawscli.utils')
+local utils = require('nvimawscli.utils.buffer')
 local self = {}
 
-
-self.header_section_length = 4
 
 self.header = {
     "AWS  CLI",
@@ -32,7 +30,7 @@ function self.load(config)
     vim.api.nvim_buf_set_keymap(self.bufnr, 'n', '<CR>', '', {
         callback = function()
             local position = vim.api.nvim_win_get_cursor(self.winnr)
-            if position[1] <= self.header_section_length then
+            if position[1] <= #self.header + #self.services_header then
                 return
             end
             local service_name = utils.get_line(self.bufnr, position[1])
@@ -42,7 +40,7 @@ function self.load(config)
                 service.load(config)
                 vim.api.nvim_win_set_width(self.winnr, config.menu.width)
             else
-                print("Service not implemented yet: " .. service_name)
+                vim.api.nvim_err_writeln("Service not implemented yet: " .. service_name)
             end
         end
     })

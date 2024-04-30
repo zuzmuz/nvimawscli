@@ -1,4 +1,4 @@
-local utils = require("nvimawscli.utils")
+local utils = require("nvimawscli.utils.command")
 
 local ui = {}
 
@@ -25,13 +25,10 @@ function ui.create_floating_select_popup(title, lines, config, selected)
         height = height,
         width = width + 4,
         style = 'minimal',
-        border = 'rounded',
+        border = config.table.style or 'rounded',
+        title = title,
+        title_pos = title and 'center' or nil
     }
-
-    if title then
-        options.title = title
-        options.title_pos = 'center'
-    end
 
     winnr = vim.api.nvim_open_win(bufnr, true, options)
 

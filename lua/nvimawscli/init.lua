@@ -1,4 +1,3 @@
-local utils = require('nvimawscli.utils')
 local self = {}
 
 local default_config = {
@@ -30,6 +29,10 @@ local default_config = {
             "PublicIpAddress",
         },
     },
+    table = {
+        style = 'rounded',
+        spacing = 5,
+    },
     test = false,
 }
 
@@ -37,7 +40,6 @@ self.launched = false
 
 function self.setup(config)
     self.config = vim.tbl_deep_extend('keep', config or {}, default_config)
-    print(vim.inspect(self.config))
 end
 
 function self.launch()
