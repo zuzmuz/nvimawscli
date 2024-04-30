@@ -11,85 +11,99 @@ local self = {}
 ---@param sorted_by_column_index number|nil: The index of the column that is sorted, nil if no column is sorted
 ---@param sorted_direction number: The direction of the sort, 1 for ascending, -1 for descending
 ---@param config table_config: The configuration of the table
----@return table<string>: The lines of the table
+---@return table<string>, table<table<table<number>>>, table<number>: The lines of the table, the allowed positions in the window, the widths of the column
 function self.render(headers, rows, sorted_by_column_index, sorted_direction, config)
     if #rows == 0 then
-        return {}
+        return {}, {}, {}
     end
 
-    self.spacing = config.spacing
-
-    self.widths = {}
+    local widths = {}
 
     for i, header in ipairs(headers) do
-        self.widths[i] = vim.fn.strdisplaywidth(header)
+        widths[i] = vim.fn.strdisplaywidth(header)
     end
 
     for _, row in ipairs(rows) do
         for i, header in ipairs(headers) do
-            if vim.fn.strdisplaywidth(row[header]) > self.widths[i] then
-                self.widths[i] = vim.fn.strdisplaywidth(row[header])
+            if vim.fn.strdisplaywidth(row[header]) > widths[i] then
+                widths[i] = vim.fn.strdisplaywidth(row[header])
             end
         end
     end
 
     for i, _ in ipairs(headers) do
-        self.widths[i] = self.widths[i] + self.spacing
+        widths[i] = widths[i] + config.spacing
     end
 
-    self.lines = {}
+    local lines = {}
+    local allowed_positions = {}
 
     if config.border then
         local border = require('nvimawscli.utils.characters')[config.border]
         if not border then
             vim.api.nvim_err_writeln("Invalid table style: " .. config.border)
-            return {}
+            return {}, {}, {}
         end
 
-        self.lines[1] = border.top_left
-        self.lines[2] = border.vertical
-        self.lines[3] = border.left_tee
+        lines[1] = border.top_left
+        lines[2] = border.vertical
+        lines[3] = border.left_tee
+
+        allowed_positions[#allowed_positions + 1] = {}
+        local accumulated_width = 2
+
         for j, header in ipairs(headers) do
-            self.lines[1] = self.lines[1] ..
-                            string.rep(border.horizontal, self.widths[j]) ..
-                            (j == #headers and border.top_right or border.top_tee)
+            lines[1] = lines[1] ..
+                       string.rep(border.horizontal, widths[j]) ..
+                       (j == #headers and border.top_right or border.top_tee)
 
             local header_suffix = string.rep(' ',
-                                             self.widths[j] -
+                                             widths[j] -
                                              vim.fn.strdisplaywidth(header) -
                                              (sorted_by_column_index == j and 2 or 0)) ..
                                   (sorted_by_column_index == j and (sorted_direction == 1 and '▲ ' or '▼ ') or '')
 
-            self.lines[2] = self.lines[2] .. header .. header_suffix .. border.vertical
+            lines[2] = lines[2] .. header .. header_suffix .. border.vertical
 
-            self.lines[3] = self.lines[3] ..
-                            string.rep(border.horizontal, self.widths[j]) ..
+            allowed_positions[#allowed_positions][j] = { 2, accumulated_width }
+            accumulated_width = accumulated_width + widths[j] + 1
+
+            lines[3] = lines[3] ..
+                            string.rep(border.horizontal, widths[j]) ..
                             (j == #headers and border.right_tee or border.cross)
         end
 
         for _, row in pairs(rows) do
-            local line_index = #self.lines + 1
-            self.lines[line_index] = border.vertical
+
+            local line_index = #lines + 1
+            lines[line_index] = border.vertical
+
+            allowed_positions[#allowed_positions+1] = {}
+            accumulated_width = 2
+
             for j, header in ipairs(headers) do
-                self.lines[line_index] = self.lines[line_index] .. row[header] ..
+                lines[line_index] = lines[line_index] .. row[header] ..
                                          string.rep(' ',
-                                                    self.widths[j] - vim.fn.strdisplaywidth(row[header])) ..
+                                                    widths[j] - vim.fn.strdisplaywidth(row[header])) ..
                                          border.vertical
+
+                allowed_positions[#allowed_positions][j] = { line_index, accumulated_width }
+                accumulated_width = accumulated_width + widths[j] + 1
             end
         end
-        self.lines[#self.lines+1] = border.bottom_left
+        lines[#lines+1] = border.bottom_left
         for j, _ in ipairs(headers) do
-            self.lines[#self.lines] = self.lines[#self.lines] ..
-                                     string.rep(border.horizontal, self.widths[j]) ..
+            lines[#lines] = lines[#lines] ..
+                                     string.rep(border.horizontal, widths[j]) ..
                                      (j == #headers and border.bottom_right or border.bottom_tee)
         end
 
     else
         vim.api.nvim_err_writeln("Table style not found")
-        return {}
+        return {}, {}, {}
     end
 
-    return self.lines
+    return lines, allowed_positions, widths
 end
 
 
@@ -102,10 +116,11 @@ end
 
 ---Get the index of the column of the rendered table from the column position of the cursor in the window
 ---@param column_number number: The column number in the window at the cursor position
+---@param widths table<number>: The widths of columns
 ---@return number|nil: The index of the column in the headers table, nil if invalid
-function self.get_column_index_from_position(column_number)
+function self.get_column_index_from_position(column_number, widths)
     local accumulated_width = 0
-    for i, width in ipairs(self.widths) do
+    for i, width in ipairs(widths) do
         accumulated_width = accumulated_width + width + 1
         if column_number <= accumulated_width then
             return i

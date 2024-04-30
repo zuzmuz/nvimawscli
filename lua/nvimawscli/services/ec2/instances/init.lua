@@ -31,7 +31,7 @@ local function get_instance_name(instance)
 end
 
 ---Sort the rows based on the column and direction
----@param column string: the name of the column header name to use as key for sorting 
+---@param column string: the name of the column header name to use as key for sorting
 function self.sort_rows(column, direction)
     table.sort(self.rows, function(a, b)
         if direction == 1 then
@@ -87,7 +87,7 @@ function self.load()
                         end
                     end)
             else -- perform sorting based on column selection
-                local column_index = table_renderer.get_column_index_from_position(column_number)
+                local column_index = table_renderer.get_column_index_from_position(column_number, self.widths)
                 if self.sorted_by_column_index == column_index then
                     self.sorted_direction = self.sorted_direction * -1
                 else
@@ -157,18 +157,21 @@ function self.parse(reservations)
     return rows
 end
 
-
 ---@private
 ---Render the table containing the ec2 instances into the buffer
 ---@param rows table<instance>
 function self.render(rows)
+    local lines, allowed_positions, widths = table_renderer.render(
+        config.ec2.columns,
+        rows,
+        self.sorted_by_column_index,
+        self.sorted_direction,
+        config.table)
 
-    local lines = table_renderer.render(config.ec2.columns,
-                                        rows,
-                                        self.sorted_by_column_index,
-                                        self.sorted_direction,
-                                        config.table)
+    self.widths = widths
     utils.write_lines(self.bufnr, lines)
+    print('allowed positions ' .. vim.inspect(allowed_positions))
+    utils.set_allowed_positions(self.bufnr, allowed_positions)
 end
 
 return self
