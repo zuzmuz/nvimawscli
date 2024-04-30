@@ -39,7 +39,6 @@ function self.render(headers, rows, config)
                             string.rep(style.horizontal, self.widths[j] + self.spacing) ..
                             (j == #headers and style.top_right or style.top_tee)
 
-            -- print(header, self.widths[j], vim.fn.strdisplaywidth(header), style.horizontal, style.top_right, style.top_tee, style.top_left, style.left_tee, style.vertical, style.right_tee, style.cross, style.bottom_left, style.bottom_right, style.bottom_tee)
             self.lines[2] = self.lines[2] .. header ..
                             string.rep(' ',
                                        self.widths[j] - vim.fn.strdisplaywidth(header) + self.spacing) ..
@@ -72,8 +71,6 @@ function self.render(headers, rows, config)
         vim.api.nvim_err_writeln("Table style not found")
         return {}
     end
-
-    print(vim.inspect(self.lines))
 
     return self.lines
 end

@@ -1,4 +1,4 @@
-local utils = require("nvimawscli.utils.command")
+local utils = require("nvimawscli.utils.buffer")
 
 local ui = {}
 

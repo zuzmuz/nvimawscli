@@ -44,7 +44,7 @@ end
 
 function self.launch()
     if self.launched then
-        print("Dashboard already launched")
+        vim.api.nvim_err_writeln("Dashboard already launched")
         return
     end
     self.launched = true
