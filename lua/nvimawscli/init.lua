@@ -1,4 +1,3 @@
-local utils = require('nvimawscli.utils')
 local self = {}
 
 local default_config = {
@@ -27,8 +26,13 @@ local default_config = {
             "State",
             "Type",
             "PrivateIpAddress",
-            "PublicIpAddress",
+            -- "PublicIpAddress",
+            "KeyName",
         },
+    },
+    table = {
+        style = 'rounded',
+        spacing = 5,
     },
     test = false,
 }
@@ -37,19 +41,15 @@ self.launched = false
 
 function self.setup(config)
     self.config = vim.tbl_deep_extend('keep', config or {}, default_config)
-    print(vim.inspect(self.config))
 end
 
 function self.launch()
     if self.launched then
-        print("Dashboard already launched")
+        vim.api.nvim_err_writeln("Dashboard already launched")
         return
     end
     self.launched = true
-
-    self.menu = require("nvimawscli.menu")
-
-    self.menu.load(self.config)
+    require("nvimawscli.menu").load(self.config)
 end
 
 return self
