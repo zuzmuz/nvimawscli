@@ -1,5 +1,6 @@
 local command = require('nvimawscli.utils.command')
 
+---@class InstanceAction
 local self = {}
 
 function self.get(instance)

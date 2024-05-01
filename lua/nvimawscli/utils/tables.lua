@@ -1,4 +1,7 @@
+---@class TableRenderer
 local self = {}
+
+
 
 
 ---@class table_config
@@ -6,12 +9,12 @@ local self = {}
 ---@field spacing number: The extra spacing between the columns
 
 ---Render a table to be written in a buffer
----@param headers table<string>: The headers of the table, the name of the columns
----@param rows table<table<string, string>>: The rows of the table, every row is a table, the keys are the the headers and the values are the content of the cell
+---@param headers string[]: The headers of the table, the name of the columns
+---@param rows {[string]: string}[]: The rows of the table, every row is a table, the keys are the the headers and the values are the content of the cell
 ---@param sorted_by_column_index number|nil: The index of the column that is sorted, nil if no column is sorted
 ---@param sorted_direction number: The direction of the sort, 1 for ascending, -1 for descending
 ---@param config table_config: The configuration of the table
----@return table<string>, table<table<table<number>>>, table<number>: The lines of the table, the allowed positions in the window, the widths of the column
+---@return string[], number[][][], number[]: The lines of the table, the allowed positions in the window, the widths of the column
 function self.render(headers, rows, sorted_by_column_index, sorted_direction, config)
     if #rows == 0 then
         return {}, {}, {}
@@ -39,7 +42,7 @@ function self.render(headers, rows, sorted_by_column_index, sorted_direction, co
     local allowed_positions = {}
 
     if config.border then
-        local border = require('nvimawscli.utils.characters')[config.border]
+        local border = require('nvimawscli.utils.characterset')[config.border]
         if not border then
             vim.api.nvim_err_writeln("Invalid table style: " .. config.border)
             return {}, {}, {}

@@ -1,3 +1,4 @@
+---@class BufferUtil
 local self = {}
 
 
@@ -66,7 +67,7 @@ end
 
 ---Overwrite the buffer with the given lines
 ---@param bufnr number: The buffer number
----@param lines table<string>: The lines to write
+---@param lines string[]: The lines to write
 function self.write_lines(bufnr, lines)
     vim.api.nvim_buf_set_option(bufnr, 'modifiable', true)
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
@@ -77,7 +78,7 @@ end
 ---The allowed positions are used to restrict the cursor movement to the allowed positions.
 ---The hjkl in normal mode will only move the cursor to the allowed positions.
 ---@param bufnr number: The buffer number
----@param allowed_positions table<table<table<number>>>: The allowed positions, a matrix of 2 dimensional points
+---@param allowed_positions number[][][]: The allowed positions, a matrix of 2 dimensional points
 function self.set_allowed_positions(bufnr, allowed_positions)
     local current_position = { 1, 1 }
     local new_cursor_position = allowed_positions[current_position[1]][current_position[2]]

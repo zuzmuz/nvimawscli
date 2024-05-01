@@ -5,11 +5,12 @@ local ui = require('nvimawscli.utils.ui')
 local table_renderer = require('nvimawscli.utils.tables')
 local instance_actions = require('nvimawscli.services.ec2.instances.instance_actions')
 
+---@class InstanceManager
 local self = {}
 
 
 
----@class instance
+---@class Instance
 ---@field Name string
 ---@field PrivateIpAddress string
 ---@field State string
@@ -47,7 +48,7 @@ function self.load()
     end
 
     if not self.winnr or not utils.check_if_window_exists(self.winnr) then
-        self.winnr = utils.create_window(self.bufnr, config.submenu.split)
+        self.winnr = utils.create_window(self.bufnr, config.menu.split)
     end
 
     vim.api.nvim_set_current_win(self.winnr)
@@ -69,7 +70,7 @@ function self.load()
                 local instance = self.rows[item_number]
                 local available_actions = instance_actions.get(instance)
 
-                ui.create_floating_select_popup(nil, available_actions, config,
+                ui.create_floating_select_popup(nil, available_actions, config.table,
                     function(selected_action)
                         local action = available_actions[selected_action]
                         if instance_actions[action].ask_for_confirmation then
@@ -124,7 +125,7 @@ end
 ---@private
 ---Parse the ec2 instances and store the rows
 ---@param reservations table: the raw json reservations received from aws ec2 command
----@return table<instance>
+---@return Instance[]
 function self.parse(reservations)
     local rows = {}
     for reservation_index, reservation in ipairs(reservations) do
@@ -159,7 +160,7 @@ end
 
 ---@private
 ---Render the table containing the ec2 instances into the buffer
----@param rows table<instance>
+---@param rows Instance[]
 function self.render(rows)
     local lines, allowed_positions, widths = table_renderer.render(
         config.ec2.columns,
