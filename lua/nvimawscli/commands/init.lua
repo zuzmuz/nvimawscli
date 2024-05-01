@@ -1,4 +1,7 @@
+---@class CommandHandler
 local self = {}
+
+---@alias OnResult fun(result: string|nil, error: string|nil): nil
 
 ---Execute a terminal command asynchronously
 ---@param command string: The command to execute
@@ -20,6 +23,13 @@ function self.async(command, on_result)
             on_result(nil, table.concat(result, '\n'))
         end
     })
+end
+
+
+function self.interactive()
+end
+
+function self.sync()
 end
 
 return self
