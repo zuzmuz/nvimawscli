@@ -25,7 +25,7 @@ function self.load()
             local status, subservice = pcall(require, 'nvimawscli.services.ec2.' .. subservice_name)
 
             if status then
-                subservice.load(config)
+                subservice.load()
                 vim.api.nvim_win_set_width(self.winnr, config.menu.width)
             else
                 vim.api.nvim_err_writeln('Subservice not found: ' .. subservice_name)

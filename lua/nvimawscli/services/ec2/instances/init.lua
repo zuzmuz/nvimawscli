@@ -1,6 +1,6 @@
 local utils = require('nvimawscli.utils.buffer')
-local command = require('nvimawscli.utils.command')
 local config = require('nvimawscli.config')
+local command = require('nvimawscli.commands.ec2')
 local ui = require('nvimawscli.utils.ui')
 local table_renderer = require('nvimawscli.utils.tables')
 local instance_actions = require('nvimawscli.services.ec2.instances.instance_actions')
@@ -109,13 +109,15 @@ end
 function self.fetch()
     self.ready = false
     self.sorted_by_column_index = nil
-    command.async('aws ec2 describe-instances', function(result, error)
+    command.describe_instance(function(result, error)
         if error then
             utils.write_lines_string(self.bufnr, error)
-        else
+        elseif result then
             local reservations = vim.json.decode(result).Reservations
             self.rows = self.parse(reservations)
             self.render(self.rows)
+        else
+            utils.write_lines_string(self.bufnr, 'Result was nil')
         end
         self.ready = true
     end)

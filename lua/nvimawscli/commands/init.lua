@@ -25,11 +25,15 @@ function self.async(command, on_result)
     })
 end
 
+-- function self.sync()
 
-function self.interactive()
+-- end
+
+---Run a terminal in the window and execute the command interactively
+---@param command string: The command to execute
+function self.interactive(command)
+    vim.fn.termopen(command)
 end
 
-function self.sync()
-end
 
 return self
