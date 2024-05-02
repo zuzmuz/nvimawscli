@@ -57,6 +57,7 @@ self.stop = {
                     print('instance ' ..
                            instance.InstanceId .. ' is ' ..
                            decoded.StoppingInstances[1].CurrentState.Name)
+                    return
                 end
                 vim.api.nvim_err_writeln('Result was nil')
             end)

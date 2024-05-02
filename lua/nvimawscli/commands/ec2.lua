@@ -13,7 +13,7 @@ end
 ---@param instance_id string
 ---@param on_result OnResult
 function self.start_instance(instance_id, on_result)
-    handler.async("aws ec2 start-instances --instance-is " .. instance_id, on_result)
+    handler.async("aws ec2 start-instances --instance-ids " .. instance_id, on_result)
 end
 
 ---Stop ec2 instance
