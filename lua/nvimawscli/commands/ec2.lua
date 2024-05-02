@@ -16,6 +16,25 @@ function self.get_instance_status(instance_id, on_result)
     handler.async("aws ec2 describe-instance-status --instance-ids " .. instance_id, on_result)
 end
 
+
+---Fetch ec2 instance metrics
+---@param instance_id string
+---@param start_time string: the start date for metric, format is timestamp yyyy-mm-ddThh:mm:ssss
+---@param end_time string: then end date for metric, format is timestamp yyyy-mm-ddThh:mm:ssss
+---@param interval number: in seconds, the granularity of the fetch metrics data in seconds
+---@param on_result OnResult
+function self.fetch_instance_metrics(instance_id, start_time, end_time, interval, on_result)
+    handler.async("aws cloudwatch get-metric-data --metric-data-queries " ..
+                      "[{'Id=cpu, MetricStat={Metric={Namespace=AWS/EC2, MetricName=CPUUtilization, Dimensions=[{Name=InstanceId,Value=" ..
+                      instance_id ..
+                      "}],},Period=" ..
+                      interval ..
+                      ",Stat=Average}' --start-time " ..
+                      start_time ..
+                      " --end-time " ..
+                      end_time .. "}]", on_result)
+end
+
 ---Start ec2 instance
 ---@param instance_id string
 ---@param on_result OnResult
@@ -51,4 +70,8 @@ end
 
 
 -- we can have basic cloudwatch ecw metrics here
+--
+-- aws cloudwatch get-metric-data
+-- aws cloudwatch list-metric-data
+-- aws cloudwatch list-dashboard (maybe creating dashbords would be interesting)
 return self
