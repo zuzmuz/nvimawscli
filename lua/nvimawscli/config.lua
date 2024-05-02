@@ -9,13 +9,13 @@ local self = {
     },
     all_services = {
         "ec2",
+        "cloudwatch",
         "elb",
         "s3",
         "codedeploy",
         "rds",
         "iam",
         "vpc",
-        "cloudwatch",
     },
     menu = {
         split = "vertical",

@@ -49,4 +49,6 @@ function self.connect_instance(private_key_file_path, os_user, instance_id)
                         ' --os-user ' .. os_user)
 end
 
+
+-- we can have basic cloudwatch ecw metrics here
 return self
