@@ -9,6 +9,7 @@ local self = {
     },
     all_services = {
         "ec2",
+        "elb",
         "s3",
         "codedeploy",
         "rds",
@@ -48,7 +49,7 @@ local self = {
         relative = 'cursor',
         spacing = 5,
     },
-    test = false,
+    commands = "nvimawscli.commands",
 }
 
 

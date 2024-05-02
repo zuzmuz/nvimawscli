@@ -5,8 +5,15 @@ local self = {}
 
 ---Fecth ec2 instances details
 ---@param on_result OnResult
-function self.describe_instance(on_result)
+function self.describe_instances(on_result)
     handler.async("aws ec2 describe-instances", on_result)
+end
+
+---Fetch ec2 instance status
+---@param instance_id string
+---@param on_result OnResult
+function self.get_instance_status(instance_id, on_result)
+    handler.async("aws ec2 describe-instance-status --instance-ids " .. instance_id, on_result)
 end
 
 ---Start ec2 instance

@@ -1,6 +1,8 @@
 local utils = require('nvimawscli.utils.buffer')
 local config = require('nvimawscli.config')
-local command = require('nvimawscli.commands.ec2')
+print('config', config.commands)
+---@type Ec2Handler
+local command = require(config.commands .. '.ec2')
 local ui = require('nvimawscli.utils.ui')
 local table_renderer = require('nvimawscli.utils.tables')
 local instance_actions = require('nvimawscli.services.ec2.instances.instance_actions')
@@ -109,7 +111,8 @@ end
 function self.fetch()
     self.ready = false
     self.sorted_by_column_index = nil
-    command.describe_instance(function(result, error)
+    utils.write_lines_string(self.bufnr, 'Fetching...')
+    command.describe_instances(function(result, error)
         if error then
             utils.write_lines_string(self.bufnr, error)
         elseif result then
@@ -121,7 +124,6 @@ function self.fetch()
         end
         self.ready = true
     end)
-    utils.write_lines_string(self.bufnr, 'Fetching...')
 end
 
 ---@private
