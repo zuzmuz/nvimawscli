@@ -9,6 +9,11 @@ self.launched = false
 
 function self.setup(config)
     require('nvimawscli.config').setup(config)
+
+    vim.api.nvim_create_user_command('Aws', function (opts)
+        require('nvimawscli').launch()
+    end, {})
+
     self.is_setup = true
 end
 
