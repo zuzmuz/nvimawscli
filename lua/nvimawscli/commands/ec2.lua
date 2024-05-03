@@ -12,7 +12,7 @@ end
 ---Fetch ec2 instance status
 ---@param instance_id string
 ---@param on_result OnResult
-function self.get_instance_status(instance_id, on_result)
+function self.fetch_instance_status(instance_id, on_result)
     handler.async("aws ec2 describe-instance-status --instance-ids " .. instance_id, on_result)
 end
 
@@ -33,6 +33,22 @@ function self.fetch_instance_metrics(instance_id, start_time, end_time, interval
                       ",\"Stat\":\"Average\"}}]' --start-time " .. start_time ..
                       " --end-time " .. end_time,
                       on_result)
+end
+
+---Fetch ec2 instance metrics for the last number of hours
+---@param instance_id string
+---@param current_time number: the number of hourse past the current time to fetch metrics data
+---@param hours number: the number of hourse past the current time to fetch metrics data
+---@param interval number: in seconds, the granularity of the fetch metrics data in seconds
+---@param on_result OnResult
+function self.fetch_last_hours_instance_metrics(instance_id, current_time, hours, interval, on_result)
+    local end_time = os.date("%Y-%m-%dT%H:%M:%S", current_time)
+    local start_time = os.date("%Y-%m-%dT%H:%M:%S", current_time - (hours * 3600))
+    ---@cast end_time string
+    ---@cast start_time string
+
+    print("start_time: " .. start_time .. " end_time: " .. end_time)
+    self.fetch_instance_metrics(instance_id, start_time, end_time, interval, on_result)
 end
 
 ---Start ec2 instance

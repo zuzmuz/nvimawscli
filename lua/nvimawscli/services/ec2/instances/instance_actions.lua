@@ -1,4 +1,3 @@
-local config = require('nvimawscli.config')
 local command = require('nvimawscli.commands.ec2')
 
 ---@class InstanceAction
@@ -17,7 +16,7 @@ self.details = {
     ask_for_confirmation = false,
     action = function(instance)
         print('showing details ' .. instance.InstanceId)
-        command.fetch_instance_metrics(instance.InstanceId, '2024-05-03T10:00:0000', '2024-05-03T11:00:0000', 300,
+        command.fetch_last_hours_instance_metrics(instance.InstanceId, os.time(), 3, 600,
             function(result, error)
                 if error then
                     vim.api.nvim_err_writeln(error)
