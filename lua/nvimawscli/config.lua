@@ -1,3 +1,6 @@
+
+
+
 ---@class Config
 ---@field preferred_services string[]: list of most used services to be shown on top
 ---@field all_services string[]: list of all the services
@@ -22,6 +25,19 @@ local self = {
         width = 15,
     },
     ec2 = {
+        get_attribute_name = function(attribute)
+            if type(attribute) == 'table' then
+                return attribute[1]
+            end
+            return attribute
+        end,
+        get_attribute_name_and_value = function(attribute, instance)
+            if type(attribute) == 'table' then
+                return attribute[1], attribute.get_from(instance)
+            else
+                return attribute, instance.attribute
+            end
+        end,
         ---@type table<table|string>
         preferred_attributes = {
             {

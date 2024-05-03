@@ -20,19 +20,6 @@ local self = {}
 ---@field KeyName string
 
 
-
----Get name form ec2 instance tags
----@param instance table: the raw json instance received from aws ec2 command
----@return string
-local function get_instance_name(instance)
-    for _, tag in ipairs(instance.Tags) do
-        if tag.Key == 'Name' then
-            return tag.Value
-        end
-    end
-    return ''
-end
-
 ---Sort the rows based on the column and direction
 ---@param column string: the name of the column header name to use as key for sorting
 function self.sort_rows(column, direction)
@@ -99,10 +86,9 @@ function self.load()
                     self.sorted_direction = 1
                 end
                 if column_index then
-                    local column_value = config.ec2.preferred_attributes[column_index]
-                    if type(column_value) == "table" then
-                        column_value = column_value[1]
-                    end
+                    local column_value = config.ec2.get_attribute_name(
+                        config.ec2.preferred_attributes[column_index]
+                    )
                     self.sort_rows(column_value, self.sorted_direction)
                     self.render(self.rows)
                 end
@@ -142,17 +128,10 @@ function self.parse(reservations)
         local row = {}
 
         for _, column in ipairs(config.ec2.preferred_attributes) do
-            if type(column) == "table" then
-                local attribute = column[1]
-                row[attribute] = column.get_from(instance)
-                if not row[attribute] then
-                    row[attribute] = ''
-                end
-            else
-                row[column] = instance[column]
-                if not row[column] then
-                    row[column] = ''
-                end
+            local name, value = config.ec2.get_attribute_name_and_value(column, instance)
+            row[name] = value
+            if not row[name] then
+                row[name] = ''
             end
         end
 
