@@ -1,4 +1,7 @@
+---@class CommandHandler
 local self = {}
+
+---@alias OnResult fun(result: string|nil, error: string|nil): nil
 
 ---Execute a terminal command asynchronously
 ---@param command string: The command to execute
@@ -21,5 +24,16 @@ function self.async(command, on_result)
         end
     })
 end
+
+-- function self.sync()
+
+-- end
+
+---Run a terminal in the window and execute the command interactively
+---@param command string: The command to execute
+function self.interactive(command)
+    vim.fn.termopen(command)
+end
+
 
 return self

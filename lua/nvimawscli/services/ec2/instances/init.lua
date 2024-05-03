@@ -1,34 +1,25 @@
 local utils = require('nvimawscli.utils.buffer')
-local command = require('nvimawscli.utils.command')
+local itertools = require("nvimawscli.utils.itertools")
 local config = require('nvimawscli.config')
+print('config', config.commands)
+---@type Ec2Handler
+local command = require(config.commands .. '.ec2')
 local ui = require('nvimawscli.utils.ui')
 local table_renderer = require('nvimawscli.utils.tables')
 local instance_actions = require('nvimawscli.services.ec2.instances.instance_actions')
 
+---@class InstanceManager
 local self = {}
 
 
 
----@class instance
+---@class Instance
 ---@field Name string
 ---@field PrivateIpAddress string
 ---@field State string
 ---@field Type string
 ---@field KeyName string
 
-
-
----Get name form ec2 instance tags
----@param instance table: the raw json instance received from aws ec2 command
----@return string
-local function get_instance_name(instance)
-    for _, tag in ipairs(instance.Tags) do
-        if tag.Key == 'Name' then
-            return tag.Value
-        end
-    end
-    return ''
-end
 
 ---Sort the rows based on the column and direction
 ---@param column string: the name of the column header name to use as key for sorting
@@ -47,7 +38,7 @@ function self.load()
     end
 
     if not self.winnr or not utils.check_if_window_exists(self.winnr) then
-        self.winnr = utils.create_window(self.bufnr, config.submenu.split)
+        self.winnr = utils.create_window(self.bufnr, config.menu.split)
     end
 
     vim.api.nvim_set_current_win(self.winnr)
@@ -69,7 +60,7 @@ function self.load()
                 local instance = self.rows[item_number]
                 local available_actions = instance_actions.get(instance)
 
-                ui.create_floating_select_popup(nil, available_actions, config,
+                ui.create_floating_select_popup(nil, available_actions, config.table,
                     function(selected_action)
                         local action = available_actions[selected_action]
                         if instance_actions[action].ask_for_confirmation then
@@ -87,7 +78,8 @@ function self.load()
                         end
                     end)
             else -- perform sorting based on column selection
-                local column_index = table_renderer.get_column_index_from_position(column_number, self.widths)
+                local column_index = table_renderer.get_column_index_from_position(
+                    column_number, self.widths)
                 if self.sorted_by_column_index == column_index then
                     self.sorted_direction = self.sorted_direction * -1
                 else
@@ -95,7 +87,10 @@ function self.load()
                     self.sorted_direction = 1
                 end
                 if column_index then
-                    self.sort_rows(config.ec2.columns[column_index], self.sorted_direction)
+                    local column_value = config.ec2.get_attribute_name(
+                        config.ec2.preferred_attributes[column_index]
+                    )
+                    self.sort_rows(column_value, self.sorted_direction)
                     self.render(self.rows)
                 end
             end
@@ -108,61 +103,50 @@ end
 function self.fetch()
     self.ready = false
     self.sorted_by_column_index = nil
-    command.async('aws ec2 describe-instances', function(result, error)
+    utils.write_lines_string(self.bufnr, 'Fetching...')
+    command.describe_instances(function(result, error)
         if error then
             utils.write_lines_string(self.bufnr, error)
-        else
+        elseif result then
             local reservations = vim.json.decode(result).Reservations
             self.rows = self.parse(reservations)
-            self.render(self.rows)
+            local allowed_positions = self.render(self.rows)
+            utils.set_allowed_positions(self.bufnr, allowed_positions)
+        else
+            utils.write_lines_string(self.bufnr, 'Result was nil')
         end
         self.ready = true
     end)
-    utils.write_lines_string(self.bufnr, 'Fetching...')
 end
 
 ---@private
 ---Parse the ec2 instances and store the rows
 ---@param reservations table: the raw json reservations received from aws ec2 command
----@return table<instance>
+---@return Instance[]
 function self.parse(reservations)
-    local rows = {}
-    for reservation_index, reservation in ipairs(reservations) do
-        local instance = reservation.Instances[1]
-        local row = {}
-
-        for _, column in ipairs(config.ec2.columns) do
-            if column == 'Name' then
-                row[column] = get_instance_name(instance)
-            elseif column == 'PublicIpAddress' then
-                local public_ip = instance.PublicIpAddress
-                if not public_ip then
-                    public_ip = ''
-                end
-                row[column] = public_ip
-            elseif column == 'State' then
-                row[column] = instance.State.Name
-            elseif column == 'Type' then
-                row[column] = instance.InstanceType
-            else
-                row[column] = instance[column]
-                if not row[column] then
-                    row[column] = ''
-                end
-            end
-        end
-
-        rows[reservation_index] = row
-    end
+    local rows = itertools.imap(reservations,
+        function(reservation)
+            local instance = reservation.Instances[1]
+            return itertools.associate(config.ec2.preferred_attributes,
+                function (attribute)
+                    return config.ec2.get_attribute_name_and_value(attribute, instance)
+               end)
+    end)
     return rows
 end
 
 ---@private
 ---Render the table containing the ec2 instances into the buffer
----@param rows table<instance>
+---@param rows Instance[]
+---@return number[][][]: The positions the cursor is allowed to be at
 function self.render(rows)
+    local column_names = itertools.imap(config.ec2.preferred_attributes,
+        function (attribute)
+            return config.ec2.get_attribute_name(attribute)
+        end)
+
     local lines, allowed_positions, widths = table_renderer.render(
-        config.ec2.columns,
+        column_names,
         rows,
         self.sorted_by_column_index,
         self.sorted_direction,
@@ -170,7 +154,7 @@ function self.render(rows)
 
     self.widths = widths
     utils.write_lines(self.bufnr, lines)
-    utils.set_allowed_positions(self.bufnr, allowed_positions)
+    return allowed_positions
 end
 
 return self

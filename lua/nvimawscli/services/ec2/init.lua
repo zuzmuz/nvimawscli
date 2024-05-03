@@ -1,16 +1,8 @@
 local utils = require('nvimawscli.utils.buffer')
 local config = require('nvimawscli.config')
+
+---@class Ec2
 local self = {}
-
-
-self.subservices = {
-    'instances',
-    'images',
-    'security_groups',
-    'elastic_ips',
-    'load_balancers',
-    'target_groups',
-}
 
 function self.load()
     if not self.bufnr then
@@ -18,7 +10,7 @@ function self.load()
     end
 
     if not self.winnr or not utils.check_if_window_exists(self.winnr) then
-        self.winnr = utils.create_window(self.bufnr, config.submenu.split)
+        self.winnr = utils.create_window(self.bufnr, config.menu.split)
     end
 
     vim.api.nvim_set_current_win(self.winnr)
@@ -33,17 +25,17 @@ function self.load()
             local status, subservice = pcall(require, 'nvimawscli.services.ec2.' .. subservice_name)
 
             if status then
-                subservice.load(config)
-                vim.api.nvim_win_set_width(self.winnr, config.submenu.width)
+                subservice.load()
+                vim.api.nvim_win_set_width(self.winnr, config.menu.width)
             else
                 vim.api.nvim_err_writeln('Subservice not found: ' .. subservice_name)
             end
         end
     })
 
-    utils.write_lines(self.bufnr, self.subservices)
+    utils.write_lines(self.bufnr, config.ec2.preferred_services)
     local allowed_positions = {}
-    for i, _ in ipairs(self.subservices) do
+    for i, _ in ipairs(config.ec2.preferred_services) do
         allowed_positions[#allowed_positions+1] = { { i, 1 } }
     end
     utils.set_allowed_positions(self.bufnr, allowed_positions)

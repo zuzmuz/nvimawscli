@@ -1,3 +1,8 @@
+---@class Dashboard
+---@field launched boolean
+---@field is_setup boolean
+---@field launch fun(): nil
+---@field setup fun(table): nil
 local self = {}
 
 self.launched = false

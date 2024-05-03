@@ -1,33 +1,129 @@
-local self = {}
 
-local default_config = {
-    menu = {
-        prefered_services = {
-            "ec2",
-            "codedeply",
-            "s3",
-            "rds",
-            "iam",
-            "vpc",
-        },
-        split = "vertical",
-        width = 15,
-        height = 20,
+
+
+---@class Config
+---@field preferred_services string[]: list of most used services to be shown on top
+---@field all_services string[]: list of all the services
+---@field menu table: menu window config
+---@field table table: rendered tables config
+local self = {
+    preferred_services = {
+        "ec2",
     },
-    submenu = {
+    all_services = {
+        "ec2",
+        "cloudwatch",
+        "elb",
+        "s3",
+        "codedeploy",
+        "rds",
+        "iam",
+        "vpc",
+    },
+    menu = {
         split = "vertical",
         width = 15,
-        height = 20,
     },
     ec2 = {
-        columns = {
-            "Name",
+        get_attribute_name = function(attribute)
+            if type(attribute) == 'table' then
+                return attribute[1]
+            end
+            return attribute
+        end,
+        get_attribute_name_and_value = function(attribute, instance)
+            if type(attribute) == 'table' then
+                return attribute[1], attribute.get_from(instance) or ''
+            else
+                return attribute, instance[attribute] or ''
+            end
+        end,
+        ---@type table<table|string>
+        preferred_attributes = {
+            {
+                "Name",
+                get_from = function(instance)
+                    for _, tag in ipairs(instance.Tags) do
+                        if tag.Key == "Name" then
+                            return tag.Value
+                        end
+                    end
+                    return ""
+                end,
+            },
             "InstanceId",
-            "State",
-            "Type",
+            {
+                "State",
+                get_from = function(instance)
+                    return instance.State.Name
+                end,
+            },
+            "InstanceType",
             "PrivateIpAddress",
-            -- "PublicIpAddress",
             "KeyName",
+        },
+        all_attributes = {
+            "ImageId",
+            "InstanceId",
+            "InstanceType",
+            "KeyName",
+            "LaunchTime",
+            {
+                "Monitoring",
+                attributes = {
+                    "State",
+                },
+            },
+            "PrivateDnsName",
+            "PrivateIpAddress",
+            {
+                "State",
+                attributes = {
+                    "Code",
+                    "Name",
+                },
+            },
+            "StateTransitionReason",
+            "SubnetId",
+            "VpcId",
+            "Architecture",
+            {
+                "IamInstanceProfile",
+                attributes = {
+                    "Arn",
+                    "Id",
+                },
+            },
+            {
+                "SecurityGroups",
+                list = {
+                    {
+                        "GroupId",
+                        "GroupName",
+                    },
+                },
+            },
+            {
+                "Tags",
+                list = {
+                    {
+                        "Key",
+                        "Value",
+                    },
+                },
+            },
+        },
+        preferred_services = {
+            'instances',
+        },
+        all_services = {
+            'instances',
+            'launch_instance',
+            'ami',
+            'security_groups',
+            'elb',
+            'target_groups',
+            'elastic_ip',
         },
     },
     table = {
@@ -35,15 +131,14 @@ local default_config = {
         relative = 'cursor',
         spacing = 5,
     },
-    test = false,
+    commands = "nvimawscli.commands",
 }
 
 
 ---Setup the configurations
 ---@param config table: The configuration to setup
 function self.setup(config)
-
-    local new_config = vim.tbl_deep_extend('keep', config or {}, default_config)
+    local new_config = vim.tbl_deep_extend('keep', config or {}, self)
 
     for key, value in pairs(new_config) do
         self[key] = value
