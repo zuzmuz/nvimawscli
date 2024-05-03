@@ -25,14 +25,14 @@ end
 ---@param on_result OnResult
 function self.fetch_instance_metrics(instance_id, start_time, end_time, interval, on_result)
     handler.async("aws cloudwatch get-metric-data --metric-data-queries " ..
-                      "[{'Id=cpu, MetricStat={Metric={Namespace=AWS/EC2, MetricName=CPUUtilization, Dimensions=[{Name=InstanceId,Value=" ..
-                      instance_id ..
-                      "}],},Period=" ..
-                      interval ..
-                      ",Stat=Average}' --start-time " ..
-                      start_time ..
-                      " --end-time " ..
-                      end_time .. "}]", on_result)
+                      "'[{\"Id\":\"cpu\", \"MetricStat\":{" ..
+                      "\"Metric\":{\"Namespace\":\"AWS/EC2\", " ..
+                      "\"MetricName\":\"CPUUtilization\", \"Dimensions\":[{\"Name\":\"InstanceId\"," ..
+                      "\"Value\": \"" .. instance_id .. "\"" ..
+                      "}]},\"Period\":" .. interval ..
+                      ",\"Stat\":\"Average\"}}]' --start-time " .. start_time ..
+                      " --end-time " .. end_time,
+                      on_result)
 end
 
 ---Start ec2 instance

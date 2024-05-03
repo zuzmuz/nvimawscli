@@ -17,6 +17,19 @@ self.details = {
     ask_for_confirmation = false,
     action = function(instance)
         print('showing details ' .. instance.InstanceId)
+        command.fetch_instance_metrics(instance.InstanceId, '2024-05-03T10:00:0000', '2024-05-03T11:00:0000', 300,
+            function(result, error)
+                if error then
+                    vim.api.nvim_err_writeln(error)
+                    return
+                end
+                if result then
+                    local decoded = vim.json.decode(result)
+                    print(vim.inspect(decoded))
+                    return
+                end
+                vim.api.nvim_err_writeln('Result was nil')
+            end)
     end,
 }
 
