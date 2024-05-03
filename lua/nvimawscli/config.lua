@@ -33,9 +33,9 @@ local self = {
         end,
         get_attribute_name_and_value = function(attribute, instance)
             if type(attribute) == 'table' then
-                return attribute[1], attribute.get_from(instance)
+                return attribute[1], attribute.get_from(instance) or ''
             else
-                return attribute, instance.attribute
+                return attribute, instance[attribute] or ''
             end
         end,
         ---@type table<table|string>

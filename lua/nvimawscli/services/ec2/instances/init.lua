@@ -1,4 +1,5 @@
 local utils = require('nvimawscli.utils.buffer')
+local itertools = require("nvimawscli.utils.itertools")
 local config = require('nvimawscli.config')
 print('config', config.commands)
 ---@type Ec2Handler
@@ -109,7 +110,8 @@ function self.fetch()
         elseif result then
             local reservations = vim.json.decode(result).Reservations
             self.rows = self.parse(reservations)
-            self.render(self.rows)
+            local allowed_positions = self.render(self.rows)
+            utils.set_allowed_positions(self.bufnr, allowed_positions)
         else
             utils.write_lines_string(self.bufnr, 'Result was nil')
         end
@@ -122,36 +124,26 @@ end
 ---@param reservations table: the raw json reservations received from aws ec2 command
 ---@return Instance[]
 function self.parse(reservations)
-    local rows = {}
-    for reservation_index, reservation in ipairs(reservations) do
-        local instance = reservation.Instances[1]
-        local row = {}
-
-        for _, column in ipairs(config.ec2.preferred_attributes) do
-            local name, value = config.ec2.get_attribute_name_and_value(column, instance)
-            row[name] = value
-            if not row[name] then
-                row[name] = ''
-            end
-        end
-
-        rows[reservation_index] = row
-    end
+    local rows = itertools.imap(reservations,
+        function(reservation)
+            local instance = reservation.Instances[1]
+            return itertools.associate(config.ec2.preferred_attributes,
+                function (attribute)
+                    return config.ec2.get_attribute_name_and_value(attribute, instance)
+               end)
+    end)
     return rows
 end
 
 ---@private
 ---Render the table containing the ec2 instances into the buffer
 ---@param rows Instance[]
+---@return number[][][]: The positions the cursor is allowed to be at
 function self.render(rows)
-    local column_names = {}
-    for i, column in ipairs(config.ec2.preferred_attributes) do
-        if type(column) == 'table' then
-            column_names[i] = column[1]
-        else
-            column_names[i] = column
-        end
-    end
+    local column_names = itertools.imap(config.ec2.preferred_attributes,
+        function (attribute)
+            return config.ec2.get_attribute_name(attribute)
+        end)
 
     local lines, allowed_positions, widths = table_renderer.render(
         column_names,
@@ -162,7 +154,7 @@ function self.render(rows)
 
     self.widths = widths
     utils.write_lines(self.bufnr, lines)
-    utils.set_allowed_positions(self.bufnr, allowed_positions)
+    return allowed_positions
 end
 
 return self
