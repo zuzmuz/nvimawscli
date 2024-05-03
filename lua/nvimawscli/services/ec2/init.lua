@@ -33,9 +33,9 @@ function self.load()
         end
     })
 
-    utils.write_lines(self.bufnr, config.ec2.prefered_services)
+    utils.write_lines(self.bufnr, config.ec2.preferred_services)
     local allowed_positions = {}
-    for i, _ in ipairs(config.ec2.prefered_services) do
+    for i, _ in ipairs(config.ec2.preferred_services) do
         allowed_positions[#allowed_positions+1] = { { i, 1 } }
     end
     utils.set_allowed_positions(self.bufnr, allowed_positions)

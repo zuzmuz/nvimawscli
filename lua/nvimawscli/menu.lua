@@ -53,13 +53,15 @@ function self.load()
     utils.write_lines_string(self.bufnr,
         table.concat(self.header, '\n') .. '\n' ..
         table.concat(self.preferred_services_header, '\n') .. '\n' ..
-        table.concat(config.prefered_services, '\n'))
+        table.concat(config.preferred_services, '\n'))
 
 
     local allowed_positions = {}
 
-    for i, _ in ipairs(config.prefered_services) do
-        allowed_positions[#allowed_positions+1] = { { #self.header + #self.preferred_services_header + i, 1 } }
+    for i, _ in ipairs(config.preferred_services) do
+        allowed_positions[#allowed_positions+1] = {
+            { #self.header + #self.preferred_services_header + i, 1 }
+        }
     end
     utils.set_allowed_positions(self.bufnr, allowed_positions)
 end

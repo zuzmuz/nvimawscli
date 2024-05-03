@@ -1,10 +1,10 @@
 ---@class Config
----@field prefered_services string[]: list of most used services to be shown on top
+---@field preferred_services string[]: list of most used services to be shown on top
 ---@field all_services string[]: list of all the services
 ---@field menu table: menu window config
 ---@field table table: rendered tables config
 local self = {
-    prefered_services = {
+    preferred_services = {
         "ec2",
     },
     all_services = {
@@ -22,16 +22,82 @@ local self = {
         width = 15,
     },
     ec2 = {
-        columns = {
-            "Name",
+        ---@type table<table|string>
+        preferred_attributes = {
+            {
+                "Name",
+                get_from = function(instance)
+                    for _, tag in ipairs(instance.Tags) do
+                        if tag.Key == "Name" then
+                            return tag.Value
+                        end
+                    end
+                    return ""
+                end,
+            },
             "InstanceId",
-            "State",
-            "Type",
+            {
+                "State",
+                get_from = function(instance)
+                    return instance.State.Name
+                end,
+            },
+            "InstanceType",
             "PrivateIpAddress",
-            -- "PublicIpAddress",
             "KeyName",
         },
-        prefered_services = {
+        all_attributes = {
+            "ImageId",
+            "InstanceId",
+            "InstanceType",
+            "KeyName",
+            "LaunchTime",
+            {
+                "Monitoring",
+                attributes = {
+                    "State",
+                },
+            },
+            "PrivateDnsName",
+            "PrivateIpAddress",
+            {
+                "State",
+                attributes = {
+                    "Code",
+                    "Name",
+                },
+            },
+            "StateTransitionReason",
+            "SubnetId",
+            "VpcId",
+            "Architecture",
+            {
+                "IamInstanceProfile",
+                attributes = {
+                    "Arn",
+                    "Id",
+                },
+            },
+            {
+                "SecurityGroups",
+                list = {
+                    {
+                        "GroupId",
+                        "GroupName",
+                    },
+                },
+            },
+            {
+                "Tags",
+                list = {
+                    {
+                        "Key",
+                        "Value",
+                    },
+                },
+            },
+        },
+        preferred_services = {
             'instances',
         },
         all_services = {

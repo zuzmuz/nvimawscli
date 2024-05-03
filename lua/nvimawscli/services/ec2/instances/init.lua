@@ -90,7 +90,8 @@ function self.load()
                         end
                     end)
             else -- perform sorting based on column selection
-                local column_index = table_renderer.get_column_index_from_position(column_number, self.widths)
+                local column_index = table_renderer.get_column_index_from_position(
+                    column_number, self.widths)
                 if self.sorted_by_column_index == column_index then
                     self.sorted_direction = self.sorted_direction * -1
                 else
@@ -98,7 +99,11 @@ function self.load()
                     self.sorted_direction = 1
                 end
                 if column_index then
-                    self.sort_rows(config.ec2.columns[column_index], self.sorted_direction)
+                    local column_value = config.ec2.preferred_attributes[column_index]
+                    if type(column_value) == "table" then
+                        column_value = column_value[1]
+                    end
+                    self.sort_rows(column_value, self.sorted_direction)
                     self.render(self.rows)
                 end
             end
@@ -136,19 +141,13 @@ function self.parse(reservations)
         local instance = reservation.Instances[1]
         local row = {}
 
-        for _, column in ipairs(config.ec2.columns) do
-            if column == 'Name' then
-                row[column] = get_instance_name(instance)
-            elseif column == 'PublicIpAddress' then
-                local public_ip = instance.PublicIpAddress
-                if not public_ip then
-                    public_ip = ''
+        for _, column in ipairs(config.ec2.preferred_attributes) do
+            if type(column) == "table" then
+                local attribute = column[1]
+                row[attribute] = column.get_from(instance)
+                if not row[attribute] then
+                    row[attribute] = ''
                 end
-                row[column] = public_ip
-            elseif column == 'State' then
-                row[column] = instance.State.Name
-            elseif column == 'Type' then
-                row[column] = instance.InstanceType
             else
                 row[column] = instance[column]
                 if not row[column] then
@@ -166,8 +165,17 @@ end
 ---Render the table containing the ec2 instances into the buffer
 ---@param rows Instance[]
 function self.render(rows)
+    local column_names = {}
+    for i, column in ipairs(config.ec2.preferred_attributes) do
+        if type(column) == 'table' then
+            column_names[i] = column[1]
+        else
+            column_names[i] = column
+        end
+    end
+
     local lines, allowed_positions, widths = table_renderer.render(
-        config.ec2.columns,
+        column_names,
         rows,
         self.sorted_by_column_index,
         self.sorted_direction,
