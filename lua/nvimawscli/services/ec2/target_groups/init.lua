@@ -36,7 +36,7 @@ function self.load()
 
     self.fetch()
 
-    vim.api.nvim_buf_set_keymap(self.bufnr, 'n', '<CR', '', {
+    vim.api.nvim_buf_set_keymap(self.bufnr, 'n', '<CR>', '', {
         callback = function()
             if not self.ready then
                 return
