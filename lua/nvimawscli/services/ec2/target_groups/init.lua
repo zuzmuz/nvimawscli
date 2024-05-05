@@ -10,6 +10,17 @@ local command = require(config.commands .. '.ec2')
 ---@class TargetGroupsManager
 local self = {}
 
+---Sort the rows based on the column and direction
+---@param column string: the name of the column header name to use as key for sorting
+function self.sort_rows(column, direction)
+    table.sort(self.rows, function(a, b)
+        if direction == 1 then
+            return a[column] < b[column]
+        end
+        return a[column] > b[column]
+    end)
+end
+
 function self.load()
     print("loading target groups functionality")
 
@@ -24,6 +35,41 @@ function self.load()
     vim.api.nvim_set_current_win(self.winnr)
 
     self.fetch()
+
+    vim.api.nvim_buf_set_keymap(self.bufnr, 'n', '<CR', '', {
+        callback = function()
+            if not self.ready then
+                return
+            end
+
+            local position = vim.fn.getcursorcharpos()
+            local line_number = position[2]
+            local column_number = position[3]
+
+            local item_number = table_renderer.get_item_number_from_row(line_number)
+            if item_number > 0 and item_number < #self.rows then
+                -- To be implemente 
+            else
+                local column_index = table_renderer.get_column_index_from_position(
+                    column_number, self.widths
+                )
+                if self.sorted_by_column_index == column_index then
+                    self.sorted_direction = self.sorted_direction * -1
+                else
+                    self.sorted_by_column_index = column_index
+                    self.sorted_direction = 1
+                end
+
+                if column_index then
+                    local column_value = config.ec2.get_attribute_name(
+                        config.ec2.preferred_target_groups_attributes[column_index]
+                    )
+                    self.sort_rows(column_value, self.sorted_direction)
+                    self.render(self.rows)
+                end
+            end
+        end
+    })
 end
 
 ---@private
@@ -73,8 +119,8 @@ function self.render(rows)
     local lines, allowed_positions, widths = table_renderer.render(
         column_names,
         rows,
-        nil,
-        1,
+        self.sorted_by_column_index,
+        self.sorted_direction,
         config.table
     )
     self.widths = widths
