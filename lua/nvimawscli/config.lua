@@ -130,10 +130,6 @@ local self = {
             "TargetGroupName",
             "Protocol",
             "Port",
-            "HealthCheckEnabled",
-            "HealthCheckPath",
-            "HealthCheckIntervalSeconds",
-            "HealthCheckTimeoutSeconds",
             "TargetType"
         },
         all_target_groups_attributes = {
