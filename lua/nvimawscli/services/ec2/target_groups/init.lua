@@ -5,7 +5,7 @@ local itertools = require('nvimawscli.utils.itertools')
 local table_renderer = require('nvimawscli.utils.tables')
 
 ---@type Ec2Handler
-local command = require(config.commands .. 'ec2')
+local command = require(config.commands .. '.ec2')
 
 ---@class TargetGroupsManager
 local self = {}
