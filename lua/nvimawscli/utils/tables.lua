@@ -85,10 +85,10 @@ function self.render(headers, rows, sorted_by_column_index, sorted_direction, co
             accumulated_width = 2
 
             for j, header in ipairs(headers) do
-                lines[line_index] = lines[line_index] .. row[header] ..
+                lines[line_index] = tostring(lines[line_index]) .. tostring(row[header]) ..
                                          string.rep(' ',
                                                     widths[j] - vim.fn.strdisplaywidth(row[header])) ..
-                                         border.vertical
+                                         tostring(border.vertical)
 
                 allowed_positions[#allowed_positions][j] = { line_index, accumulated_width }
                 accumulated_width = accumulated_width + widths[j] + 1
