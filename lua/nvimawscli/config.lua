@@ -115,6 +115,7 @@ local self = {
         },
         preferred_services = {
             'instances',
+            'target_groups',
         },
         all_services = {
             'instances',
@@ -125,6 +126,22 @@ local self = {
             'target_groups',
             'elastic_ip',
         },
+        preferred_target_groups_attributes = {
+            "TargetGroupName",
+            "Protocol",
+            "Port",
+            "TargetType"
+        },
+        all_target_groups_attributes = {
+            "TargetGroupName",
+            "Protocol",
+            "Port",
+            "HealthCheckEnabled",
+            "HealthCheckPath",
+            "HealthCheckIntervalSeconds",
+            "HealthCheckTimeoutSeconds",
+            "TargetType"
+        }
     },
     table = {
         border = 'rounded',

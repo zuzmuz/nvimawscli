@@ -85,6 +85,13 @@ function self.connect_instance(private_key_file_path, os_user, instance_id)
 end
 
 
+
+-- Fetch all target groups details
+---@param on_result OnResult
+function self.describe_target_groups(on_result)
+    handler.async("aws elbv2 describe-target-groups", on_result)
+end
+
 -- we can have basic cloudwatch ecw metrics here
 --
 -- aws cloudwatch get-metric-data
