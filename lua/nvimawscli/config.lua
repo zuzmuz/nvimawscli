@@ -22,94 +22,6 @@ local self = {
         width = 15,
     },
     ec2 = {
-        get_attribute_name = function(attribute)
-            if type(attribute) == 'table' then
-                return attribute[1]
-            end
-            return attribute
-        end,
-        get_attribute_name_and_value = function(attribute, instance)
-            if type(attribute) == 'table' then
-                return attribute[1], attribute.get_from(instance) or ''
-            else
-                return attribute, instance[attribute] or ''
-            end
-        end,
-        ---@type table<table|string>
-        preferred_attributes = {
-            {
-                "Name",
-                get_from = function(instance)
-                    for _, tag in ipairs(instance.Tags) do
-                        if tag.Key == "Name" then
-                            return tag.Value
-                        end
-                    end
-                    return ""
-                end,
-            },
-            "InstanceId",
-            {
-                "State",
-                get_from = function(instance)
-                    return instance.State.Name
-                end,
-            },
-            "InstanceType",
-            "PrivateIpAddress",
-            "KeyName",
-        },
-        all_attributes = {
-            "ImageId",
-            "InstanceId",
-            "InstanceType",
-            "KeyName",
-            "LaunchTime",
-            {
-                "Monitoring",
-                attributes = {
-                    "State",
-                },
-            },
-            "PrivateDnsName",
-            "PrivateIpAddress",
-            {
-                "State",
-                attributes = {
-                    "Code",
-                    "Name",
-                },
-            },
-            "StateTransitionReason",
-            "SubnetId",
-            "VpcId",
-            "Architecture",
-            {
-                "IamInstanceProfile",
-                attributes = {
-                    "Arn",
-                    "Id",
-                },
-            },
-            {
-                "SecurityGroups",
-                list = {
-                    {
-                        "GroupId",
-                        "GroupName",
-                    },
-                },
-            },
-            {
-                "Tags",
-                list = {
-                    {
-                        "Key",
-                        "Value",
-                    },
-                },
-            },
-        },
         preferred_services = {
             'instances',
             'target_groups',
@@ -123,22 +35,114 @@ local self = {
             'target_groups',
             'elastic_ip',
         },
-        preferred_target_groups_attributes = {
-            "TargetGroupName",
-            "Protocol",
-            "Port",
-            "TargetType"
+        get_attribute_name = function(attribute)
+            if type(attribute) == 'table' then
+                return attribute[1]
+            end
+            return attribute
+        end,
+        get_attribute_name_and_value = function(attribute, element)
+            if type(attribute) == 'table' then
+                return attribute[1], attribute.get_from(element) or ''
+            else
+                return attribute, element[attribute] or ''
+            end
+        end,
+        instances = {
+            ---@type table<table|string>
+            preferred_attributes = {
+                {
+                    "Name",
+                    get_from = function(instance)
+                        for _, tag in ipairs(instance.Tags) do
+                            if tag.Key == "Name" then
+                                return tag.Value
+                            end
+                        end
+                        return ""
+                    end,
+                },
+                "InstanceId",
+                {
+                    "State",
+                    get_from = function(instance)
+                        return instance.State.Name
+                    end,
+                },
+                "InstanceType",
+                "PrivateIpAddress",
+                "KeyName",
+            },
+            all_attributes = {
+                "ImageId",
+                "InstanceId",
+                "InstanceType",
+                "KeyName",
+                "LaunchTime",
+                {
+                    "Monitoring",
+                    attributes = {
+                        "State",
+                    },
+                },
+                "PrivateDnsName",
+                "PrivateIpAddress",
+                {
+                    "State",
+                    attributes = {
+                        "Code",
+                        "Name",
+                    },
+                },
+                "StateTransitionReason",
+                "SubnetId",
+                "VpcId",
+                "Architecture",
+                {
+                    "IamInstanceProfile",
+                    attributes = {
+                        "Arn",
+                        "Id",
+                    },
+                },
+                {
+                    "SecurityGroups",
+                    list = {
+                        {
+                            "GroupId",
+                            "GroupName",
+                        },
+                    },
+                },
+                {
+                    "Tags",
+                    list = {
+                        {
+                            "Key",
+                            "Value",
+                        },
+                    },
+                },
+            },
         },
-        all_target_groups_attributes = {
-            "TargetGroupName",
-            "Protocol",
-            "Port",
-            "HealthCheckEnabled",
-            "HealthCheckPath",
-            "HealthCheckIntervalSeconds",
-            "HealthCheckTimeoutSeconds",
-            "TargetType"
-        }
+        target_groups = {
+            preferred_attributes = {
+                "TargetGroupName",
+                "Protocol",
+                "Port",
+                "TargetType"
+            },
+            all_attributes = {
+                "TargetGroupName",
+                "Protocol",
+                "Port",
+                "HealthCheckEnabled",
+                "HealthCheckPath",
+                "HealthCheckIntervalSeconds",
+                "HealthCheckTimeoutSeconds",
+                "TargetType"
+            },
+        },
     },
     table = {
         border = 'rounded',

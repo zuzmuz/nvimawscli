@@ -95,7 +95,7 @@ function self.handle_sort_event(column_number)
     end
     if column_index then
         local column_value = config.ec2.get_attribute_name(
-        config.ec2.preferred_attributes[column_index]
+        config.ec2.instances.preferred_attributes[column_index]
         )
         self.sort_rows(column_value, self.sorted_direction)
         self.render(self.rows)
@@ -131,7 +131,7 @@ function self.parse(reservations)
     local rows = itertools.imap(reservations,
         function(reservation)
             local instance = reservation.Instances[1]
-            return itertools.associate(config.ec2.preferred_attributes,
+            return itertools.associate(config.ec2.instances.preferred_attributes,
                 function (attribute)
                     return config.ec2.get_attribute_name_and_value(attribute, instance)
                end)
@@ -144,7 +144,7 @@ end
 ---@param rows Instance[]
 ---@return number[][][]: The positions the cursor is allowed to be at
 function self.render(rows)
-    local column_names = itertools.imap(config.ec2.preferred_attributes,
+    local column_names = itertools.imap(config.ec2.instances.preferred_attributes,
         function (attribute)
             return config.ec2.get_attribute_name(attribute)
         end)
