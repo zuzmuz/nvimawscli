@@ -95,9 +95,9 @@ end
 ---Parse target groups result and store in rows
 ---@param target_groups table: the raw json target groups
 function self.parse(target_groups)
-    return itertools.imap(target_groups,
+    return itertools.imap_values(target_groups,
         function(target_group)
-            return itertools.associate(config.ec2.target_groups.preferred_attributes,
+            return itertools.associate_values(config.ec2.target_groups.preferred_attributes,
                 function(attribute)
                     return config.ec2.get_attribute_name_and_value(attribute, target_group)
                 end
@@ -110,7 +110,7 @@ end
 ---Render the table containing ec2 target groups into the buffer
 ---@return number[][][]: the position the cursor is allows to be at
 function self.render(rows)
-    local column_names = itertools.imap(config.ec2.target_groups.preferred_attributes,
+    local column_names = itertools.imap_values(config.ec2.target_groups.preferred_attributes,
         function(attribute)
             return config.ec2.get_attribute_name(attribute)
         end

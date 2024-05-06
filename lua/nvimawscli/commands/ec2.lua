@@ -1,3 +1,5 @@
+local config = require("nvimawscli.config")
+local itertools = require("nvimawscli.utils.itertools")
 local handler = require("nvimawscli.commands")
 
 ---@class Ec2Handler
@@ -6,7 +8,15 @@ local self = {}
 ---Fecth ec2 instances details
 ---@param on_result OnResult
 function self.describe_instances(on_result)
-    handler.async("aws ec2 describe-instances", on_result)
+    local query_strings = itertools.imap_values(config.ec2.instances.preferred_attributes,
+        function(value)
+            return value[1] .. ': ' .. value[2]
+        end)
+    local query_string = table.concat(query_strings, ', ')
+    handler.async("aws ec2 describe-instances " ..
+                  "--query 'Reservations[].Instances[].{" ..
+                  query_string ..
+                  "}'", on_result)
 end
 
 ---Fetch ec2 instance status

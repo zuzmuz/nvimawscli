@@ -34,43 +34,15 @@ local self = {
             'target_groups',
             'elastic_ip',
         },
-        get_attribute_name = function(attribute)
-            if type(attribute) == 'table' then
-                return attribute[1]
-            end
-            return attribute
-        end,
-        get_attribute_name_and_value = function(attribute, element)
-            if type(attribute) == 'table' then
-                return attribute[1], attribute.get_from(element) or ''
-            else
-                return attribute, element[attribute] or ''
-            end
-        end,
         instances = {
             ---@type table<table|string>
             preferred_attributes = {
-                {
-                    "Name",
-                    get_from = function(instance)
-                        for _, tag in ipairs(instance.Tags) do
-                            if tag.Key == "Name" then
-                                return tag.Value
-                            end
-                        end
-                        return ""
-                    end,
-                },
-                "InstanceId",
-                {
-                    "State",
-                    get_from = function(instance)
-                        return instance.State.Name
-                    end,
-                },
-                "InstanceType",
-                "PrivateIpAddress",
-                "KeyName",
+                {"Name", "Tags[?Key==`Name`].Value | [0]"},
+                {"InstanceId", "InstanceId"},
+                {"State", "State.Name"},
+                {"InstanceType", "InstanceType"},
+                {"PrivateIpAddress", "PrivateIpAddress"},
+                {"KeyName", "KeyName"},
             },
             all_attributes = {
                 "ImageId",
