@@ -1,7 +1,6 @@
 local utils = require('nvimawscli.utils.buffer')
 local itertools = require("nvimawscli.utils.itertools")
 local config = require('nvimawscli.config')
-print('config', config.commands)
 ---@type Ec2Handler
 local command = require(config.commands .. '.ec2')
 local ui = require('nvimawscli.utils.ui')
@@ -10,8 +9,6 @@ local instance_actions = require('nvimawscli.services.ec2.instances.instance_act
 
 ---@class InstanceManager
 local self = {}
-
-
 
 ---@class Instance
 ---@field Name string
@@ -56,7 +53,8 @@ function self.load()
 
             local item_number = table_renderer.get_item_number_from_row(line_number)
 
-            if item_number > 0 and item_number <= #self.rows then -- open floating window for instance functions
+            if item_number > 0 and item_number <= #self.rows then
+                -- open floating window for instance functions
                 local instance = self.rows[item_number]
                 local available_actions = instance_actions.get(instance)
 
@@ -78,24 +76,30 @@ function self.load()
                         end
                     end)
             else -- perform sorting based on column selection
-                local column_index = table_renderer.get_column_index_from_position(
-                    column_number, self.widths)
-                if self.sorted_by_column_index == column_index then
-                    self.sorted_direction = self.sorted_direction * -1
-                else
-                    self.sorted_by_column_index = column_index
-                    self.sorted_direction = 1
-                end
-                if column_index then
-                    local column_value = config.ec2.get_attribute_name(
-                        config.ec2.preferred_attributes[column_index]
-                    )
-                    self.sort_rows(column_value, self.sorted_direction)
-                    self.render(self.rows)
-                end
+                self.handle_sort_event(column_number)
             end
         end
     })
+end
+
+---@private
+---Handle the sort event when a column header is clicked
+---@param column_number number: the column number clicked
+function self.handle_sort_event(column_number)
+    local column_index = table_renderer.get_column_index_from_position(column_number, self.widths)
+    if self.sorted_by_column_index == column_index then
+        self.sorted_direction = self.sorted_direction * -1
+    else
+        self.sorted_by_column_index = column_index
+        self.sorted_direction = 1
+    end
+    if column_index then
+        local column_value = config.ec2.get_attribute_name(
+        config.ec2.preferred_attributes[column_index]
+        )
+        self.sort_rows(column_value, self.sorted_direction)
+        self.render(self.rows)
+    end
 end
 
 ---@private

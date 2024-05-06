@@ -1,6 +1,3 @@
-
-
-
 ---@class Config
 ---@field preferred_services string[]: list of most used services to be shown on top
 ---@field all_services string[]: list of all the services
