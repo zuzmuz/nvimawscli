@@ -1,7 +1,6 @@
 local utils = require('nvimawscli.utils.buffer')
 local config = require('nvimawscli.config')
 local itertools = require('nvimawscli.utils.itertools')
-
 local table_renderer = require('nvimawscli.utils.tables')
 
 ---@type Ec2Handler
@@ -25,7 +24,7 @@ function self.load()
     print("loading target groups functionality")
 
     if not self.bufnr then
-        self.bufnr = utils.create_buffer('ec2')
+        self.bufnr = utils.create_buffer('ec2.target_groups')
     end
 
     if not self.winnr or not utils.check_if_window_exists(self.winnr) then
@@ -62,7 +61,7 @@ function self.load()
 
                 if column_index then
                     local column_value = config.ec2.get_attribute_name(
-                        config.ec2.preferred_target_groups_attributes[column_index]
+                        config.ec2.target_groups.preferred_attributes[column_index]
                     )
                     self.sort_rows(column_value, self.sorted_direction)
                     self.render(self.rows)
@@ -98,7 +97,7 @@ end
 function self.parse(target_groups)
     return itertools.imap(target_groups,
         function(target_group)
-            return itertools.associate(config.ec2.preferred_target_groups_attributes,
+            return itertools.associate(config.ec2.target_groups.preferred_attributes,
                 function(attribute)
                     return config.ec2.get_attribute_name_and_value(attribute, target_group)
                 end
@@ -111,7 +110,7 @@ end
 ---Render the table containing ec2 target groups into the buffer
 ---@return number[][][]: the position the cursor is allows to be at
 function self.render(rows)
-    local column_names = itertools.imap(config.ec2.preferred_target_groups_attributes,
+    local column_names = itertools.imap(config.ec2.target_groups.preferred_attributes,
         function(attribute)
             return config.ec2.get_attribute_name(attribute)
         end

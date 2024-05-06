@@ -10,7 +10,6 @@ local self = {
     all_services = {
         "ec2",
         "cloudwatch",
-        "elb",
         "s3",
         "codedeploy",
         "rds",

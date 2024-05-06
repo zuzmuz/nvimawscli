@@ -31,7 +31,7 @@ end
 
 function self.load()
     if not self.bufnr then
-        self.bufnr = utils.create_buffer('ec2')
+        self.bufnr = utils.create_buffer('ec2.instances')
     end
 
     if not self.winnr or not utils.check_if_window_exists(self.winnr) then
