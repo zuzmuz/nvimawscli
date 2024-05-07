@@ -19,6 +19,10 @@ function self.describe_instances(on_result)
                   "}'", on_result)
 end
 
+function self.describe_instance_details(instance_id, on_result)
+    handler.async("aws ec2 describe-instances --instance-ids " .. instance_id, on_result)
+end
+
 ---Fetch ec2 instance status
 ---@param instance_id string
 ---@param on_result OnResult
