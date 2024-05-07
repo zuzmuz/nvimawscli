@@ -13,14 +13,20 @@ local function get_block_for(value)
     return self.blocks[block_index]
 end
 
-function self.render(values, height, max_optional)
-    local _, max = itertools.max_with_index(values)
-    if max_optional and max_optional > max then
-        max = max_optional
+
+---Generate a multiline text that represent positive numerical data in a graph
+---@param values number[]: a table contanining positive numerical data
+---@param height number: an integer defining the number of lines to use when generating the graph
+---@param scale number?: the max value for adjusting the scale for normalizing the values, if nil then the max of values is the scale
+function self.render(values, height, scale)
+
+    if #values == 0 then
+        return {}
     end
-
-    print('max ' .. max)
-
+    local _, max = itertools.max_with_index(values)
+    if scale and scale > max then
+        max = scale
+    end
     local columns = itertools.imap_values(values,
         function (value)
             local ratio = value/max
