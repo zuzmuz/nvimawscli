@@ -37,12 +37,30 @@ local self = {
         instances = {
             ---@type table<table|string>
             preferred_attributes = {
-                {"Name", "Tags[?Key==`Name`].Value | [0]"},
-                {"InstanceId", "InstanceId"},
-                {"State", "State.Name"},
-                {"InstanceType", "InstanceType"},
-                {"PrivateIpAddress", "PrivateIpAddress"},
-                {"KeyName", "KeyName"},
+                {
+                    name = "Name",
+                    value = "Tags[?Key==`Name`].Value | [0]",
+                },
+                {
+                    name = "InstanceId",
+                    value = "InstanceId",
+                },
+                {
+                    name = "State",
+                    value = "State.Name",
+                },
+                {
+                    name = "InstanceType",
+                    value = "InstanceType",
+                },
+                {
+                    name = "PrivateIpAddress",
+                    value = "PrivateIpAddress",
+                },
+                {
+                    name = "KeyName",
+                    value = "KeyName",
+                },
             },
             all_attributes = {
                 "ImageId",

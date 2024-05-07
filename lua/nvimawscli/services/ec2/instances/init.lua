@@ -94,7 +94,7 @@ function self.handle_sort_event(column_number)
         self.sorted_direction = 1
     end
     if column_index then
-        local column_value = config.ec2.instances.preferred_attributes[column_index][1]
+        local column_value = config.ec2.instances.preferred_attributes[column_index].name
         self.sort_rows(column_value, self.sorted_direction)
         self.render(self.rows)
     end
@@ -127,9 +127,8 @@ end
 function self.render(rows)
     local column_names = itertools.imap_values(config.ec2.instances.preferred_attributes,
         function(attribute)
-            return attribute[1]
+            return attribute.name
         end)
-    print(vim.inspect(column_names))
     local lines, allowed_positions, widths = table_renderer.render(
         column_names,
         rows,

@@ -10,7 +10,7 @@ local self = {}
 function self.describe_instances(on_result)
     local query_strings = itertools.imap_values(config.ec2.instances.preferred_attributes,
         function(value)
-            return value[1] .. ': ' .. value[2]
+            return value.name .. ': ' .. value.value
         end)
     local query_string = table.concat(query_strings, ', ')
     handler.async("aws ec2 describe-instances " ..
