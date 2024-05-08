@@ -56,6 +56,27 @@ function self.imap_values(t, callback)
     return new
 end
 
+function self.imap_values_grouped(t, step, padding, callback)
+    if step == 1 then
+        return self.imap_values(t, callback)
+    end
+    local new = {}
+    local i = 1
+    while i <= #t do
+        local group = {}
+        for j = 1, step do
+            if i <= #t then
+                group[j] = t[i]
+            else
+                group[j] = padding
+            end
+            i = i + 1
+        end
+        new[#new+1] = callback(unpack(group))
+    end
+    return new
+end
+
 
 ---Returns new array from a table performing the callback on each entry in the original table
 ---@generic K
