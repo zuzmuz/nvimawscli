@@ -1,10 +1,25 @@
 local itertools = require('nvimawscli.utils.itertools')
 local self = {}
 
-self.blocks = {'▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'}
+self.blocks = {' ', '▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'}
+
+
+-- ⢀⢠⢰⢸⡀⣀⣠⣰⣸⡄⣄⣤⣴⣼⡆⣆⣦⣶⣾⡇⣇⣧⣷⣿
+-- ⠈⠘⠸⢸⠁⠉⠙⠹⢹⠃⠋⠛⠻⢻⠇⠏⠟⠿⢿⡇⡏⡟⡿⣿
+-- 
+-- ⠰⢾⡷⠆⠠⠄⠤⠶⢸⡇⡧⢼ 
+--
+-- ⡠⠔⠊⠑⠢⢄⡐⠌⡈⢁⠡⢂⠉⠒⠤⣀   ⠈⠐⠠⢀⠁⠂⠄⡀
+--
+--   ⢀⣀
+--  ⠔⠁ ⠡
+-- ⡈    ⠂
+--       ⢂
+--        ⠢⣀
+
 
 local function get_block_for(value)
-    local block_index = math.ceil(value * #self.blocks)
+    local block_index = math.ceil((value * #self.blocks) - 0.5)
     if block_index < 1 then
         return ' '
     elseif block_index > #self.blocks then
