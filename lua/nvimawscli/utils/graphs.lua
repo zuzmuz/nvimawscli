@@ -3,70 +3,76 @@ local itertools = require('nvimawscli.utils.itertools')
 ---@class GraphRenderer
 local self = {}
 
+---@alias graph_type 'block' | 'braille' | 'line'
 
-local graph_resolution = {
-    [1] = {
-        block = {' ', ' ', '▁', '▂', '▃', '▄', '▅', '▆', '▇', '█', '█'},
-        braille = {' ', ' ', '⣀', '⣤', '⣶', '⣿', '⣿'},
-        line = {' ', '⠉', '⠒', '⠤', '⣀', ' ' },
-    },
-    [2] = {
-        braille = {
-            {' ', ' ', '⢀', '⢠', '⢰', '⢸', '⢸'},
-            {' ', ' ', '⢀', '⢠', '⢰', '⢸', '⢸'},
-            {'⡀', '⡀', '⣀', '⣠', '⣰', '⣸', '⣸'},
-            {'⡄', '⡄', '⣄', '⣤', '⣴', '⣼', '⣼'},
-            {'⡆', '⡆', '⣆', '⣦', '⣶', '⣾', '⣾'},
-            {'⡇', '⡇', '⣇', '⣧', '⣷', '⣿', '⣿'},
-            {'⡇', '⡇', '⣇', '⣧', '⣷', '⣿', '⣿'},
-        },
-        line = {
-            {' ', '⢀', '⠠', '⠐', '⠈', ' '},
-            {'⡀', '⣀', '⡠', '⡐', '⡈', '⡀'},
-            {'⠄', '⢄', '⠤', '⠔', '⠌', '⠄'},
-            {'⠂', '⢂', '⠢', '⠒', '⠊', '⠂'},
-            {'⠁', '⢁', '⠡', '⠑', '⠉', '⠁'},
-            {' ', '⢀', '⠠', '⠐', '⠈', ' '},
-        },
-    },
+---Symbol mapping returns the symbols for graphing a table of values.
+---It supports 2 resolutions, 1 and 2. Resolution 1 represents one value per character, while 2 represents 2 values per character.
+---It supports 3 types of graphs: block, braille and line.
+---The symbols for resolution 1 is a 1D array, the symbols for resolution 2 is a 2D array.
+---@class SymbolMapping
+local symbol_mapping = {}
+
+symbol_mapping[1] = {
+    block = {' ', ' ', '▁', '▂', '▃', '▄', '▅', '▆', '▇', '█', '█'},
+    braille = {' ', ' ', '⣀', '⣤', '⣶', '⣿', '⣿'},
+    line = {' ', '⠉', '⠒', '⠤', '⣀', ' ' },
+
+    ---Returns the graph symbol that maps to a value
+    ---If the value is less than 0, it returns the first symbol, if the value is greater than 1, it returns the last symbol.
+    ---A value between 0 and 1 will be mapped to the symbols from index 2 to #symbols-1.
+    ---@param value number: the value will be multiplied by the number of symbols minus 2 and rounded to the nearest integer to get the index of the symbol
+    ---@param graph_type graph_type: the type of graph to use
+    ---@return string?: the symbol that represents the value, if the graph type is not supported, it returns nil
+    get_symbol = function (value, graph_type)
+        local symbols = symbol_mapping[1][graph_type]
+        if symbols then
+            local i = math.max(math.min(#symbols, math.ceil((value * (#symbols-2)) + 0.5)), 1)
+            return symbols[i]
+        end
+        return nil
+    end,
 }
 
--- ▗⢀▁	▀◥◤
+symbol_mapping[2] = {
+    braille = {
+        {' ', ' ', '⢀', '⢠', '⢰', '⢸', '⢸'},
+        {' ', ' ', '⢀', '⢠', '⢰', '⢸', '⢸'},
+        {'⡀', '⡀', '⣀', '⣠', '⣰', '⣸', '⣸'},
+        {'⡄', '⡄', '⣄', '⣤', '⣴', '⣼', '⣼'},
+        {'⡆', '⡆', '⣆', '⣦', '⣶', '⣾', '⣾'},
+        {'⡇', '⡇', '⣇', '⣧', '⣷', '⣿', '⣿'},
+        {'⡇', '⡇', '⣇', '⣧', '⣷', '⣿', '⣿'},
+    },
+    line = {
+        {' ', '⢀', '⠠', '⠐', '⠈', ' '},
+        {'⡀', '⣀', '⡠', '⡐', '⡈', '⡀'},
+        {'⠄', '⢄', '⠤', '⠔', '⠌', '⠄'},
+        {'⠂', '⢂', '⠢', '⠒', '⠊', '⠂'},
+        {'⠁', '⢁', '⠡', '⠑', '⠉', '⠁'},
+        {' ', '⢀', '⠠', '⠐', '⠈', ' '},
+    },
+    ---Returns the graph symbol that maps and represents two values
+    ---If the graph type suppors representing two values, the first part of the symbol represents the first value and the second part represents the second value.
+    ---The table of symbold to map from is in this case a 2D array, rows represent the first value and columns represent the second value.
+    ---If the value is less than 0, it will be mapped to the first index, if the value is greater than 1, it will be mapped the last index.
+    ---A value between 0 and 1 will be mapped to the symbols from index 2 to #symbols-1.
+    ---@param value1 number: the value 1 
+    ---@param value2 number: the value 2 
+    ---@param graph_type graph_type: the type of graph to use
+    ---@return string?: the symbol that represents the value, if the graph type is not supported, it returns nil
+    get_symbol = function (value1, value2, graph_type)
+        local symbols = symbol_mapping[2][graph_type]
+        if symbols then
+            local i = math.max(math.min(#symbols, math.ceil((value1 * (#symbols-2)) + 0.5)), 1)
+            local j = math.max(math.min(#symbols[1], math.ceil((value2 * (#symbols[1]-2)) + 0.5)), 1)
+            return symbols[i][j]
+        end
+        return nil
+    end,
+}
 
--- ⢀⢠⢰⢸⡀⣀⣠⣰⣸⡄⣄⣤⣴⣼⡆⣆⣦⣶⣾⡇⣇⣧⣷⣿
--- ⠈⠘⠸⢸⠁⠉⠙⠹⢹⠃⠋⠛⠻⢻⠇⠏⠟⠿⢿⡇⡏⡟⡿⣿
--- 
 -- ⠰⢾⡷⠆⠠⠄⠤⠶⢸⡇⡧⢼ 
---
--- ⡠⠔⠊⠑⠢⢄⡐⠌⡈⢁⠡⢂⠉⠒⠤⣀   ⠈⠐⠠⢀⠁⠂⠄⡀
---
---   ⢀⣀
---  ⠔⠁ ⠡
--- ⡈    ⠂
---       ⢂
---        ⠢⣀
 
-
-local function get_graph_symbol(value, graph_type)
-    local graph_symbols = graph_resolution[1][graph_type]
-    if graph_symbols then
-        local block_index = math.max(math.min(#graph_symbols, math.ceil((value * (#graph_symbols-2)) + 0.5)), 1)
-        return graph_symbols[block_index]
-    end
-    return nil
-end
-
-local function get_graph_symbol2(value1, value2, graph_type)
-    local graph_symbols = graph_resolution[2][graph_type]
-    if graph_symbols then
-        local block_index1 = math.max(math.min(#graph_symbols, math.ceil((value1 * (#graph_symbols-2)) + 0.5)), 1)
-        local block_index2 = math.max(math.min(#graph_symbols[1], math.ceil((value2 * (#graph_symbols[1]-2)) + 0.5)), 1)
-        return graph_symbols[block_index1][block_index2]
-    end
-    return nil
-end
-
----@alias graph_type 'block' | 'braille' | 'line'
 
 ---Generate a multiline text that represent positive numerical data in a graph
 ---@param values number[]: a table contanining positive numerical data
