@@ -11,10 +11,11 @@ local instance_actions = require('nvimawscli.services.ec2.instances.instance_act
 local self = {}
 
 ---@class Instance
+---@field InstanceId string
 ---@field Name string
 ---@field PrivateIpAddress string
 ---@field State string
----@field Type string
+---@field InstanceType string
 ---@field KeyName string
 
 

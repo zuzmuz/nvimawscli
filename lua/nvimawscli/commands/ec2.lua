@@ -56,8 +56,8 @@ end
 ---@param interval number: in seconds, the granularity of the fetch metrics data in seconds
 ---@param on_result OnResult
 function self.fetch_last_hours_instance_metrics(instance_id, current_time, hours, interval, on_result)
-    local end_time = os.date("%Y-%m-%dT%H:%M:%S", current_time)
-    local start_time = os.date("%Y-%m-%dT%H:%M:%S", current_time - (hours * 3600))
+    local end_time = os.date("!%Y-%m-%dT%H:%M:%S", current_time)
+    local start_time = os.date("!%Y-%m-%dT%H:%M:%S", current_time - (hours * 3600))
     ---@cast end_time string
     ---@cast start_time string
 

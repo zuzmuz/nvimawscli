@@ -1,6 +1,6 @@
 local command = require('nvimawscli.commands.ec2')
 
----@class InstanceAction
+---@class InstanceActionsManage
 local self = {}
 
 function self.get(instance)
@@ -12,6 +12,12 @@ function self.get(instance)
     return { "details", "terminate" }
 end
 
+---@class InstanceAction
+---@field ask_for_confirmation boolean if true the user should be prompted for confirmation
+---@field action fun(instance: Instance, callback: fun(result)) the action to be executed
+
+
+---@type InstanceAction
 self.details = {
     ask_for_confirmation = false,
     action = function(instance)
@@ -32,6 +38,7 @@ self.details = {
     end,
 }
 
+---@type InstanceAction
 self.start = {
     ask_for_confirmation = true,
     action = function(instance)
@@ -54,6 +61,8 @@ self.start = {
     end,
 }
 
+
+---@type InstanceAction
 self.stop = {
     ask_for_confirmation = true,
     action = function(instance)
@@ -76,6 +85,8 @@ self.stop = {
     end,
 }
 
+
+---@type InstanceAction
 self.terminate = {
     ask_for_confirmation = true,
     action = function(instance)
@@ -97,6 +108,7 @@ self.terminate = {
     end,
 }
 
+---@type InstanceAction
 self.connect = {
     ask_for_confirmation = true,
     action = function(instance)
