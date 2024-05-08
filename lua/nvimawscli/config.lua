@@ -34,43 +34,33 @@ local self = {
             'target_groups',
             'elastic_ip',
         },
-        get_attribute_name = function(attribute)
-            if type(attribute) == 'table' then
-                return attribute[1]
-            end
-            return attribute
-        end,
-        get_attribute_name_and_value = function(attribute, element)
-            if type(attribute) == 'table' then
-                return attribute[1], attribute.get_from(element) or ''
-            else
-                return attribute, element[attribute] or ''
-            end
-        end,
         instances = {
             ---@type table<table|string>
             preferred_attributes = {
                 {
-                    "Name",
-                    get_from = function(instance)
-                        for _, tag in ipairs(instance.Tags) do
-                            if tag.Key == "Name" then
-                                return tag.Value
-                            end
-                        end
-                        return ""
-                    end,
+                    name = "Name",
+                    value = "Tags[?Key==`Name`].Value | [0]",
                 },
-                "InstanceId",
                 {
-                    "State",
-                    get_from = function(instance)
-                        return instance.State.Name
-                    end,
+                    name = "InstanceId",
+                    value = "InstanceId",
                 },
-                "InstanceType",
-                "PrivateIpAddress",
-                "KeyName",
+                {
+                    name = "State",
+                    value = "State.Name",
+                },
+                {
+                    name = "InstanceType",
+                    value = "InstanceType",
+                },
+                {
+                    name = "PrivateIpAddress",
+                    value = "PrivateIpAddress",
+                },
+                {
+                    name = "KeyName",
+                    value = "KeyName",
+                },
             },
             all_attributes = {
                 "ImageId",

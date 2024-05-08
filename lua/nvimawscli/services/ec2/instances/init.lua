@@ -94,9 +94,7 @@ function self.handle_sort_event(column_number)
         self.sorted_direction = 1
     end
     if column_index then
-        local column_value = config.ec2.get_attribute_name(
-        config.ec2.instances.preferred_attributes[column_index]
-        )
+        local column_value = config.ec2.instances.preferred_attributes[column_index].name
         self.sort_rows(column_value, self.sorted_direction)
         self.render(self.rows)
     end
@@ -112,8 +110,7 @@ function self.fetch()
         if error then
             utils.write_lines_string(self.bufnr, error)
         elseif result then
-            local reservations = vim.json.decode(result).Reservations
-            self.rows = self.parse(reservations)
+            self.rows = vim.json.decode(result)
             local allowed_positions = self.render(self.rows)
             utils.set_allowed_positions(self.bufnr, allowed_positions)
         else
@@ -124,31 +121,14 @@ function self.fetch()
 end
 
 ---@private
----Parse the ec2 instances and store the rows
----@param reservations table: the raw json reservations received from aws ec2 command
----@return Instance[]
-function self.parse(reservations)
-    local rows = itertools.imap(reservations,
-        function(reservation)
-            local instance = reservation.Instances[1]
-            return itertools.associate(config.ec2.instances.preferred_attributes,
-                function (attribute)
-                    return config.ec2.get_attribute_name_and_value(attribute, instance)
-               end)
-    end)
-    return rows
-end
-
----@private
 ---Render the table containing the ec2 instances into the buffer
 ---@param rows Instance[]
 ---@return number[][][]: The positions the cursor is allowed to be at
 function self.render(rows)
-    local column_names = itertools.imap(config.ec2.instances.preferred_attributes,
-        function (attribute)
-            return config.ec2.get_attribute_name(attribute)
+    local column_names = itertools.imap_values(config.ec2.instances.preferred_attributes,
+        function(attribute)
+            return attribute.name
         end)
-
     local lines, allowed_positions, widths = table_renderer.render(
         column_names,
         rows,

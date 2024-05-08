@@ -42,7 +42,7 @@ function self.render(headers, rows, sorted_by_column_index, sorted_direction, co
     local allowed_positions = {}
 
     if config.border then
-        local border = require('nvimawscli.utils.characterset')[config.border]
+        local border = require('nvimawscli.utils.borders')[config.border]
         if not border then
             vim.api.nvim_err_writeln("Invalid table style: " .. config.border)
             return {}, {}, {}
