@@ -5,11 +5,17 @@ local self = {}
 
 ---@alias graph_type 'block' | 'braille' | 'line'
 
+---@class SymbolMapping
+---@field block string[]|string[][]|nil: a table of symbols for block graph
+---@field braille string[]|string[][]|nil: a table of symbols for block graph
+---@field line string[]|string[][]|nil: a table of symbols for block graph
+---@field get_symbol fun(a,b,c): string?: table of symbols for block graph
+
 ---Symbol mapping returns the symbols for graphing a table of values.
 ---It supports 2 resolutions, 1 and 2. Resolution 1 represents one value per character, while 2 represents 2 values per character.
 ---It supports 3 types of graphs: block, braille and line.
 ---The symbols for resolution 1 is a 1D array, the symbols for resolution 2 is a 2D array.
----@class SymbolMapping
+---@type table<number, SymbolMapping>>
 local symbol_mapping = {}
 
 symbol_mapping[1] = {
@@ -51,6 +57,7 @@ symbol_mapping[2] = {
         {'⠁', '⢁', '⠡', '⠑', '⠉', '⠁'},
         {' ', '⢀', '⠠', '⠐', '⠈', ' '},
     },
+    block = nil,
     ---Returns the graph symbol that maps and represents two values
     ---If the graph type suppors representing two values, the first part of the symbol represents the first value and the second part represents the second value.
     ---The table of symbold to map from is in this case a 2D array, rows represent the first value and columns represent the second value.
@@ -96,7 +103,7 @@ function self.render(values, height, scale, graph_type, resolution)
                 local ratio_height = ratio * height
                 local blocks = {}
                 for i = 1, height do
-                    blocks[i] = get_graph_symbol(ratio_height + i - height, graph_type)
+                    blocks[i] = symbol_mapping[1].get_symbol(ratio_height + i - height, graph_type)
                 end
                 return blocks
             end)
@@ -109,9 +116,9 @@ function self.render(values, height, scale, graph_type, resolution)
                 local ratio_height2 = ratio2 * height
                 local blocks = {}
                 for i = 1, height do
-                    blocks[i] = get_graph_symbol2(ratio_height1 + i - height,
-                                                  ratio_height2 + i - height,
-                                                  graph_type)
+                    blocks[i] = symbol_mapping[2].get_symbol(ratio_height1 + i - height,
+                                                             ratio_height2 + i - height,
+                                                             graph_type)
                 end
                 return blocks
             end)
