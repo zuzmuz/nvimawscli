@@ -21,7 +21,7 @@ local symbol_mapping = {}
 symbol_mapping[1] = {
     block = {' ', ' ', '▁', '▂', '▃', '▄', '▅', '▆', '▇', '█', '█'},
     braille = {' ', ' ', '⣀', '⣤', '⣶', '⣿', '⣿'},
-    line = {' ', '⠉', '⠒', '⠤', '⣀', ' ' },
+    line = {' ', '⣀', '⠤', '⠒', '⠉', ' ' },
 
     ---Returns the graph symbol that maps to a value
     ---If the value is less than 0, it returns the first symbol, if the value is greater than 1, it returns the last symbol.
