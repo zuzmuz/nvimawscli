@@ -74,6 +74,17 @@ function self.write_lines(bufnr, lines)
     vim.api.nvim_buf_set_option(bufnr, 'modifiable', false)
 end
 
+
+---Insert the given lines the buffer at the given line number
+---@param bufnr number: The buffer number
+---@param lines string[]: The lines to write
+---@param at_line number: The line number to insert the lines
+function self.write_lines_at(bufnr, lines, at_line)
+    vim.api.nvim_buf_set_option(bufnr, 'modifiable', true)
+    vim.api.nvim_buf_set_lines(bufnr, at_line, at_line + #lines, false, lines)
+    vim.api.nvim_buf_set_option(bufnr, 'modifiable', false)
+end
+
 ---Set the allowed cursor positions of the buffer.
 ---The allowed positions are used to restrict the cursor movement to the allowed positions.
 ---The hjkl in normal mode will only move the cursor to the allowed positions.
