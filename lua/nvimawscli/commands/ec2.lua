@@ -19,15 +19,15 @@ function self.describe_instances(on_result)
                   "}'", on_result)
 end
 
-function self.describe_instance_details(instance_id, on_result)
-    handler.async("aws ec2 describe-instances --instance-ids " .. instance_id, on_result)
-end
 
----Fetch ec2 instance status
+---Fetch details about ec2 instance
 ---@param instance_id string
 ---@param on_result OnResult
-function self.fetch_instance_status(instance_id, on_result)
-    handler.async("aws ec2 describe-instance-status --instance-ids " .. instance_id, on_result)
+function self.describe_instance_details(instance_id, on_result)
+    handler.group_async({
+        "aws ec2 describe-instance-status --instance-ids  " .. instance_id,
+        "aws ec2 describe-instances --query 'Reservations[].Instances[]' --instance-ids " .. instance_id,
+    }, on_result)
 end
 
 

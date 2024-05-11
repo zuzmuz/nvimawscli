@@ -5,7 +5,7 @@ local self = {}
 
 ---Execute a terminal command asynchronously
 ---@param command string: The command to execute
----@param on_result fun(result: string|nil, error: string|nil): nil callback function
+---@param on_result OnResult callback function
 function self.async(command, on_result)
     vim.fn.jobstart(command, {
         stdout_buffered = true,
@@ -25,9 +25,30 @@ function self.async(command, on_result)
     })
 end
 
--- function self.sync()
-
--- end
+---Execute a group of terminal commands asynchronously and return the combined result
+---@param commands string[]: The commands to Execute
+---@param on_result OnResult callback function
+function self.group_async(commands, on_result)
+    local results = {}
+    local errors = {}
+    local count = 0
+    for _, command in ipairs(commands) do
+        self.async(command, function(result, error)
+            count = count + 1
+            if result then
+                print(count, command)
+                table.insert(results, result)
+            end
+            if error then
+                table.insert(errors, error)
+            end
+            if count == #commands then
+                on_result((#results > 0 and ('[' .. table.concat(results, ',\n') .. ']')) or nil,
+                          (#errors > 0 and ('[' .. table.concat(errors, ',\n') .. ']')) or nil)
+            end
+        end)
+    end
+end
 
 ---Run a terminal in the window and execute the command interactively
 ---@param command string: The command to execute

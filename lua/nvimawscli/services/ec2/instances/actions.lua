@@ -20,9 +20,9 @@ end
 ---@type InstanceAction
 self.details = {
     ask_for_confirmation = false,
-    action = function(instance)
+    action = function(instance, callback)
         print('showing details ' .. instance.InstanceId)
-        command.fetch_last_hours_instance_metrics(instance.InstanceId, os.time(), 3, 600,
+        command.describe_instance_details(instance.InstanceId,
             function(result, error)
                 if error then
                     vim.api.nvim_err_writeln(error)
@@ -30,7 +30,7 @@ self.details = {
                 end
                 if result then
                     local decoded = vim.json.decode(result)
-                    print(vim.inspect(decoded))
+                    callback(decoded)
                     return
                 end
                 vim.api.nvim_err_writeln('Result was nil')

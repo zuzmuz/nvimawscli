@@ -5,7 +5,7 @@ local config = require('nvimawscli.config')
 local command = require(config.commands .. '.ec2')
 local ui = require('nvimawscli.utils.ui')
 local table_renderer = require('nvimawscli.utils.tables')
-local instance_actions = require('nvimawscli.services.ec2.instances.instance_actions')
+local instance_actions = require('nvimawscli.services.ec2.instances.actions')
 
 ---@class InstanceManager
 local self = {}
@@ -69,7 +69,10 @@ function self.load()
                                 config.table,
                                 function(confirmation)
                                     if confirmation == 1 then -- yes selected
-                                        instance_actions[action].action(instance)
+                                        instance_actions[action].action(instance,
+                                            function(result)
+                                                print('Result: ', vim.inspect(result))
+                                            end)
                                     end
                                 end)
                         else
