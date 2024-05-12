@@ -65,56 +65,21 @@ local self = {
                     value = "KeyName",
                 },
             },
-            all_attributes = {
-                "ImageId",
+            preferred_details = {
+                "InstanceStatuses",
                 "InstanceId",
                 "InstanceType",
                 "KeyName",
                 "LaunchTime",
-                {
-                    "Monitoring",
-                    attributes = {
-                        "State",
-                    },
-                },
+                "IamInstanceProfile",
                 "PrivateDnsName",
                 "PrivateIpAddress",
-                {
-                    "State",
-                    attributes = {
-                        "Code",
-                        "Name",
-                    },
-                },
                 "StateTransitionReason",
                 "SubnetId",
                 "VpcId",
                 "Architecture",
-                {
-                    "IamInstanceProfile",
-                    attributes = {
-                        "Arn",
-                        "Id",
-                    },
-                },
-                {
-                    "SecurityGroups",
-                    list = {
-                        {
-                            "GroupId",
-                            "GroupName",
-                        },
-                    },
-                },
-                {
-                    "Tags",
-                    list = {
-                        {
-                            "Key",
-                            "Value",
-                        },
-                    },
-                },
+                "SecurityGroups",
+                "Tags",
             },
         },
         target_groups = {

@@ -143,6 +143,20 @@ function self.associate(t, callback)
 end
 
 
+---Flattens a list of lists into 1 list
+---@param t table[]: the input array
+---@return table: the new array
+function self.flatten(t)
+    local new = {}
+    for _, value in ipairs(t) do
+        for _, v in ipairs(value) do
+            new[#new+1] = v
+        end
+    end
+    return new
+end
+
+
 ---Returns the maximum value in the table
 function self.max_with_index(t)
     local max_key, max = 1, t[1]
