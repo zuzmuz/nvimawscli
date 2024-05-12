@@ -26,7 +26,7 @@ end
 function self.describe_instance_details(instance_id, on_result)
     handler.group_async({
         "aws ec2 describe-instance-status --instance-ids  " .. instance_id,
-        "aws ec2 describe-instances --query 'Reservations[].Instances[]' --instance-ids " .. instance_id,
+        "aws ec2 describe-instances --query 'Reservations[].Instances[] | [0]' --instance-ids " .. instance_id,
     }, on_result)
 end
 

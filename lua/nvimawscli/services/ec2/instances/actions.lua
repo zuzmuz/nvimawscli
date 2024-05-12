@@ -14,27 +14,15 @@ end
 
 ---@class InstanceAction
 ---@field ask_for_confirmation boolean if true the user should be prompted for confirmation
----@field action fun(instance: Instance, callback: fun(result)) the action to be executed
+---@field action fun(instance: Instance) the action to be executed
 
 
 ---@type InstanceAction
 self.details = {
     ask_for_confirmation = false,
-    action = function(instance, callback)
-        print('showing details ' .. instance.InstanceId)
-        command.describe_instance_details(instance.InstanceId,
-            function(result, error)
-                if error then
-                    vim.api.nvim_err_writeln(error)
-                    return
-                end
-                if result then
-                    local decoded = vim.json.decode(result)
-                    callback(decoded)
-                    return
-                end
-                vim.api.nvim_err_writeln('Result was nil')
-            end)
+    action = function(instance)
+        local details = require('nvimawscli.services.ec2.instances.details')
+        details.load(instance.InstanceId)
     end,
 }
 

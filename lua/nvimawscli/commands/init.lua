@@ -36,7 +36,6 @@ function self.group_async(commands, on_result)
         self.async(command, function(result, error)
             count = count + 1
             if result then
-                print(count, command)
                 table.insert(results, result)
             end
             if error then

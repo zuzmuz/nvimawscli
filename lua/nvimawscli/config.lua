@@ -20,6 +20,9 @@ local self = {
         split = "vertical",
         width = 15,
     },
+    details = {
+        split = "horizontal"
+    },
     ec2 = {
         preferred_services = {
             'instances',
