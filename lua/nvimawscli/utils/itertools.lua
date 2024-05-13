@@ -14,6 +14,17 @@ function self.keys(t)
     return keys
 end
 
+---Extends a list with the values of another list
+---@param t any[]: the table to extend
+---@param other any[]: the table to extend with
+---@return table: the extended table
+function self.extend(t, other)
+    for _, value in pairs(other) do
+        t[#t+1] = value
+    end
+    return t
+end
+
 ---Returns new array by performing th callback on the items of the original array
 ---@generic T
 ---@generic U
@@ -149,6 +160,23 @@ end
 function self.flatten(t)
     local new = {}
     for _, value in ipairs(t) do
+        for _, v in ipairs(value) do
+            new[#new+1] = v
+        end
+    end
+    return new
+end
+
+---Flattens a list of lists into 1 lists and inserts a separator between each list
+---@param t table[]: the input array
+---@param separator table: the separator to insert between each list
+---@return table: the new array
+function self.flatten_with_separator(t, separator)
+    local new = {}
+    for _, value in ipairs(t) do
+        for _, sep in ipairs(separator) do
+            new[#new+1] = sep
+        end
         for _, v in ipairs(value) do
             new[#new+1] = v
         end

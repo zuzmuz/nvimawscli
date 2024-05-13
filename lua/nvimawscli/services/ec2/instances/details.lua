@@ -2,7 +2,7 @@ local utils = require('nvimawscli.utils.buffer')
 local config = require('nvimawscli.config')
 ---@type Ec2Handler
 local command = require(config.commands .. '.ec2')
-local itertools = require('nvimawscli.utils.itertools')
+local display = require('nvimawscli.utils.display')
 
 ---@class InstanceDetailsManager
 local self = {}
@@ -11,7 +11,6 @@ local self = {}
 function self.load(instance_id)
     self.instance_id = instance_id
 
-    print('what the buff ', self.bufnr, self.winnr)
     if not self.bufnr then
         self.bufnr = utils.create_buffer('ec2.instances.details')
     end
@@ -43,18 +42,7 @@ end
 
 function self.parse(response)
     local new_response = vim.tbl_deep_extend('keep', unpack(response))
-
-    utils.write_lines_string(self.bufnr, vim.inspect(new_response))
-    -- local details = itertools.imap_values(config.ec2.instances.preferred_details,
-    --     function(detail_key)
-    --         local detail_value = new_response[detail_key]
-    --         if type(detail_value) == 'table' then
-    --             return { detail_key .. ": " .. vim.inspect(detail_value) }
-    --         else
-    --             return { detail_key .. ": " .. tostring(detail_value) }
-    --         end
-    --     end)
-    -- return itertools.flatten(details)
+    utils.write_lines(self.bufnr, display.render(new_response))
 end
 
 function self.render(rows)

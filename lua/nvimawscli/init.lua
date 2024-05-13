@@ -29,7 +29,6 @@ function self.launch()
     end
     self.launched = true
     require("nvimawscli.menu").load()
-
 end
 
 return self
