@@ -19,15 +19,15 @@ function self.describe_instances(on_result)
                   "}'", on_result)
 end
 
-function self.describe_instance_details(instance_id, on_result)
-    handler.async("aws ec2 describe-instances --instance-ids " .. instance_id, on_result)
-end
 
----Fetch ec2 instance status
+---Fetch details about ec2 instance
 ---@param instance_id string
 ---@param on_result OnResult
-function self.fetch_instance_status(instance_id, on_result)
-    handler.async("aws ec2 describe-instance-status --instance-ids " .. instance_id, on_result)
+function self.describe_instance_details(instance_id, on_result)
+    handler.group_async({
+        "aws ec2 describe-instance-status --query 'InstanceStatuses[] | [0]' --instance-ids  " .. instance_id,
+        "aws ec2 describe-instances --query 'Reservations[].Instances[] | [0]' --instance-ids " .. instance_id,
+    }, on_result)
 end
 
 
@@ -56,8 +56,8 @@ end
 ---@param interval number: in seconds, the granularity of the fetch metrics data in seconds
 ---@param on_result OnResult
 function self.fetch_last_hours_instance_metrics(instance_id, current_time, hours, interval, on_result)
-    local end_time = os.date("%Y-%m-%dT%H:%M:%S", current_time)
-    local start_time = os.date("%Y-%m-%dT%H:%M:%S", current_time - (hours * 3600))
+    local end_time = os.date("!%Y-%m-%dT%H:%M:%S", current_time)
+    local start_time = os.date("!%Y-%m-%dT%H:%M:%S", current_time - (hours * 3600))
     ---@cast end_time string
     ---@cast start_time string
 
