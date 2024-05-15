@@ -1,12 +1,12 @@
 ---@class BufferUtil
-local self = {}
+local M = {}
 
 
 ---Create a new buffer
 ---@param name string|nil: The name of the buffer
 ---@param deletable boolean|nil: If the buffer should be removed if it's hidden
 ---@return number: The buffer number
-function self.create_buffer(name, deletable)
+function M.create_buffer(name, deletable)
     local bufnr = vim.api.nvim_create_buf(false, true)
 
     vim.api.nvim_buf_set_option(bufnr, 'buftype', 'nofile')
@@ -26,7 +26,7 @@ end
 ---Create a new large window
 ---@param bufnr number: The buffer number to associate with the window
 ---@param split split: The split direction
-function self.create_window(bufnr, split)
+function M.create_window(bufnr, split)
     local winnr = 0
     if split == "vertical" then
         vim.cmd("rightbelow vnew")
@@ -41,7 +41,7 @@ function self.create_window(bufnr, split)
     return winnr
 end
 
-function self.check_if_window_exists(winnr)
+function M.check_if_window_exists(winnr)
     return vim.api.nvim_win_is_valid(winnr)
 end
 
@@ -49,7 +49,7 @@ end
 ---@param bufnr number: The buffer number
 ---@param line_number number: The line number
 ---@return string|nil: The line content
-function self.get_line(bufnr, line_number)
+function M.get_line(bufnr, line_number)
     local lines = vim.api.nvim_buf_get_lines(bufnr, line_number - 1, line_number, false)
     if #lines > 0 then
         return lines[1]
@@ -60,15 +60,15 @@ end
 ---Overwrite the buffer with the given lines
 ---@param bufnr number: The buffer number
 ---@param lines string: The lines to write, the lines are split by '\n'
-function self.write_lines_string(bufnr, lines)
+function M.write_lines_string(bufnr, lines)
     local table_lines = vim.split(lines, "\n")
-    self.write_lines(bufnr, table_lines)
+    M.write_lines(bufnr, table_lines)
 end
 
 ---Overwrite the buffer with the given lines
 ---@param bufnr number: The buffer number
 ---@param lines string[]: The lines to write
-function self.write_lines(bufnr, lines)
+function M.write_lines(bufnr, lines)
     vim.api.nvim_buf_set_option(bufnr, 'modifiable', true)
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
     vim.api.nvim_buf_set_option(bufnr, 'modifiable', false)
@@ -79,7 +79,7 @@ end
 ---@param bufnr number: The buffer number
 ---@param lines string[]: The lines to write
 ---@param at_line number: The line number to insert the lines
-function self.write_lines_at(bufnr, lines, at_line)
+function M.write_lines_at(bufnr, lines, at_line)
     vim.api.nvim_buf_set_option(bufnr, 'modifiable', true)
     vim.api.nvim_buf_set_lines(bufnr, at_line, at_line + #lines, false, lines)
     vim.api.nvim_buf_set_option(bufnr, 'modifiable', false)
@@ -90,7 +90,7 @@ end
 ---The hjkl in normal mode will only move the cursor to the allowed positions.
 ---@param bufnr number: The buffer number
 ---@param allowed_positions number[][][]: The allowed positions, a matrix of 2 dimensional points
-function self.set_allowed_positions(bufnr, allowed_positions)
+function M.set_allowed_positions(bufnr, allowed_positions)
     local current_position = { 1, 1 }
     local new_cursor_position = allowed_positions[current_position[1]][current_position[2]]
     vim.fn.setcursorcharpos(new_cursor_position[1],
@@ -138,4 +138,4 @@ function self.set_allowed_positions(bufnr, allowed_positions)
     })
 end
 
-return self
+return M

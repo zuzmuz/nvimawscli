@@ -3,11 +3,11 @@ local itertools = require("nvimawscli.utils.itertools")
 local handler = require("nvimawscli.commands")
 
 ---@class Ec2Handler
-local self = {}
+local M = {}
 
 ---Fecth ec2 instances details
 ---@param on_result OnResult
-function self.describe_instances(on_result)
+function M.describe_instances(on_result)
     local query_strings = itertools.imap_values(config.ec2.instances.preferred_attributes,
         function(value)
             return value.name .. ': ' .. value.value
@@ -23,7 +23,7 @@ end
 ---Fetch details about ec2 instance
 ---@param instance_id string
 ---@param on_result OnResult
-function self.describe_instance_details(instance_id, on_result)
+function M.describe_instance_details(instance_id, on_result)
     handler.group_async({
         "aws ec2 describe-instance-status --query 'InstanceStatuses[] | [0]' --instance-ids  " .. instance_id,
         "aws ec2 describe-instances --query 'Reservations[].Instances[] | [0]' --instance-ids " .. instance_id,
@@ -37,7 +37,7 @@ end
 ---@param hours number the number of hours to fetch monitoring data
 ---@param interval number the granularity of the fetch monitoring data in seconds
 ---@param on_result OnResult
-function self.describe_instance_monitoring(instance_id, current_time, hours, interval, on_result)
+function M.describe_instance_monitoring(instance_id, current_time, hours, interval, on_result)
 
     ---@type table<string>
     local preferred_metrics = config.ec2.instances.preferred_metrics
@@ -68,14 +68,14 @@ end
 ---Start ec2 instance
 ---@param instance_id string
 ---@param on_result OnResult
-function self.start_instance(instance_id, on_result)
+function M.start_instance(instance_id, on_result)
     handler.async("aws ec2 start-instances --instance-ids " .. instance_id, on_result)
 end
 
 ---Stop ec2 instance
 ---@param instance_id string
 ---@param on_result OnResult
-function self.stop_instance(instance_id, on_result)
+function M.stop_instance(instance_id, on_result)
     handler.async('aws ec2 stop-instances --instance-ids ' .. instance_id, on_result)
 end
 
@@ -83,7 +83,7 @@ end
 ---Terminate ec2 instance
 ---@param instance_id string
 ---@param on_result OnResult
-function self.terminate_instance(instance_id, on_result)
+function M.terminate_instance(instance_id, on_result)
     handler.async('aws ec2 terminate-instance --instances-ids ' .. instance_id, on_result)
 end
 
@@ -91,7 +91,7 @@ end
 ---@param private_key_file_path string
 ---@param os_user string
 ---@param instance_id string
-function self.connect_instance(private_key_file_path, os_user, instance_id)
+function M.connect_instance(private_key_file_path, os_user, instance_id)
     handler.interactive('aws ec2-instance-connect ssh --instance-id ' ..
                          instance_id ..
                         ' --private-key-file ' .. private_key_file_path ..
@@ -102,7 +102,7 @@ end
 
 -- Fetch all target groups details
 ---@param on_result OnResult
-function self.describe_target_groups(on_result)
+function M.describe_target_groups(on_result)
     handler.async("aws elbv2 describe-target-groups", on_result)
 end
 
@@ -111,4 +111,4 @@ end
 -- aws cloudwatch get-metric-data
 -- aws cloudwatch list-metric-data
 -- aws cloudwatch list-dashboard (maybe creating dashbords would be interesting)
-return self
+return M

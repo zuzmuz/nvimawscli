@@ -1,9 +1,9 @@
 local command = require('nvimawscli.commands.ec2')
 
 ---@class InstanceActionsManage
-local self = {}
+local M = {}
 
-function self.get(instance)
+function M.get(instance)
     if instance.State == "running" then
         return { "details", "monitor", "stop", "terminate", "connect" }
     elseif instance.State == "stopped" then
@@ -18,7 +18,7 @@ end
 
 
 ---@type InstanceAction
-self.details = {
+M.details = {
     ask_for_confirmation = false,
     action = function(instance)
         local details = require('nvimawscli.services.ec2.instances.details')
@@ -27,7 +27,7 @@ self.details = {
 }
 
 ---@type InstanceAction
-self.monitor = {
+M.monitor = {
     ask_for_confirmation = false,
     action = function(instance)
         local monitoring = require('nvimawscli.services.ec2.instances.monitoring')
@@ -36,7 +36,7 @@ self.monitor = {
 }
 
 ---@type InstanceAction
-self.start = {
+M.start = {
     ask_for_confirmation = true,
     action = function(instance)
         print('starting ' .. instance.InstanceId)
@@ -60,7 +60,7 @@ self.start = {
 
 
 ---@type InstanceAction
-self.stop = {
+M.stop = {
     ask_for_confirmation = true,
     action = function(instance)
         print('stopping ' .. instance.InstanceId)
@@ -84,7 +84,7 @@ self.stop = {
 
 
 ---@type InstanceAction
-self.terminate = {
+M.terminate = {
     ask_for_confirmation = true,
     action = function(instance)
         print('terminating ' .. instance.InstanceId)
@@ -106,7 +106,7 @@ self.terminate = {
 }
 
 ---@type InstanceAction
-self.connect = {
+M.connect = {
     ask_for_confirmation = true,
     action = function(instance)
         print('connecting ' .. instance.InstanceId)
@@ -115,4 +115,4 @@ self.connect = {
     end,
 }
 
-return self
+return M

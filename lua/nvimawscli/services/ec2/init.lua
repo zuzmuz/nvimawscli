@@ -2,43 +2,43 @@ local utils = require('nvimawscli.utils.buffer')
 local config = require('nvimawscli.config')
 
 ---@class Ec2
-local self = {}
+local M = {}
 
-function self.load()
-    if not self.bufnr then
-        self.bufnr = utils.create_buffer('submenu')
+function M.load()
+    if not M.bufnr then
+        M.bufnr = utils.create_buffer('submenu')
     end
 
-    if not self.winnr or not utils.check_if_window_exists(self.winnr) then
-        self.winnr = utils.create_window(self.bufnr, config.menu.split)
+    if not M.winnr or not utils.check_if_window_exists(M.winnr) then
+        M.winnr = utils.create_window(M.bufnr, config.menu.split)
     end
 
-    vim.api.nvim_set_current_win(self.winnr)
+    vim.api.nvim_set_current_win(M.winnr)
 
-    vim.api.nvim_buf_set_keymap(self.bufnr, 'n', '<CR>', '', {
+    vim.api.nvim_buf_set_keymap(M.bufnr, 'n', '<CR>', '', {
         callback = function()
-            local position = vim.api.nvim_win_get_cursor(self.winnr)
+            local position = vim.api.nvim_win_get_cursor(M.winnr)
 
-            local subservice_name = utils.get_line(self.bufnr, position[1])
+            local subservice_name = utils.get_line(M.bufnr, position[1])
 
 
             local status, subservice = pcall(require, 'nvimawscli.services.ec2.' .. subservice_name)
 
             if status then
                 subservice.load()
-                vim.api.nvim_win_set_width(self.winnr, config.menu.width)
+                vim.api.nvim_win_set_width(M.winnr, config.menu.width)
             else
                 vim.api.nvim_err_writeln('Subservice not found: ' .. subservice_name)
             end
         end
     })
 
-    utils.write_lines(self.bufnr, config.ec2.preferred_services)
+    utils.write_lines(M.bufnr, config.ec2.preferred_services)
     local allowed_positions = {}
     for i, _ in ipairs(config.ec2.preferred_services) do
         allowed_positions[#allowed_positions+1] = { { i, 1 } }
     end
-    utils.set_allowed_positions(self.bufnr, allowed_positions)
+    utils.set_allowed_positions(M.bufnr, allowed_positions)
 end
 
-return self
+return M

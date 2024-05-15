@@ -6,41 +6,41 @@ local command = require(config.commands .. '.ec2')
 local graphs = require("nvimawscli.utils.graphs")
 
 ---@class InstanceMonitoringManager
-local self = {}
+local M = {}
 
-function self.load(instance_id)
-    self.instance_id = instance_id
+function M.load(instance_id)
+    M.instance_id = instance_id
 
-    if not self.bufnr then
-        self.bufnr = utils.create_buffer('ec2.instances.monitoring')
+    if not M.bufnr then
+        M.bufnr = utils.create_buffer('ec2.instances.monitoring')
     end
 
-    if not self.winnr or not utils.check_if_window_exists(self.winnr) then
-        self.winnr = utils.create_window(self.bufnr, config.details.split)
+    if not M.winnr or not utils.check_if_window_exists(M.winnr) then
+        M.winnr = utils.create_window(M.bufnr, config.details.split)
     end
 
-    vim.api.nvim_set_current_win(self.winnr)
+    vim.api.nvim_set_current_win(M.winnr)
 
-    self.fetch()
+    M.fetch()
 end
 
-function self.fetch()
-    utils.write_lines_string(self.bufnr, 'Fetching monitoring...')
+function M.fetch()
+    utils.write_lines_string(M.bufnr, 'Fetching monitoring...')
 
-    command.describe_instance_monitoring(self.instance_id, os.time(), 3, 600,
+    command.describe_instance_monitoring(M.instance_id, os.time(), 3, 600,
         function(result, error)
             if error then
-                utils.write_lines_string(self.bufnr, error)
+                utils.write_lines_string(M.bufnr, error)
             end
             if result then
                 local response = vim.json.decode(result)
-                self.render(response)
+                M.render(response)
             end
         end)
 end
 
 
-function self.render(response)
+function M.render(response)
     local lines = itertools.flatten(itertools.map_values(response.MetricDataResults,
         function(metric)
             local graph = graphs.render(metric.Values, 5, 0, 'block', 1)
@@ -48,7 +48,7 @@ function self.render(response)
             table.insert(graph, 2, tostring(math.max(unpack(metric.Values))))
             return graph
         end))
-    utils.write_lines(self.bufnr, lines)
+    utils.write_lines(M.bufnr, lines)
 end
 
-return self
+return M
