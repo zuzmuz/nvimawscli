@@ -4,6 +4,7 @@
 ---@field menu table: menu window config
 ---@field table table: rendered tables config
 local M = {
+    startup_service = nil,
     preferred_services = {
         "ec2",
     },
