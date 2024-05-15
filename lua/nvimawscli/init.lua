@@ -33,13 +33,13 @@ function M.launch()
     if config.startup_service then
         local status, service = pcall(require, "nvimawscli.services." .. config.startup_service)
         if status then
-            service.load()
+            service.load("inplace")
             return
         else
             vim.api.nvim_err_writeln("startup service " .. config.startup_service .. " not supported")
         end
     end
-    require("nvimawscli.menu").load()
+    require("nvimawscli.menu").load("inplace")
 end
 
 return M

@@ -21,7 +21,7 @@ function M.create_buffer(name, deletable)
     return bufnr
 end
 
----@alias split "vertical"|"horizontal"
+---@alias split "vertical"|"horizontal"|"inplace"
 
 ---Create a new large window
 ---@param bufnr number: The buffer number to associate with the window
@@ -32,8 +32,10 @@ function M.create_window(bufnr, split)
         vim.cmd("rightbelow vnew")
     elseif split == "horizontal" then
         vim.cmd("below new")
+    elseif split == "inplace" then
+        -- use current window
     else
-        vim.api.nvim_err_writeln("Invalid split direction: " .. split)
+        vim.api.nvim_err_writeln("Invalid split direction: " .. (split or 'nil'))
         return
     end
     winnr = vim.api.nvim_get_current_win()

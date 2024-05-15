@@ -4,13 +4,13 @@ local config = require('nvimawscli.config')
 ---@class Ec2
 local M = {}
 
-function M.load()
+function M.load(split)
     if not M.bufnr then
         M.bufnr = utils.create_buffer('submenu')
     end
 
     if not M.winnr or not utils.check_if_window_exists(M.winnr) then
-        M.winnr = utils.create_window(M.bufnr, config.menu.split)
+        M.winnr = utils.create_window(M.bufnr, split)
     end
 
     vim.api.nvim_set_current_win(M.winnr)
@@ -25,7 +25,8 @@ function M.load()
             local status, subservice = pcall(require, 'nvimawscli.services.ec2.' .. subservice_name)
 
             if status then
-                subservice.load()
+                -- FIX: same problem here as in the menu
+                subservice.load(config.menu.split)
                 vim.api.nvim_win_set_width(M.winnr, config.menu.width)
             else
                 vim.api.nvim_err_writeln('Subservice not found: ' .. subservice_name)

@@ -25,9 +25,10 @@ M.all_services_header = {
     "------------------",
 }
 
+-- TODO: should rethink window management if I want to toggle menu and submenu
 ---Load the menu
 ---The menu is the initial buffer and contain the list of aws services available
-function M.load()
+function M.load(split)
     M.bufnr = utils.create_buffer('menu')
     M.winnr = vim.api.nvim_get_current_win()
 
@@ -43,7 +44,9 @@ function M.load()
 
             local status, service = pcall(require, 'nvimawscli.services.' .. service_name)
             if status then
-                service.load()
+                service.load(config.menu.split)
+                -- FIX: here I'm setting the width independently from the load function, instead of menu resizing itself the new window should, with param sent to it with the split
+                -- maybe the util create window should worry about this, (when creating the new window we resize the old one)
                 vim.api.nvim_win_set_width(M.winnr, config.menu.width)
             else
                 vim.api.nvim_err_writeln("Service not implemented yet: " .. service_name)
