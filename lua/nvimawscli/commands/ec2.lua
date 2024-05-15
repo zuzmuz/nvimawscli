@@ -31,38 +31,38 @@ function self.describe_instance_details(instance_id, on_result)
 end
 
 
----Fetch ec2 instance metrics
----@param instance_id string
----@param start_time string: the start date for metric, format is timestamp yyyy-mm-ddThh:mm:ssss
----@param end_time string: then end date for metric, format is timestamp yyyy-mm-ddThh:mm:ssss
----@param interval number: in seconds, the granularity of the fetch metrics data in seconds
+---Fetch ec2 instance monitoring details
+---@param instance_id string the instance id
+---@param current_time number the current timestamp
+---@param hours number the number of hours to fetch monitoring data
+---@param interval number the granularity of the fetch monitoring data in seconds
 ---@param on_result OnResult
-function self.fetch_instance_metrics(instance_id, start_time, end_time, interval, on_result)
-    handler.async("aws cloudwatch get-metric-data --metric-data-queries " ..
-                      "'[{\"Id\":\"cpu\", \"MetricStat\":{" ..
-                      "\"Metric\":{\"Namespace\":\"AWS/EC2\", " ..
-                      "\"MetricName\":\"CPUUtilization\", \"Dimensions\":[{\"Name\":\"InstanceId\"," ..
-                      "\"Value\": \"" .. instance_id .. "\"" ..
-                      "}]},\"Period\":" .. interval ..
-                      ",\"Stat\":\"Average\"}}]' --start-time " .. start_time ..
-                      " --end-time " .. end_time,
-                      on_result)
-end
+function self.describe_instance_monitoring(instance_id, current_time, hours, interval, on_result)
 
----Fetch ec2 instance metrics for the last number of hours
----@param instance_id string
----@param current_time number: the number of hourse past the current time to fetch metrics data
----@param hours number: the number of hourse past the current time to fetch metrics data
----@param interval number: in seconds, the granularity of the fetch metrics data in seconds
----@param on_result OnResult
-function self.fetch_last_hours_instance_metrics(instance_id, current_time, hours, interval, on_result)
+    ---@type table<string>
+    local preferred_metrics = config.ec2.instances.preferred_metrics
+
+    local metric_data_queries = itertools.imap_values(preferred_metrics,
+        function(metric)
+            return '{"Id":"' .. string.lower(metric) .. '", "MetricStat":{' ..
+            '"Metric":{"Namespace":"AWS/EC2", ' ..
+            '"MetricName":"' .. metric .. '", ' ..
+            '"Dimensions":[{"Name":"InstanceId",' ..
+            '"Value": "' .. instance_id .. '"' ..
+            '}]},"Period":' .. interval ..
+            ',"Stat":"Average"}}'
+        end)
+    local metric_data_queries_string = '[' .. table.concat(metric_data_queries, ', ') .. ']'
     local end_time = os.date("!%Y-%m-%dT%H:%M:%S", current_time)
     local start_time = os.date("!%Y-%m-%dT%H:%M:%S", current_time - (hours * 3600))
     ---@cast end_time string
     ---@cast start_time string
 
-    print("start_time: " .. start_time .. " end_time: " .. end_time)
-    self.fetch_instance_metrics(instance_id, start_time, end_time, interval, on_result)
+    handler.async("aws cloudwatch get-metric-data --metric-data-queries " ..
+        "'" .. metric_data_queries_string .. "' " ..
+        "--start-time " .. start_time ..
+        " --end-time " .. end_time,
+        on_result)
 end
 
 ---Start ec2 instance

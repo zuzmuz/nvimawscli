@@ -81,6 +81,13 @@ local self = {
                 "SecurityGroups",
                 "Tags",
             },
+            preferred_metrics = {
+                "CPUUtilization",
+                "CPUCreditUsage",
+                "CPUCreditBalance",
+                "NetworkIn",
+                "NetworkOut",
+            },
         },
         target_groups = {
             preferred_attributes = {
