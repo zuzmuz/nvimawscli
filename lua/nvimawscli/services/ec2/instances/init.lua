@@ -8,7 +8,7 @@ local table_renderer = require('nvimawscli.utils.tables')
 local instance_actions = require('nvimawscli.services.ec2.instances.actions')
 
 ---@class InstanceManager
-local self = {}
+local M = {}
 
 ---@class Instance
 ---@field InstanceId string
@@ -21,8 +21,8 @@ local self = {}
 
 ---Sort the rows based on the column and direction
 ---@param column string: the name of the column header name to use as key for sorting
-function self.sort_rows(column, direction)
-    table.sort(self.rows, function(a, b)
+function M.sort_rows(column, direction)
+    table.sort(M.rows, function(a, b)
         if direction == 1 then
             return a[column] < b[column]
         end
@@ -30,22 +30,22 @@ function self.sort_rows(column, direction)
     end)
 end
 
-function self.load()
-    if not self.bufnr then
-        self.bufnr = utils.create_buffer('ec2.instances')
+function M.load()
+    if not M.bufnr then
+        M.bufnr = utils.create_buffer('ec2.instances')
     end
 
-    if not self.winnr or not utils.check_if_window_exists(self.winnr) then
-        self.winnr = utils.create_window(self.bufnr, config.menu.split)
+    if not M.winnr or not utils.check_if_window_exists(M.winnr) then
+        M.winnr = utils.create_window(M.bufnr, config.menu.split)
     end
 
-    vim.api.nvim_set_current_win(self.winnr)
+    vim.api.nvim_set_current_win(M.winnr)
 
-    self.fetch()
+    M.fetch()
 
-    vim.api.nvim_buf_set_keymap(self.bufnr, 'n', '<CR>', '', {
+    vim.api.nvim_buf_set_keymap(M.bufnr, 'n', '<CR>', '', {
         callback = function()
-            if not self.ready then
+            if not M.ready then
                 return
             end
             local position = vim.fn.getcursorcharpos()
@@ -54,9 +54,9 @@ function self.load()
 
             local item_number = table_renderer.get_item_number_from_row(line_number)
 
-            if item_number > 0 and item_number <= #self.rows then
+            if item_number > 0 and item_number <= #M.rows then
                 -- open floating window for instance functions
-                local instance = self.rows[item_number]
+                local instance = M.rows[item_number]
                 local available_actions = instance_actions.get(instance)
 
                 ui.create_floating_select_popup(nil, available_actions, config.table,
@@ -80,7 +80,7 @@ function self.load()
                         end
                     end)
             else -- perform sorting based on column selection
-                self.handle_sort_event(column_number)
+                M.handle_sort_event(column_number)
             end
         end
     })
@@ -89,38 +89,38 @@ end
 ---@private
 ---Handle the sort event when a column header is clicked
 ---@param column_number number: the column number clicked
-function self.handle_sort_event(column_number)
-    local column_index = table_renderer.get_column_index_from_position(column_number, self.widths)
-    if self.sorted_by_column_index == column_index then
-        self.sorted_direction = self.sorted_direction * -1
+function M.handle_sort_event(column_number)
+    local column_index = table_renderer.get_column_index_from_position(column_number, M.widths)
+    if M.sorted_by_column_index == column_index then
+        M.sorted_direction = M.sorted_direction * -1
     else
-        self.sorted_by_column_index = column_index
-        self.sorted_direction = 1
+        M.sorted_by_column_index = column_index
+        M.sorted_direction = 1
     end
     if column_index then
         local column_value = config.ec2.instances.preferred_attributes[column_index].name
-        self.sort_rows(column_value, self.sorted_direction)
-        self.render(self.rows)
+        M.sort_rows(column_value, M.sorted_direction)
+        M.render(M.rows)
     end
 end
 
 ---@private
 ---Fetch the ec2 instances from aws cli and parse the result
-function self.fetch()
-    self.ready = false
-    self.sorted_by_column_index = nil
-    utils.write_lines_string(self.bufnr, 'Fetching...')
+function M.fetch()
+    M.ready = false
+    M.sorted_by_column_index = nil
+    utils.write_lines_string(M.bufnr, 'Fetching...')
     command.describe_instances(function(result, error)
         if error then
-            utils.write_lines_string(self.bufnr, error)
+            utils.write_lines_string(M.bufnr, error)
         elseif result then
-            self.rows = vim.json.decode(result)
-            local allowed_positions = self.render(self.rows)
-            utils.set_allowed_positions(self.bufnr, allowed_positions)
+            M.rows = vim.json.decode(result)
+            local allowed_positions = M.render(M.rows)
+            utils.set_allowed_positions(M.bufnr, allowed_positions)
         else
-            utils.write_lines_string(self.bufnr, 'Result was nil')
+            utils.write_lines_string(M.bufnr, 'Result was nil')
         end
-        self.ready = true
+        M.ready = true
     end)
 end
 
@@ -128,7 +128,7 @@ end
 ---Render the table containing the ec2 instances into the buffer
 ---@param rows Instance[]
 ---@return number[][][]: The positions the cursor is allowed to be at
-function self.render(rows)
+function M.render(rows)
     local column_names = itertools.imap_values(config.ec2.instances.preferred_attributes,
         function(attribute)
             return attribute.name
@@ -136,13 +136,13 @@ function self.render(rows)
     local lines, allowed_positions, widths = table_renderer.render(
         column_names,
         rows,
-        self.sorted_by_column_index,
-        self.sorted_direction,
+        M.sorted_by_column_index,
+        M.sorted_direction,
         config.table)
 
-    self.widths = widths
-    utils.write_lines(self.bufnr, lines)
+    M.widths = widths
+    utils.write_lines(M.bufnr, lines)
     return allowed_positions
 end
 
-return self
+return M

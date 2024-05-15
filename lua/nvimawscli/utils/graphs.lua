@@ -1,7 +1,7 @@
 local itertools = require('nvimawscli.utils.itertools')
 
 ---@class GraphRenderer
-local self = {}
+local M = {}
 
 ---@alias graph_type 'block' | 'braille' | 'line'
 
@@ -87,7 +87,7 @@ symbol_mapping[2] = {
 ---@param scale number?: the max value for adjusting the scale for normalizing the values, if nil then the max of values is the scale
 ---@param graph_type graph_type: the type of graph to use
 ---@param resolution number: the resolution of the graph, 1 or 2
-function self.render(values, height, scale, graph_type, resolution)
+function M.render(values, height, scale, graph_type, resolution)
 
     if #values == 0 then
         return {}
@@ -138,4 +138,4 @@ function self.render(values, height, scale, graph_type, resolution)
     return rows
 end
 
-return self
+return M

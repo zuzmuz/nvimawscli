@@ -1,12 +1,12 @@
 
-local self = {}
+local M = {}
 
 -- The difference between the methods with the same name but with an i,
 -- is that the i only works for numerical contiguous keys, and ensure the order
 -- whereas without the i, the order is not guaranteed and the keys can be non numerical
 
 ---Returns keys of table
-function self.keys(t)
+function M.keys(t)
     local keys = {}
     for key, _ in pairs(t) do
         keys[#keys+1] = key
@@ -18,7 +18,7 @@ end
 ---@param t any[]: the table to extend
 ---@param other any[]: the table to extend with
 ---@return table: the extended table
-function self.extend(t, other)
+function M.extend(t, other)
     for _, value in pairs(other) do
         t[#t+1] = value
     end
@@ -31,7 +31,7 @@ end
 ---@param t `T`[]: the input array
 ---@param callback fun(t: `T`): `U`: the transformation function
 ---@return `U`[]: the new array
-function self.map_keys(t, callback)
+function M.map_keys(t, callback)
     local new = {}
     for key, value in pairs(t) do
         new[callback(key)] = value
@@ -45,7 +45,7 @@ end
 ---@param t `T`[]: the input array
 ---@param callback fun(t: `T`): `U`: the transformation function
 ---@return `U`[]: the new array
-function self.map_values(t, callback)
+function M.map_values(t, callback)
     local new = {}
     for key, value in pairs(t) do
         new[key] = callback(value)
@@ -59,7 +59,7 @@ end
 ---@param t `T`[]: the input array
 ---@param callback fun(t: `T`): `U`: the transformation function
 ---@return `U`[]: the new array
-function self.imap_values(t, callback)
+function M.imap_values(t, callback)
     local new = {}
     for key, value in ipairs(t) do
         new[key] = callback(value)
@@ -67,9 +67,9 @@ function self.imap_values(t, callback)
     return new
 end
 
-function self.imap_values_grouped(t, step, padding, callback)
+function M.imap_values_grouped(t, step, padding, callback)
     if step == 1 then
-        return self.imap_values(t, callback)
+        return M.imap_values(t, callback)
     end
     local new = {}
     local i = 1
@@ -96,7 +96,7 @@ end
 ---@param t table<K, V>[]: the input array
 ---@param callback fun(k: `K`, v: `V`): `U`: the transformation function
 ---@return `U`[]: the new array
-function self.map(t, callback)
+function M.map(t, callback)
     local new = {}
     for key, value in pairs(t) do
         new[#new+1] = callback(key, value)
@@ -112,7 +112,7 @@ end
 ---@param t table<K, V>: the input array
 ---@param callback fun(k: `K`, v: `V`): `U`: the transformation function
 ---@return `U`[]: the new array
-function self.imap(t, callback)
+function M.imap(t, callback)
     local new = {}
     for key, value in ipairs(t) do
         new[#new+1] = callback(key, value)
@@ -127,7 +127,7 @@ end
 ---@param t `T`[]: the input array
 ---@param callback fun(t: `T`): `U`, `V`: the transformation function
 ---@return table<`U`, `V`>: the new array
-function self.associate_values(t, callback)
+function M.associate_values(t, callback)
     local new = {}
     for _, value in pairs(t) do
         local v1, v2 = callback(value)
@@ -144,7 +144,7 @@ end
 ---@param t table<`K`, `V`> the input array
 ---@param callback fun(k: `K`, v: `V`): `R`, `S`: the transformation function
 ---@return table<`R`, `S`>: the new array
-function self.associate(t, callback)
+function M.associate(t, callback)
     local new = {}
     for key, value in pairs(t) do
         local v1, v2 = callback(key, value)
@@ -157,7 +157,7 @@ end
 ---Flattens a list of lists into 1 list
 ---@param t table[]: the input array
 ---@return table: the new array
-function self.flatten(t)
+function M.flatten(t)
     local new = {}
     for _, value in ipairs(t) do
         for _, v in ipairs(value) do
@@ -171,7 +171,7 @@ end
 ---@param t table[]: the input array
 ---@param separator table: the separator to insert between each list
 ---@return table: the new array
-function self.flatten_with_separator(t, separator)
+function M.flatten_with_separator(t, separator)
     local new = {}
     for _, value in ipairs(t) do
         for _, sep in ipairs(separator) do
@@ -186,7 +186,7 @@ end
 
 
 ---Returns the maximum value in the table
-function self.max_with_index(t)
+function M.max_with_index(t)
     local max_key, max = 1, t[1]
     for key, value in pairs(t) do
         if value > max then
@@ -198,7 +198,7 @@ function self.max_with_index(t)
 end
 
 ---Returns the minimum value in the table
-function self.min_with_index(t)
+function M.min_with_index(t)
     local min_key, min = 1, t[1]
     for key, value in pairs(t) do
         if value < min then
@@ -213,7 +213,7 @@ end
 ---@generic T
 ---@param t `T`[] the table
 ---@param callback fun(a: `T`, b: `T`) the comparison function
-function self.max_with_index_by(t, callback)
+function M.max_with_index_by(t, callback)
     local max_key, max = 1, t[1]
     for key, value in pairs(t) do
         if callback(value, max) then
@@ -224,4 +224,4 @@ function self.max_with_index_by(t, callback)
     return max_key, max
 end
 
-return self
+return M

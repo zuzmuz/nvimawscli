@@ -3,7 +3,7 @@
 ---@field all_services string[]: list of all the services
 ---@field menu table: menu window config
 ---@field table table: rendered tables config
-local self = {
+local M = {
     preferred_services = {
         "ec2",
     },
@@ -119,12 +119,12 @@ local self = {
 
 ---Setup the configurations
 ---@param config table: The configuration to setup
-function self.setup(config)
-    local new_config = vim.tbl_deep_extend('keep', config or {}, self)
+function M.setup(config)
+    local new_config = vim.tbl_deep_extend('keep', config or {}, M)
 
     for key, value in pairs(new_config) do
-        self[key] = value
+        M[key] = value
     end
 end
 
-return self
+return M

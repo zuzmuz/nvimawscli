@@ -1,7 +1,7 @@
 ---@class CharacterSet
-local self = {}
+local M = {}
 
-self.rounded = {
+M.rounded = {
     horizontal = '─',
     vertical = '│',
     top_left = '╭',
@@ -15,7 +15,7 @@ self.rounded = {
     cross = '┼',
 }
 
-self.double = {
+M.double = {
     horizontal = '═',
     vertical = '║',
     top_left = '╔',
@@ -29,7 +29,7 @@ self.double = {
     cross = '╬',
 }
 
-self.single = {
+M.single = {
     horizontal = '─',
     vertical = '│',
     top_left = '┌',
@@ -43,4 +43,4 @@ self.single = {
     cross = '┼',
 }
 
-return self
+return M

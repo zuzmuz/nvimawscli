@@ -5,44 +5,43 @@ local command = require(config.commands .. '.ec2')
 local display = require('nvimawscli.utils.display')
 
 ---@class InstanceDetailsManager
-local self = {}
+local M = {}
 
 
-function self.load(instance_id)
-    self.instance_id = instance_id
+function M.load(instance_id)
+    M.instance_id = instance_id
 
-    if not self.bufnr then
-        self.bufnr = utils.create_buffer('ec2.instances.details')
+    if not M.bufnr then
+        M.bufnr = utils.create_buffer('ec2.instances.details')
     end
 
-    if not self.winnr or not utils.check_if_window_exists(self.winnr) then
-        self.winnr = utils.create_window(self.bufnr, config.details.split)
+    if not M.winnr or not utils.check_if_window_exists(M.winnr) then
+        M.winnr = utils.create_window(M.bufnr, config.details.split)
     end
 
-    vim.api.nvim_set_current_win(self.winnr)
+    vim.api.nvim_set_current_win(M.winnr)
 
-    self.fetch()
+    M.fetch()
 end
 
-function self.fetch()
-    utils.write_lines_string(self.bufnr, 'Fetching details...')
+function M.fetch()
+    utils.write_lines_string(M.bufnr, 'Fetching details...')
 
-    command.describe_instance_details(self.instance_id,
+    command.describe_instance_details(M.instance_id,
         function(result, error)
             if error then
-                utils.write_lines_string(self.bufnr, error)
+                utils.write_lines_string(M.bufnr, error)
             end
             if result then
                 local response = vim.json.decode(result)
-                self.render(response)
-                -- self.render(self.rows)
+                M.render(response)
             end
         end)
 end
 
-function self.render(response)
+function M.render(response)
     local new_response = vim.tbl_deep_extend('keep', unpack(response))
-    utils.write_lines(self.bufnr, display.render(new_response))
+    utils.write_lines(M.bufnr, display.render(new_response))
 end
 
-return self
+return M

@@ -1,5 +1,5 @@
 ---@class TableRenderer
-local self = {}
+local M = {}
 
 
 
@@ -15,7 +15,7 @@ local self = {}
 ---@param sorted_direction number: The direction of the sort, 1 for ascending, -1 for descending
 ---@param config table_config: The configuration of the table
 ---@return string[], number[][][], number[]: The lines of the table, the allowed positions in the window, the widths of the column
-function self.render(headers, rows, sorted_by_column_index, sorted_direction, config)
+function M.render(headers, rows, sorted_by_column_index, sorted_direction, config)
     if #rows == 0 then
         return {}, {}, {}
     end
@@ -113,7 +113,7 @@ end
 ---Get the index of the row disregarding the header from the line number in the rendered table
 ---@param line_number number: The line number in the buffer
 ---@return number: The index of the row in the rows table
-function self.get_item_number_from_row(line_number)
+function M.get_item_number_from_row(line_number)
     return line_number - 3
 end
 
@@ -121,7 +121,7 @@ end
 ---@param column_number number: The column number in the window at the cursor position
 ---@param widths table<number>: The widths of columns
 ---@return number|nil: The index of the column in the headers table, nil if invalid
-function self.get_column_index_from_position(column_number, widths)
+function M.get_column_index_from_position(column_number, widths)
     local accumulated_width = 0
     for i, width in ipairs(widths) do
         accumulated_width = accumulated_width + width + 1
@@ -132,4 +132,4 @@ function self.get_column_index_from_position(column_number, widths)
     return nil
 end
 
-return self
+return M

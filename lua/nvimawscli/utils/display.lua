@@ -1,7 +1,7 @@
 local itertools = require("nvimawscli.utils.itertools")
 
 ---@class DisplayRenderer
-local self = {}
+local M = {}
 
 
 
@@ -33,9 +33,9 @@ end
 ---Renders a generic lua table by unfloding all its content into an array of strings
 ---@param t table: The table to render
 ---@return string[]: The lines to display
-function self.render(t)
+function M.render(t)
     return represent(t, 1)
 end
 
 
-return self
+return M
