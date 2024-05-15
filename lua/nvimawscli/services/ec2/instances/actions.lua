@@ -5,9 +5,9 @@ local self = {}
 
 function self.get(instance)
     if instance.State == "running" then
-        return { "details", "stop", "terminate", "connect" }
+        return { "details", "monitor", "stop", "terminate", "connect" }
     elseif instance.State == "stopped" then
-        return { "details", "start", "terminate" }
+        return { "details", "monitor", "start", "terminate" }
     end
     return { "details", "terminate" }
 end
@@ -23,6 +23,15 @@ self.details = {
     action = function(instance)
         local details = require('nvimawscli.services.ec2.instances.details')
         details.load(instance.InstanceId)
+    end,
+}
+
+---@type InstanceAction
+self.monitor = {
+    ask_for_confirmation = false,
+    action = function(instance)
+        local monitoring = require('nvimawscli.services.ec2.instances.monitoring')
+        monitoring.load(instance.InstanceId)
     end,
 }
 

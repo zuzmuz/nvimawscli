@@ -1,18 +1,18 @@
 local utils = require('nvimawscli.utils.buffer')
+local itertools = require("nvimawscli.utils.itertools")
 local config = require('nvimawscli.config')
 ---@type Ec2Handler
 local command = require(config.commands .. '.ec2')
-local display = require('nvimawscli.utils.display')
+local graphs = require("nvimawscli.utils.graphs")
 
----@class InstanceDetailsManager
+---@class InstanceMonitoringManager
 local self = {}
-
 
 function self.load(instance_id)
     self.instance_id = instance_id
 
     if not self.bufnr then
-        self.bufnr = utils.create_buffer('ec2.instances.details')
+        self.bufnr = utils.create_buffer('ec2.instances.monitoring')
     end
 
     if not self.winnr or not utils.check_if_window_exists(self.winnr) then
@@ -25,9 +25,9 @@ function self.load(instance_id)
 end
 
 function self.fetch()
-    utils.write_lines_string(self.bufnr, 'Fetching details...')
+    utils.write_lines_string(self.bufnr, 'Fetching monitoring...')
 
-    command.describe_instance_details(self.instance_id,
+    command.describe_instance_monitoring(self.instance_id, os.time(), 3, 600,
         function(result, error)
             if error then
                 utils.write_lines_string(self.bufnr, error)
@@ -35,14 +35,20 @@ function self.fetch()
             if result then
                 local response = vim.json.decode(result)
                 self.render(response)
-                -- self.render(self.rows)
             end
         end)
 end
 
+
 function self.render(response)
-    local new_response = vim.tbl_deep_extend('keep', unpack(response))
-    utils.write_lines(self.bufnr, display.render(new_response))
+    local lines = itertools.flatten(itertools.map_values(response.MetricDataResults,
+        function(metric)
+            local graph = graphs.render(metric.Values, 5, 0, 'block', 1)
+            table.insert(graph, 1, metric.Label)
+            table.insert(graph, 2, tostring(math.max(unpack(metric.Values))))
+            return graph
+        end))
+    utils.write_lines(self.bufnr, lines)
 end
 
 return self
