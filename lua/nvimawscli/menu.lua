@@ -4,9 +4,7 @@ local config = require('nvimawscli.config')
 
 
 ---@class Menu
----@field private header string[]
----@field private preferred_services_header string[]
----@field private all_services_header string[]
+---@field buffnr number
 local M = {}
 
 
@@ -25,12 +23,24 @@ M.all_services_header = {
     "------------------",
 }
 
--- TODO: should rethink window management if I want to toggle menu and submenu
+---Show the menu
+---@param split Split
+function M.show(split)
+    if not M.bufnr then
+        M.load()
+    end
+
+    if not M.winnr or not vim.api.nvim_win_is_valid(M.winnr) then
+        M.winnr = utils.create_window(M.bufnr, split)
+    end
+    vim.api.nvim_set_current_win(M.winnr)
+end
+
 ---Load the menu
 ---The menu is the initial buffer and contain the list of aws services available
-function M.load(split)
+function M.load()
+
     M.bufnr = utils.create_buffer('menu')
-    M.winnr = vim.api.nvim_get_current_win()
 
     vim.api.nvim_win_set_buf(M.winnr, M.bufnr)
 
@@ -67,13 +77,12 @@ function M.load(split)
         }
     end
     utils.set_allowed_positions(M.bufnr, allowed_positions)
+
+    M.loaded = true
 end
 
 function M.hide()
     vim.api.nvim_win_hide(M.winnr)
-end
-
-function M.show()
 end
 
 return M

@@ -1,9 +1,6 @@
 local config = require("nvimawscli.config")
+
 ---@class Dashboard
----@field launched boolean
----@field is_setup boolean
----@field launch fun(): nil
----@field setup fun(table): nil
 local M = {}
 
 M.launched = false
@@ -11,9 +8,14 @@ M.launched = false
 function M.setup(c)
     config.setup(c)
 
-    vim.api.nvim_create_user_command('Aws', function (opts)
-        require('nvimawscli').launch()
-    end, {})
+    vim.api.nvim_create_user_command('Aws', function (options)
+        M.launch()
+        if options.args then
+            require("nvimawscli.menu").show("topleft")
+        end
+    end, {
+        nargs = '?',
+    })
 
     M.is_setup = true
 end
@@ -21,15 +23,13 @@ end
 --- Launch the Dashboard
 function M.launch()
     if M.launched then
-        vim.api.nvim_err_writeln("Dashboard already launched")
         return
     end
     if not M.is_setup then
-        vim.api.nvim_err_writeln("Dashboard not setup")
-        return
+        config.setup({})
     end
-    M.launched = true
 
+    M.launched = true
     if config.startup_service then
         local status, service = pcall(require, "nvimawscli.services." .. config.startup_service)
         if status then
@@ -39,7 +39,7 @@ function M.launch()
             vim.api.nvim_err_writeln("startup service " .. config.startup_service .. " not supported")
         end
     end
-    require("nvimawscli.menu").load("inplace")
+    require("nvimawscli.menu").show("inplace")
 end
 
 return M

@@ -21,6 +21,7 @@ local M = {}
 
 ---Sort the rows based on the column and direction
 ---@param column string: the name of the column header name to use as key for sorting
+---@param direction number: 1 for ascending, -1 for descending
 function M.sort_rows(column, direction)
     table.sort(M.rows, function(a, b)
         if direction == 1 then

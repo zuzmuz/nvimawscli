@@ -21,6 +21,13 @@ Add the following to your init.lua if you're using any other way of installing t
 require('nvimawscli').setup()
 ```
 
+
+You might want to set the equalalways option to false when setting up the plugin, the default of equalalways is true. This will lead to windows to resize every time a new window is opened or closed.
+
+```lua
+vim.opt.equalalways = false
+```
+
 ## Usage
 
 You can pass by config to tinker with the default settings. A full list of the default settings will be provided soon
