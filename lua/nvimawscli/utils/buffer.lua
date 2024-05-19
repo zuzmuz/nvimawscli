@@ -21,7 +21,7 @@ function M.create_buffer(name, deletable)
     return bufnr
 end
 
----@alias Split "vertical"|"horizontal"|"inplace"
+---@alias Split "vertical"|"horizontal"|"inplace"|"topleft"
 
 ---Create a new large window
 ---@param bufnr number: The buffer number to associate with the window
@@ -30,6 +30,8 @@ function M.create_window(bufnr, split)
     local winnr = 0
     if split == "vertical" then
         vim.cmd("rightbelow vnew")
+    elseif split == "topleft" then
+        vim.cmd("topleft vnew")
     elseif split == "horizontal" then
         vim.cmd("below new")
     elseif split == "inplace" then

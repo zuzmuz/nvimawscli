@@ -27,7 +27,7 @@ local M = {
     ec2 = {
         preferred_services = {
             'instances',
-            'target_groups',
+            -- 'target_groups',
         },
         all_services = {
             'instances',

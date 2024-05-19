@@ -31,18 +31,21 @@ function M.sort_rows(column, direction)
     end)
 end
 
-function M.load(split)
+function M.show(split)
     if not M.bufnr then
-        M.bufnr = utils.create_buffer('ec2.instances')
+        M.load()
     end
 
-    if not M.winnr or not utils.check_if_window_exists(M.winnr) then
+    if not M.winnr or not vim.api.nvim_win_is_valid(M.winnr) then
         M.winnr = utils.create_window(M.bufnr, split)
     end
-
     vim.api.nvim_set_current_win(M.winnr)
-
     M.fetch()
+end
+
+
+function M.load()
+    M.bufnr = utils.create_buffer('ec2.instances')
 
     vim.api.nvim_buf_set_keymap(M.bufnr, 'n', '<CR>', '', {
         callback = function()

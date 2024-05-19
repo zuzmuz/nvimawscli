@@ -32,6 +32,7 @@ function M.show(split)
 
     if not M.winnr or not vim.api.nvim_win_is_valid(M.winnr) then
         M.winnr = utils.create_window(M.bufnr, split)
+        vim.api.nvim_win_set_width(M.winnr, config.menu.width)
     end
     vim.api.nvim_set_current_win(M.winnr)
 end
@@ -41,8 +42,6 @@ end
 function M.load()
 
     M.bufnr = utils.create_buffer('menu')
-
-    vim.api.nvim_win_set_buf(M.winnr, M.bufnr)
 
     vim.api.nvim_buf_set_keymap(M.bufnr, 'n', '<CR>', '', {
         callback = function()
@@ -54,9 +53,7 @@ function M.load()
 
             local status, service = pcall(require, 'nvimawscli.services.' .. service_name)
             if status then
-                service.load(config.menu.split)
-                -- FIX: here I'm setting the width independently from the load function, instead of menu resizing itself the new window should, with param sent to it with the split
-                -- maybe the util create window should worry about this, (when creating the new window we resize the old one)
+                service.show(config.menu.split)
                 vim.api.nvim_win_set_width(M.winnr, config.menu.width)
             else
                 vim.api.nvim_err_writeln("Service not implemented yet: " .. service_name)
@@ -76,9 +73,8 @@ function M.load()
             { #M.header + #M.preferred_services_header + i, 1 }
         }
     end
-    utils.set_allowed_positions(M.bufnr, allowed_positions)
 
-    M.loaded = true
+    utils.set_allowed_positions(M.bufnr, allowed_positions)
 end
 
 function M.hide()
