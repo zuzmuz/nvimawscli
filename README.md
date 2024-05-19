@@ -40,6 +40,17 @@ The first buffer is the menu where a list of available aws services will be show
 
 Selecting any service will open a submenu for specific actions to perform in chosen service.
 
+If you want a specific service to be opened by default you can pass the service in the config.
+
+```lua
+return {
+    'zuzmuz/nvimawscli',
+    opts = {
+        startup_service = 'ec2.instances'
+    }
+}
+```
+
 ## Services
 
 ### Ec2

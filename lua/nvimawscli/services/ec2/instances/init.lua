@@ -73,10 +73,7 @@ function M.load()
                                 config.table,
                                 function(confirmation)
                                     if confirmation == 1 then -- yes selected
-                                        instance_actions[action].action(instance,
-                                            function(result)
-                                                print('Result: ', vim.inspect(result))
-                                            end)
+                                        instance_actions[action].action(instance)
                                     end
                                 end)
                         else
