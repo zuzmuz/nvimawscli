@@ -19,17 +19,14 @@ end
 
 --- Launch the Dashboard
 function M.launch(command_service)
-    if M.launched then
-        return
-    end
     if not M.is_setup then
         config.setup({})
     end
 
-    M.launched = true
-
+    print("launching dashbord", command_service)
     if command_service then
-        local status, service = pcall(require, "nvimawscli.services." .. command_service)
+
+        local status, service = pcall(require, "nvimawscli." .. command_service)
         if status then
             -- TODO: services location should be based on its type, like menu alwyas top left but other services can be in place
             service.show("topleft")
