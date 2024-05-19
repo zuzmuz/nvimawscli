@@ -9,10 +9,7 @@ function M.setup(c)
     config.setup(c)
 
     vim.api.nvim_create_user_command('Aws', function (options)
-        M.launch()
-        if options.args then
-            require("nvimawscli.menu").show("topleft")
-        end
+        M.launch(#options.fargs > 0 and options.fargs[1] or nil)
     end, {
         nargs = '?',
     })
@@ -21,19 +18,27 @@ function M.setup(c)
 end
 
 --- Launch the Dashboard
-function M.launch()
-    if M.launched then
-        return
-    end
+function M.launch(command_service)
     if not M.is_setup then
         config.setup({})
     end
 
-    M.launched = true
-    if config.startup_service then
+    print("launching dashbord", command_service)
+    if command_service then
+
+        local status, service = pcall(require, "nvimawscli." .. command_service)
+        if status then
+            -- TODO: services location should be based on its type, like menu alwyas top left but other services can be in place
+            service.show("topleft")
+            return
+        else
+            vim.api.nvim_err_writeln("service " .. command_service .. " not supported")
+        end
+    elseif config.startup_service then
         local status, service = pcall(require, "nvimawscli.services." .. config.startup_service)
         if status then
-            service.load("inplace")
+
+            service.show("inplace")
             return
         else
             vim.api.nvim_err_writeln("startup service " .. config.startup_service .. " not supported")
