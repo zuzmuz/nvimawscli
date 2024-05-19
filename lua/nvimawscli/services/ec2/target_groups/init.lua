@@ -20,6 +20,8 @@ function M.sort_rows(column, direction)
     end)
 end
 
+-- TODO: review target groups when the time comes
+
 function M.load()
     print("loading target groups functionality")
 

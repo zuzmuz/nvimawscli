@@ -4,6 +4,7 @@
 ---@field menu table: menu window config
 ---@field table table: rendered tables config
 local M = {
+    startup_service = nil,
     preferred_services = {
         "ec2",
     },
@@ -26,7 +27,7 @@ local M = {
     ec2 = {
         preferred_services = {
             'instances',
-            'target_groups',
+            -- 'target_groups',
         },
         all_services = {
             'instances',

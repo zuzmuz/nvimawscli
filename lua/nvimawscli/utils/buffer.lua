@@ -9,31 +9,35 @@ local M = {}
 function M.create_buffer(name, deletable)
     local bufnr = vim.api.nvim_create_buf(false, true)
 
-    vim.api.nvim_buf_set_option(bufnr, 'buftype', 'nofile')
-    vim.api.nvim_buf_set_option(bufnr, 'swapfile', false)
-    vim.api.nvim_buf_set_option(bufnr, 'modifiable', false)
+    vim.api.nvim_set_option_value('buftype', 'nofile', { buf = bufnr })
+    vim.api.nvim_set_option_value('swapfile', false, { buf = bufnr })
+    vim.api.nvim_set_option_value('modifiable', false, { buf = bufnr })
     if name then
         vim.api.nvim_buf_set_name(bufnr, name)
     end
     if deletable then
-        vim.api.nvim_buf_set_option(bufnr, 'bufhidden', 'delete')
+        vim.api.nvim_set_option_value('bufhidden', 'delete', { buf = bufnr })
     end
     return bufnr
 end
 
----@alias split "vertical"|"horizontal"
+---@alias Split "vertical"|"horizontal"|"inplace"|"topleft"
 
 ---Create a new large window
 ---@param bufnr number: The buffer number to associate with the window
----@param split split: The split direction
+---@param split Split: The split direction
 function M.create_window(bufnr, split)
     local winnr = 0
     if split == "vertical" then
         vim.cmd("rightbelow vnew")
+    elseif split == "topleft" then
+        vim.cmd("topleft vnew")
     elseif split == "horizontal" then
         vim.cmd("below new")
+    elseif split == "inplace" then
+        -- use current window
     else
-        vim.api.nvim_err_writeln("Invalid split direction: " .. split)
+        vim.api.nvim_err_writeln("Invalid split direction: " .. (split or 'nil'))
         return
     end
     winnr = vim.api.nvim_get_current_win()
@@ -50,7 +54,10 @@ end
 ---@param line_number number: The line number
 ---@return string|nil: The line content
 function M.get_line(bufnr, line_number)
-    local lines = vim.api.nvim_buf_get_lines(bufnr, line_number - 1, line_number, false)
+    local lines = vim.api.nvim_buf_get_lines(bufnr,
+                                             line_number - 1,
+                                             line_number,
+                                             false)
     if #lines > 0 then
         return lines[1]
     end
@@ -69,9 +76,9 @@ end
 ---@param bufnr number: The buffer number
 ---@param lines string[]: The lines to write
 function M.write_lines(bufnr, lines)
-    vim.api.nvim_buf_set_option(bufnr, 'modifiable', true)
+    vim.api.nvim_set_option_value('modifiable', true, { buf = bufnr })
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
-    vim.api.nvim_buf_set_option(bufnr, 'modifiable', false)
+    vim.api.nvim_set_option_value('modifiable', false, { buf = bufnr })
 end
 
 
@@ -80,9 +87,9 @@ end
 ---@param lines string[]: The lines to write
 ---@param at_line number: The line number to insert the lines
 function M.write_lines_at(bufnr, lines, at_line)
-    vim.api.nvim_buf_set_option(bufnr, 'modifiable', true)
+    vim.api.nvim_set_option_value('modifiable', true, { buf = bufnr })
     vim.api.nvim_buf_set_lines(bufnr, at_line, at_line + #lines, false, lines)
-    vim.api.nvim_buf_set_option(bufnr, 'modifiable', false)
+    vim.api.nvim_set_option_value('modifiable', false, { buf = bufnr })
 end
 
 ---Set the allowed cursor positions of the buffer.

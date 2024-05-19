@@ -4,9 +4,7 @@ local config = require('nvimawscli.config')
 
 
 ---@class Menu
----@field private header string[]
----@field private preferred_services_header string[]
----@field private all_services_header string[]
+---@field buffnr number
 local M = {}
 
 
@@ -25,13 +23,25 @@ M.all_services_header = {
     "------------------",
 }
 
+---Show the menu
+---@param split Split
+function M.show(split)
+    if not M.bufnr then
+        M.load()
+    end
+
+    if not M.winnr or not vim.api.nvim_win_is_valid(M.winnr) then
+        M.winnr = utils.create_window(M.bufnr, split)
+        vim.api.nvim_win_set_width(M.winnr, config.menu.width)
+    end
+    vim.api.nvim_set_current_win(M.winnr)
+end
+
 ---Load the menu
 ---The menu is the initial buffer and contain the list of aws services available
 function M.load()
-    M.bufnr = utils.create_buffer('menu')
-    M.winnr = vim.api.nvim_get_current_win()
 
-    vim.api.nvim_win_set_buf(M.winnr, M.bufnr)
+    M.bufnr = utils.create_buffer('menu')
 
     vim.api.nvim_buf_set_keymap(M.bufnr, 'n', '<CR>', '', {
         callback = function()
@@ -43,7 +53,7 @@ function M.load()
 
             local status, service = pcall(require, 'nvimawscli.services.' .. service_name)
             if status then
-                service.load()
+                service.show(config.menu.split)
                 vim.api.nvim_win_set_width(M.winnr, config.menu.width)
             else
                 vim.api.nvim_err_writeln("Service not implemented yet: " .. service_name)
@@ -63,14 +73,12 @@ function M.load()
             { #M.header + #M.preferred_services_header + i, 1 }
         }
     end
+
     utils.set_allowed_positions(M.bufnr, allowed_positions)
 end
 
 function M.hide()
     vim.api.nvim_win_hide(M.winnr)
-end
-
-function M.show()
 end
 
 return M

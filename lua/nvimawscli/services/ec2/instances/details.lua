@@ -8,7 +8,7 @@ local display = require('nvimawscli.utils.display')
 local M = {}
 
 
-function M.load(instance_id)
+function M.load(instance_id, split)
     M.instance_id = instance_id
 
     if not M.bufnr then
@@ -16,7 +16,7 @@ function M.load(instance_id)
     end
 
     if not M.winnr or not utils.check_if_window_exists(M.winnr) then
-        M.winnr = utils.create_window(M.bufnr, config.details.split)
+        M.winnr = utils.create_window(M.bufnr, split)
     end
 
     vim.api.nvim_set_current_win(M.winnr)
