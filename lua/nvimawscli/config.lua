@@ -7,6 +7,7 @@ local M = {
     startup_service = nil,
     preferred_services = {
         "ec2",
+        "s3",
     },
     all_services = {
         "ec2",
