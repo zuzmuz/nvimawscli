@@ -39,7 +39,7 @@ function M.map_keys(t, callback)
     return new
 end
 
----Returns new array by performing th callback on the items of the original array
+---Returns new array by performing the callback on the items of the original array
 ---@generic T
 ---@generic U
 ---@param t `T`[]: the input array
