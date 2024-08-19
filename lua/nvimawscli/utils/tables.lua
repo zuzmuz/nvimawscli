@@ -87,7 +87,7 @@ function M.render(headers, rows, sorted_by_column_index, sorted_direction, confi
             for j, header in ipairs(headers) do
                 lines[line_index] = tostring(lines[line_index]) .. tostring(row[header]) ..
                                          string.rep(' ',
-                                                    widths[j] - vim.fn.strdisplaywidth(row[header])) ..
+                                                    widths[j] - vim.fn.strdisplaywidth(tostring(row[header]))) ..
                                          tostring(border.vertical)
 
                 allowed_positions[#allowed_positions][j] = { line_index, accumulated_width }
@@ -114,6 +114,9 @@ end
 ---@param line_number number: The line number in the buffer
 ---@return number: The index of the row in the rows table
 function M.get_item_number_from_row(line_number)
+    if line_number == 2 then
+        return 0
+    end
     return line_number - 3
 end
 

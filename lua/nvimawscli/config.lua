@@ -110,6 +110,9 @@ local M = {
             },
         },
     },
+    s3 = {
+        max_items = 100,
+    },
     table = {
         border = 'rounded',
         relative = 'cursor',

@@ -1,6 +1,8 @@
 local utils = require('nvimawscli.utils.buffer')
 local itertools = require("nvimawscli.utils.itertools")
 local config = require('nvimawscli.config')
+local bucket = require('nvimawscli.services.s3.bucket')
+
 ---@type S3Handler
 local command = require(config.commands .. '.s3')
 
@@ -24,6 +26,9 @@ function M.load()
 
     vim.api.nvim_buf_set_keymap(M.bufnr, 'n', '<CR>', '', {
         callback = function()
+            if not M.ready then
+                return
+            end
             local position = vim.api.nvim_win_get_cursor(M.winnr)
 
             local bucket_name = utils.get_line(M.bufnr, position[1])
@@ -31,19 +36,9 @@ function M.load()
             if not bucket_name then
                 return
             end
-
             print('Bucket name: ' .. bucket_name)
-
-            command.show_bucket(bucket_name, function (result, error)
-                if error then
-                    utils.write_lines_string(M.bufnr, error)
-                elseif result then
-                    local rows = vim.json.decode(result)
-                    print(vim.inspect(rows))
-                else
-                    utils.write_lines_string(M.bufnr, 'Result was nil')
-                end
-            end)
+            bucket.show(bucket_name, config.menu.split)
+            vim.api.nvim_win_set_width(M.winnr, config.menu.width)
         end
     })
 end
