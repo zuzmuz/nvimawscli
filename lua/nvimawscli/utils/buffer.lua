@@ -109,8 +109,10 @@ function M.set_allowed_positions(bufnr, allowed_positions)
                 current_position[2] = current_position[2] - 1
             end
             new_cursor_position = allowed_positions[current_position[1]][current_position[2]]
-            vim.fn.setcursorcharpos(new_cursor_position[1],
-                                    new_cursor_position[2])
+            if new_cursor_position then
+                vim.fn.setcursorcharpos(new_cursor_position[1],
+                                        new_cursor_position[2])
+            end
         end
     })
     vim.api.nvim_buf_set_keymap(bufnr, 'n', 'j', '', {
@@ -119,8 +121,10 @@ function M.set_allowed_positions(bufnr, allowed_positions)
                 current_position[1] = current_position[1] + 1
             end
             new_cursor_position = allowed_positions[current_position[1]][current_position[2]]
-            vim.fn.setcursorcharpos(new_cursor_position[1],
-                                    new_cursor_position[2])
+            if new_cursor_position then
+                vim.fn.setcursorcharpos(new_cursor_position[1],
+                                        new_cursor_position[2])
+            end
         end
     })
     vim.api.nvim_buf_set_keymap(bufnr, 'n', 'k', '', {
@@ -129,8 +133,10 @@ function M.set_allowed_positions(bufnr, allowed_positions)
                 current_position[1] = current_position[1] - 1
             end
             new_cursor_position = allowed_positions[current_position[1]][current_position[2]]
-            vim.fn.setcursorcharpos(new_cursor_position[1],
-                                    new_cursor_position[2])
+            if new_cursor_position then
+                vim.fn.setcursorcharpos(new_cursor_position[1],
+                                        new_cursor_position[2])
+            end
         end
     })
     vim.api.nvim_buf_set_keymap(bufnr, 'n', 'l', '', {
@@ -139,8 +145,10 @@ function M.set_allowed_positions(bufnr, allowed_positions)
                 current_position[2] = current_position[2] + 1
             end
             new_cursor_position = allowed_positions[current_position[1]][current_position[2]]
-            vim.fn.setcursorcharpos(new_cursor_position[1],
-                                    new_cursor_position[2])
+            if new_cursor_position then
+                vim.fn.setcursorcharpos(new_cursor_position[1],
+                                        new_cursor_position[2])
+            end
         end
     })
 end

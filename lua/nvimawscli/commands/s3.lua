@@ -19,4 +19,20 @@ function M.list_bucket_objects(bucket_name, on_result)
                   " --max-items " .. config.s3.max_items, on_result)
 end
 
+
+---Download an object from a bucket
+---@param bucket_name string
+---@param object_key string
+function M.download_bucket_object(bucket_name, object_key)
+    local command = "aws s3 cp \"s3://" .. bucket_name .. "/" .. object_key .. "\" ."
+    handler.async(command,
+                  function (result, error)
+        if error then
+            vim.api.nvim_err_writeln(error)
+        else
+            print(result)
+        end
+    end)
+end
+
 return M
