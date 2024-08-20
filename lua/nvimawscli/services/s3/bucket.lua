@@ -4,6 +4,7 @@ local table_renderer = require('nvimawscli.utils.tables')
 local config = require('nvimawscli.config')
 local bucket_actions = require('nvimawscli.services.s3.actions')
 local ui = require('nvimawscli.utils.ui')
+local itertools = require('nvimawscli.utils.itertools')
 ---@class S3Bucket
 local M = {}
 
@@ -45,7 +46,7 @@ function M.load()
 
             if item_number > 0 and item_number <= #M.rows then
                 local bucket_object = M.rows[item_number]
-                local available_actions = bucket_actions.get(bucket_object)
+                local available_actions = bucket_actions.actions
 
                 ui.create_floating_select_popup(nil, available_actions, config.table,
                     function (selected_action)
@@ -57,15 +58,34 @@ function M.load()
                                 config.table,
                                 function (confirmation)
                                     if confirmation == 1 then
-                                        bucket_actions[action].action(M.bucket_name, bucket_object)
+                                        bucket_actions[action].action(M.bucket_name, { bucket_object })
                                     end
                                 end)
                         else
-                            bucket_actions[action].action(M.bucket_name, bucket_object)
+                            bucket_actions[action].action(M.bucket_name, { bucket_object })
                         end
                     end)
             elseif item_number == 0 then
                 M.handle_sort_event(column_number)
+            elseif item_number == #M.rows + 3 then
+                local available_actions = bucket_actions.actions
+                ui.create_floating_select_popup(nil, available_actions, config.table,
+                    function (selected_action)
+                        local action = available_actions[selected_action]
+                        if bucket_actions[action].ask_for_confirmation then
+                            ui.create_floating_select_popup(
+                                action .. ' all',
+                                { 'yes', 'no' },
+                                config.table,
+                                function (confirmation)
+                                    if confirmation == 1 then
+                                        bucket_actions[action].action(M.bucket_name, M.rows)
+                                    end
+                                end)
+                        else
+                            bucket_actions[action].action(M.bucket_name, M.rows)
+                        end
+                    end)
             elseif M.next_token then
                 print('get more content')
             end
@@ -122,6 +142,11 @@ function M.render(rows, next_token)
         M.sorted_direction,
         config.table)
     M.widths = widths
+
+    lines[#lines + 1] = '---'
+    lines[#lines + 1] = 'Action on all objects'
+    allowed_positions[#allowed_positions + 1] = {}
+    allowed_positions[#allowed_positions][1] = { #lines, 1 }
 
     if next_token then
         lines[#lines + 1] = '---'
