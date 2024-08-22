@@ -27,7 +27,7 @@ end
 function M.fetch()
     utils.write_lines_string(M.bufnr, 'Fetching monitoring...')
 
-    command.describe_instance_monitoring(M.instance_id, os.time(), 3, 600,
+    command.describe_instance_monitoring(M.instance_id, os.time(), 10, 600,
         function(result, error)
             if error then
                 utils.write_lines_string(M.bufnr, error)
@@ -43,7 +43,7 @@ end
 function M.render(response)
     local lines = itertools.flatten(itertools.map_values(response.MetricDataResults,
         function(metric)
-            local graph = graphs.render(metric.Values, 5, 0, 'block', 1)
+            local graph = graphs.render(metric.Values, 10, 0, 'block', 1)
             table.insert(graph, 1, metric.Label)
             table.insert(graph, 2, tostring(math.max(unpack(metric.Values))))
             return graph

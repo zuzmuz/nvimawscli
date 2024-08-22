@@ -19,18 +19,6 @@ local M = {}
 ---@field KeyName string
 
 
----Sort the rows based on the column and direction
----@param column string: the name of the column header name to use as key for sorting
----@param direction number: 1 for ascending, -1 for descending
-function M.sort_rows(column, direction)
-    table.sort(M.rows, function(a, b)
-        if direction == 1 then
-            return a[column] < b[column]
-        end
-        return a[column] > b[column]
-    end)
-end
-
 function M.show(split)
     if not M.bufnr then
         M.load()
@@ -100,7 +88,12 @@ function M.handle_sort_event(column_number)
     end
     if column_index then
         local column_value = config.ec2.instances.preferred_attributes[column_index].name
-        M.sort_rows(column_value, M.sorted_direction)
+        table.sort(M.rows, function(a, b)
+            if M.sorted_direction == 1 then
+                return a[column_value] < b[column_value]
+            end
+            return a[column_value] > b[column_value]
+        end)
         M.render(M.rows)
     end
 end

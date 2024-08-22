@@ -55,8 +55,6 @@ return {
 
 ### Ec2
 
-Currenlt the only supported service.
-
 Supported actions:
 - List all available launched instances
 - Show general details and statuses about selected instance
@@ -69,6 +67,13 @@ Supported actions:
 To connect to ssh the plugin expects to find the ssh private key file in the current directory where nvim is launched. The name of the key is taken from the instance details.
 
 If the key name provided with the instance details is no longer supported (the public key has been manually removed from the instance) the automatic connection will not work.
+
+### S3
+
+Supported actions:
+- List all available buckets
+- List objects in selected bucket, up to the first 1000 objects
+- Download and delete objects
 
 ## And now what?
 

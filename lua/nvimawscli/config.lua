@@ -7,6 +7,7 @@ local M = {
     startup_service = nil,
     preferred_services = {
         "ec2",
+        "s3",
     },
     all_services = {
         "ec2",
@@ -108,6 +109,9 @@ local M = {
                 "TargetType"
             },
         },
+    },
+    s3 = {
+        max_items = 100,
     },
     table = {
         border = 'rounded',
