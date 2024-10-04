@@ -12,9 +12,9 @@ local security_group_actions = require('nvimawscli.services.ec2.security_groups.
 local M = {}
 
 ---@class SecurityGroup
+---@field Name string
 ---@field GroupId string
----@field SecurityGroupRuleId string
----@field Description string
+---@field GroupName string
 
 function M.show(split)
     if not M.bufnr then
@@ -44,24 +44,24 @@ function M.load()
 
             if item_number > 0 and item_number <= #M.rows then
                 -- open floating window for instance functions
-                local instance = M.rows[item_number]
-                local available_actions = security_group_actions.get(instance)
+                local security_group = M.rows[item_number]
+                local available_actions = security_group_actions.get('security_group')
 
                 ui.create_floating_select_popup(nil, available_actions, config.table,
                     function(selected_action)
                         local action = available_actions[selected_action]
                         if security_group_actions[action].ask_for_confirmation then
                             ui.create_floating_select_popup(
-                                action .. ' instance ' .. instance.Name,
+                                action .. ' instance ' .. security_group.Name,
                                 { 'yes', 'no' },
                                 config.table,
                                 function(confirmation)
                                     if confirmation == 1 then -- yes selected
-                                        security_group_actions[action].action(instance)
+                                        security_group_actions[action].action(security_group)
                                     end
                                 end)
                         else
-                            security_group_actions[action].action(instance)
+                            security_group_actions[action].action(security_group)
                         end
                     end)
             else -- perform sorting based on column selection

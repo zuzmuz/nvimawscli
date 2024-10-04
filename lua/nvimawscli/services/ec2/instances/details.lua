@@ -8,7 +8,7 @@ local display = require('nvimawscli.utils.display')
 local M = {}
 
 
-function M.load(instance_id, split)
+function M.show(instance_id, split)
     M.instance_id = instance_id
 
     if not M.bufnr then

@@ -1,4 +1,5 @@
 local config = require('nvimawscli.config')
+local regex = require('nvimawscli.utils.regex')
 local itertools = require('nvimawscli.utils.itertools')
 local handler = require('nvimawscli.commands')
 
@@ -34,5 +35,32 @@ function M.describe_security_group_rules(group_id, on_result)
                   "}'", on_result)
 end
 
+---Modify security group rules
+---@param group_id string
+---@param rule_id string
+---@param source string?
+---@param description string?
+---@param on_result OnResult
+function M.modify_security_group_rule(group_id, rule_id, source, description, on_result)
+    local security_group_rule = {}
+    if source then 
+        if regex.valid_ipv4(source) then
+            security_group_rule.CidrIpv4 = source
+        else
+            -- NOTE: maybe I need to verify
+            security_group_rule.ReferenceGroupId = source
+        end
+    end
+    if description then
+        security_group_rule.Description = description
+    end
+
+    local command = "aws ec2 modify-security-group-rule " ..
+                    "--group-id " .. group_id .. " " ..
+                    "--security-group-rules " .. "'SecurityGroupRuleId=" .. rule_id ..
+                    ",SecurityGroupRule=" .. vim.json.encode(security_group_rule) .. "'"
+    print(command)
+    handler.async(command, on_result)
+end
 
 return M

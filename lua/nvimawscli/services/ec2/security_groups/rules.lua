@@ -3,16 +3,23 @@ local itertools = require("nvimawscli.utils.itertools")
 local config = require('nvimawscli.config')
 ---@type SecurityGroupsHandler
 local command = require(config.commands .. '.ec2.security_groups')
+local ui = require('nvimawscli.utils.ui')
 local table_renderer = require('nvimawscli.utils.tables')
+local security_group_actions = require('nvimawscli.services.ec2.security_groups.actions')
 
 ---@class SecurityGroupRulesManager
 local M = {}
 
-function M.load(group_id, split)
+---@class SecurityGroupRule
+---@field Id string
+---@field SecurityGroupRuleId string
+---@field Description string
+
+function M.show(group_id, split)
     M.group_id = group_id
 
     if not M.bufnr then
-        M.bufnr = utils.create_buffer('ec2.security_groups.rules')
+        M.load()
     end
 
     if not M.winnr or not utils.check_if_window_exists(M.winnr) then
@@ -22,6 +29,49 @@ function M.load(group_id, split)
     vim.api.nvim_set_current_win(M.winnr)
 
     M.fetch()
+end
+
+function M.load()
+    M.bufnr = utils.create_buffer('ec2.security_groups.rules')
+
+    vim.api.nvim_buf_set_keymap(M.bufnr, 'n', '<CR>', '', {
+        callback = function()
+            if not M.ready then
+                return
+            end
+            local position = vim.fn.getcursorcharpos()
+            local line_number = position[2]
+            local column_number = position[3]
+
+            local item_number = table_renderer.get_item_number_from_row(line_number)
+
+            if item_number > 0 and item_number <= #M.rows then
+                -- open floating window for instance functions
+                local security_group_rule = M.rows[item_number]
+                local available_actions = security_group_actions.get('security_group_rule')
+
+                ui.create_floating_select_popup(nil, available_actions, config.table,
+                    function(selected_action)
+                        local action = available_actions[selected_action]
+                        if security_group_actions[action].ask_for_confirmation then
+                            ui.create_floating_select_popup(
+                                action .. ' instance ' .. security_group_rule.Name,
+                                { 'yes', 'no' },
+                                config.table,
+                                function(confirmation)
+                                    if confirmation == 1 then -- yes selected
+                                        security_group_actions[action].action(M.group_id, security_group_rule)
+                                    end
+                                end)
+                        else
+                            security_group_actions[action].action(M.group_id, security_group_rule)
+                        end
+                    end)
+            else -- perform sorting based on column selection
+                M.handle_sort_event(column_number)
+            end
+        end
+    })
 end
 
 ---@private

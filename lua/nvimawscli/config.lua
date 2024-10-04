@@ -138,8 +138,16 @@ local M = {
                     value = "IsEgress",
                 },
                 {
-                    name = "Port",
+                    name = "PortRange",
                     value = "FromPort",
+                },
+                {
+                    name = "Source",
+                    value = "not_null(CidrIpv4, CidrIpv6, ReferencedGroupInfo.GroupId)",
+                },
+                {
+                    name = "Description",
+                    value = "Description",
                 },
             },
         },
