@@ -1,7 +1,7 @@
 local utils = require('nvimawscli.utils.buffer')
 local config = require('nvimawscli.config')
 ---@type Ec2Handler
-local command = require(config.commands .. '.ec2')
+local command = require(config.commands .. '.ec2.instances')
 local display = require('nvimawscli.utils.display')
 
 ---@class InstanceDetailsManager

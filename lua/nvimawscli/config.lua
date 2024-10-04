@@ -29,6 +29,7 @@ local M = {
     ec2 = {
         preferred_services = {
             'instances',
+            'security_groups',
             -- 'target_groups',
         },
         all_services = {
@@ -108,6 +109,22 @@ local M = {
                 "HealthCheckIntervalSeconds",
                 "HealthCheckTimeoutSeconds",
                 "TargetType"
+            },
+        },
+        security_groups = {
+            preferred_attributes = {
+                {
+                    name = "Name",
+                    value = "Tags[?Key==`Name`].Value | [0]",
+                },
+                {
+                    name = "GroupName",
+                    value = "GroupName",
+                },
+                {
+                    name = "GroupId",
+                    value = "GroupId",
+                },
             },
         },
     },

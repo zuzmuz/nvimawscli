@@ -1,23 +1,15 @@
 local utils = require('nvimawscli.utils.buffer')
 local itertools = require("nvimawscli.utils.itertools")
 local config = require('nvimawscli.config')
----@type Ec2Handler
-local command = require(config.commands .. '.ec2.instances')
+---@type SecurityGroupsHandler
+local command = require(config.commands .. '.ec2.security_groups')
 local ui = require('nvimawscli.utils.ui')
 local table_renderer = require('nvimawscli.utils.tables')
-local instance_actions = require('nvimawscli.services.ec2.instances.actions')
+-- local instance_actions = require('nvimawscli.services.ec2.security_groups.actions')
 
----@class InstanceManager
+
+---@class SecurityGroupsManager
 local M = {}
-
----@class Instance
----@field InstanceId string
----@field Name string
----@field PrivateIpAddress string
----@field State string
----@field InstanceType string
----@field KeyName string
-
 
 function M.show(split)
     if not M.bufnr then
@@ -31,9 +23,8 @@ function M.show(split)
     M.fetch()
 end
 
-
 function M.load()
-    M.bufnr = utils.create_buffer('ec2.instances')
+    M.bufnr = utils.create_buffer('ec2.security_groups')
 
     vim.api.nvim_buf_set_keymap(M.bufnr, 'n', '<CR>', '', {
         callback = function()
@@ -75,6 +66,8 @@ function M.load()
     })
 end
 
+
+-- TODO: the handle sort events can become common utils
 ---@private
 ---Handle the sort event when a column header is clicked
 ---@param column_number number: the column number clicked
@@ -87,7 +80,7 @@ function M.handle_sort_event(column_number)
         M.sorted_direction = 1
     end
     if column_index then
-        local column_value = config.ec2.instances.preferred_attributes[column_index].name
+        local column_value = config.ec2.security_groups.preferred_attributes[column_index].name
         table.sort(M.rows, function(a, b)
             if M.sorted_direction == 1 then
                 return a[column_value] < b[column_value]
@@ -104,7 +97,7 @@ function M.fetch()
     M.ready = false
     M.sorted_by_column_index = nil
     utils.write_lines_string(M.bufnr, 'Fetching...')
-    command.describe_instances(function(result, error)
+    command.describe_security_groups(function(result, error)
         if error then
             utils.write_lines_string(M.bufnr, error)
         elseif result then
@@ -123,7 +116,7 @@ end
 ---@param rows Instance[]
 ---@return number[][][]: The positions the cursor is allowed to be at
 function M.render(rows)
-    local column_names = itertools.imap_values(config.ec2.instances.preferred_attributes,
+    local column_names = itertools.imap_values(config.ec2.security_groups.preferred_attributes,
         function(attribute)
             return attribute.name
         end)
@@ -138,5 +131,4 @@ function M.render(rows)
     utils.write_lines(M.bufnr, lines)
     return allowed_positions
 end
-
 return M

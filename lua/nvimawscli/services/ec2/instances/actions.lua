@@ -1,5 +1,5 @@
 local config = require('nvimawscli.config')
-local command = require('nvimawscli.commands.ec2')
+local command = require(config.commands .. '.ec2.instances')
 
 ---@class InstanceActionsManage
 local M = {}

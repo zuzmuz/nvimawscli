@@ -2,7 +2,7 @@ local utils = require('nvimawscli.utils.buffer')
 local itertools = require("nvimawscli.utils.itertools")
 local config = require('nvimawscli.config')
 ---@type Ec2Handler
-local command = require(config.commands .. '.ec2')
+local command = require(config.commands .. '.ec2.instances')
 local graphs = require("nvimawscli.utils.graphs")
 
 ---@class InstanceMonitoringManager
