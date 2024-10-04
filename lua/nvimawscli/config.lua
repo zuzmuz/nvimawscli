@@ -8,6 +8,7 @@ local M = {
     preferred_services = {
         "ec2",
         "s3",
+        "rds",
     },
     all_services = {
         "ec2",
