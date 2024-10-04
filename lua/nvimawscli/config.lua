@@ -114,6 +114,22 @@ local M = {
     s3 = {
         max_items = 100,
     },
+    rds = {
+        preferred_attributes = {
+            {
+                name = "InstanceName",
+                value = "DBInstanceIdentifier",
+            },
+            {
+                name = "InstanceClass",
+                value = "DBInstanceClass",
+            },
+            {
+                name = "Endpoint",
+                value = "Endpoint.Address",
+            },
+        },
+    },
     table = {
         border = 'rounded',
         relative = 'cursor',

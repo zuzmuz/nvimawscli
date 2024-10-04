@@ -50,7 +50,6 @@ function M.load()
                 return
             end
             local service_name = utils.get_line(M.bufnr, line_number)
-
             local status, service = pcall(require, 'nvimawscli.services.' .. service_name)
             if status then
                 service.show(config.menu.split)

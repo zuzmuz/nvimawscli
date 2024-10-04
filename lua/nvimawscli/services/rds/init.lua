@@ -2,6 +2,7 @@ local utils = require('nvimawscli.utils.buffer')
 local itertools = require("nvimawscli.utils.itertools")
 local config = require('nvimawscli.config')
 local instance = require('nvimawscli.services.rds.instance')
+local table_renderer = require('nvimawscli.utils.tables')
 
 ---@type RdsHandler
 local command = require(config.commands .. '.rds')
@@ -45,6 +46,7 @@ end
 
 function M.fetch()
     M.ready = false
+    M.sorted_by_column_index = nil
     utils.write_lines(M.bufnr, { 'Fetching databases...' })
     command.list_databases(function(result, error)
         if error then
@@ -60,11 +62,25 @@ function M.fetch()
     end)
 end
 
+---@private
+---Render the table containing the ec2 instances into the buffer
+---@param rows Instance[]
+---@return number[][][]: The positions the cursor is allowed to be at
 function M.render(rows)
-    utils.write_lines(M.bufnr, rows)
-    return itertools.imap(rows, function(i, _)
-        return { { i, 1 } }
-    end)
+    local column_names = itertools.imap_values(config.rds.preferred_attributes,
+        function(attribute)
+            return attribute.name
+        end)
+    local lines, allowed_positions, widths = table_renderer.render(
+        column_names,
+        rows,
+        M.sorted_by_column_index,
+        M.sorted_direction,
+        config.table)
+
+    M.widths = widths
+    utils.write_lines(M.bufnr, lines)
+    return allowed_positions
 end
 
 

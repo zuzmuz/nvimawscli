@@ -1,9 +1,9 @@
 local utils = require('nvimawscli.utils.buffer')
-local command = require('nvimawscli.commands.rds')
-local config = require('nvimawscli.config')
-local actions = require('nvimawscli.services.rds.actions')
-local ui = require('nvimawscli.utils.ui')
-local itertools = require('nvimawscli.utils.itertools')
+-- local command = require('nvimawscli.commands.rds')
+-- local config = require('nvimawscli.config')
+-- local actions = require('nvimawscli.services.rds.actions')
+-- local ui = require('nvimawscli.utils.ui')
+-- local itertools = require('nvimawscli.utils.itertools')
 
 ---@class RdsInstance
 local M = {}
