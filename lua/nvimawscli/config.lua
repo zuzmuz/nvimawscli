@@ -127,6 +127,22 @@ local M = {
                 },
             },
         },
+        security_group_rules = {
+            preferred_attributes = {
+                {
+                    name = "Id",
+                    value = "SecurityGroupRuleId",
+                },
+                {
+                    name = "Outbound",
+                    value = "IsEgress",
+                },
+                {
+                    name = "Port",
+                    value = "FromPort",
+                },
+            },
+        },
     },
     s3 = {
         max_items = 100,

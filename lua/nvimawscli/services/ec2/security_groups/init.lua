@@ -5,11 +5,16 @@ local config = require('nvimawscli.config')
 local command = require(config.commands .. '.ec2.security_groups')
 local ui = require('nvimawscli.utils.ui')
 local table_renderer = require('nvimawscli.utils.tables')
--- local instance_actions = require('nvimawscli.services.ec2.security_groups.actions')
+local security_group_actions = require('nvimawscli.services.ec2.security_groups.actions')
 
 
 ---@class SecurityGroupsManager
 local M = {}
+
+---@class SecurityGroup
+---@field GroupId string
+---@field SecurityGroupRuleId string
+---@field Description string
 
 function M.show(split)
     if not M.bufnr then
@@ -40,23 +45,23 @@ function M.load()
             if item_number > 0 and item_number <= #M.rows then
                 -- open floating window for instance functions
                 local instance = M.rows[item_number]
-                local available_actions = instance_actions.get(instance)
+                local available_actions = security_group_actions.get(instance)
 
                 ui.create_floating_select_popup(nil, available_actions, config.table,
                     function(selected_action)
                         local action = available_actions[selected_action]
-                        if instance_actions[action].ask_for_confirmation then
+                        if security_group_actions[action].ask_for_confirmation then
                             ui.create_floating_select_popup(
                                 action .. ' instance ' .. instance.Name,
                                 { 'yes', 'no' },
                                 config.table,
                                 function(confirmation)
                                     if confirmation == 1 then -- yes selected
-                                        instance_actions[action].action(instance)
+                                        security_group_actions[action].action(instance)
                                     end
                                 end)
                         else
-                            instance_actions[action].action(instance)
+                            security_group_actions[action].action(instance)
                         end
                     end)
             else -- perform sorting based on column selection
@@ -83,9 +88,9 @@ function M.handle_sort_event(column_number)
         local column_value = config.ec2.security_groups.preferred_attributes[column_index].name
         table.sort(M.rows, function(a, b)
             if M.sorted_direction == 1 then
-                return a[column_value] < b[column_value]
+                return tostring(a[column_value]) < tostring(b[column_value])
             end
-            return a[column_value] > b[column_value]
+            return tostring(a[column_value]) > tostring(b[column_value])
         end)
         M.render(M.rows)
     end
