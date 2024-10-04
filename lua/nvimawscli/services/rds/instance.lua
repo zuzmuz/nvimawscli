@@ -1,9 +1,22 @@
 local utils = require('nvimawscli.utils.buffer')
-local command = require('nvimawscli.commands.s3')
-local table_renderer = require('nvimawscli.utils.tables')
+local command = require('nvimawscli.commands.rds')
 local config = require('nvimawscli.config')
-local bucket_actions = require('nvimawscli.services.s3.actions')
+local actions = require('nvimawscli.services.rds.actions')
 local ui = require('nvimawscli.utils.ui')
 local itertools = require('nvimawscli.utils.itertools')
----@class S3Bucket
+
+---@class RdsInstance
 local M = {}
+
+function M.show(rds_instance_name, split)
+    M.rds_instance_name = rds_instance_name
+    if not M.bufnr then
+        M.load()
+    end
+
+    if not M.winnr or not vim.api.nvim_win_is_valid(M.winnr) then
+        M.winnr = utils.create_window(M.bufnr, split)
+    end
+    vim.api.nvim_set_current_win(M.winnr)
+    M.fetch()
+end
