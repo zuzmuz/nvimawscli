@@ -1,6 +1,7 @@
 local utils = require('nvimawscli.utils.buffer')
 local itertools = require("nvimawscli.utils.itertools")
 local config = require('nvimawscli.config')
+local instance = require('nvimawscli.services.rds.instance')
 
 ---@type RdsHandler
 local command = require(config.commands .. '.rds')
@@ -25,9 +26,19 @@ function M.load()
 
     vim.api.nvim_buf_set_keymap(M.bufnr, 'n', '<CR>', '', {
         callback = function()
+            if not M.ready then
+                return
+            end
             local position = vim.api.nvim_win_get_cursor(M.winnr)
 
-            local subservice_name = utils.get_line(M.bufnr, position[1])
+            local rds_instance_name = utils.get_line(M.bufnr, position[1])
+
+            if not rds_instance_name then
+                return
+            end
+            print('Rds Instance name: ' .. rds_instance_name)
+            instance.show(rds_instance_name, config.menu.split)
+            vim.api.nvim_win_set_width(M.winnr, config.menu.width)
         end
     })
 end
