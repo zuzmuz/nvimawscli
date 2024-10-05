@@ -86,12 +86,12 @@ function M.handle_sort_event(column_number)
         M.sorted_direction = 1
     end
     if column_index then
-        local column_value = config.ec2.instances.preferred_attributes[column_index].name
+        local column_value = config.ec2.security_group_rules.preferred_attributes[column_index].name
         table.sort(M.rows, function(a, b)
             if M.sorted_direction == 1 then
-                return a[column_value] < b[column_value]
+                return tostring(a[column_value]) < tostring(b[column_value])
             end
-            return a[column_value] > b[column_value]
+            return tostring(a[column_value]) > tostring(b[column_value])
         end)
         M.render(M.rows)
     end
