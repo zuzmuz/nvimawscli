@@ -6,12 +6,16 @@ local M = {}
 ---@param name string|nil: The name of the buffer
 ---@param deletable boolean|nil: If the buffer should be removed if it's hidden
 ---@return number: The buffer number
-function M.create_buffer(name, deletable)
+function M.create_buffer(name, deletable, modifiable)
     local bufnr = vim.api.nvim_create_buf(false, true)
 
     vim.api.nvim_set_option_value('buftype', 'nofile', { buf = bufnr })
     vim.api.nvim_set_option_value('swapfile', false, { buf = bufnr })
-    vim.api.nvim_set_option_value('modifiable', false, { buf = bufnr })
+    if modifiable then
+        vim.api.nvim_set_option_value('modifiable', true, { buf = bufnr })
+    else
+        vim.api.nvim_set_option_value('modifiable', false, { buf = bufnr })
+    end
     if name then
         vim.api.nvim_buf_set_name(bufnr, name)
     end

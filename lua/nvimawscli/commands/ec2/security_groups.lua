@@ -41,24 +41,24 @@ end
 ---@param source string?
 ---@param description string?
 ---@param on_result OnResult
-function M.modify_security_group_rule(group_id, rule_id, source, description, on_result)
-    local security_group_rule = {}
-    if source then 
+function M.modify_security_group_rule(group_id, rule_id, source, on_result)
+    local security_group_rule = ""
+    if source then
         if regex.valid_ipv4(source) then
-            security_group_rule.CidrIpv4 = source
+            security_group_rule = security_group_rule .. "CidrIpv4=" .. source
         else
             -- NOTE: maybe I need to verify
-            security_group_rule.ReferenceGroupId = source
+            security_group_rule = security_group_rule .. "ReferenceGroupId=" .. source
         end
     end
-    if description then
-        security_group_rule.Description = description
-    end
+    -- if description then
+    --     security_group_rule.Description = description
+    -- end
 
-    local command = "aws ec2 modify-security-group-rule " ..
+    local command = "aws ec2 modify-security-group-rules " ..
                     "--group-id " .. group_id .. " " ..
                     "--security-group-rules " .. "'SecurityGroupRuleId=" .. rule_id ..
-                    ",SecurityGroupRule=" .. vim.json.encode(security_group_rule) .. "'"
+                    ",SecurityGroupRule={" .. security_group_rule .. "}'"
     print(command)
     handler.async(command, on_result)
 end
