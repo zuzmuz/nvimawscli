@@ -1,14 +1,14 @@
 local utils = require('nvimawscli.utils.buffer')
 local config = require('nvimawscli.config')
 ---@type Ec2Handler
-local command = require(config.commands .. '.ec2')
+local command = require(config.commands .. '.ec2.instances')
 local display = require('nvimawscli.utils.display')
 
 ---@class InstanceDetailsManager
 local M = {}
 
 
-function M.load(instance_id, split)
+function M.show(instance_id, split)
     M.instance_id = instance_id
 
     if not M.bufnr then

@@ -1,5 +1,5 @@
 local config = require('nvimawscli.config')
-local command = require('nvimawscli.commands.ec2')
+local command = require(config.commands .. '.ec2.instances')
 
 ---@class InstanceActionsManage
 local M = {}
@@ -23,7 +23,7 @@ M.details = {
     ask_for_confirmation = false,
     action = function(instance)
         local details = require('nvimawscli.services.ec2.instances.details')
-        details.load(instance.InstanceId, config.details.split)
+        details.show(instance.InstanceId, config.details.split)
     end,
 }
 
@@ -32,7 +32,7 @@ M.monitor = {
     ask_for_confirmation = false,
     action = function(instance)
         local monitoring = require('nvimawscli.services.ec2.instances.monitoring')
-        monitoring.load(instance.InstanceId, config.details.split)
+        monitoring.show(instance.InstanceId, config.details.split)
     end,
 }
 
