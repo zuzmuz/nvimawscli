@@ -1,12 +1,9 @@
-local utils = require('nvimawscli.utils.buffer')
 local config = require('nvimawscli.config')
-local itertools = require('nvimawscli.utils.itertools')
 local ListView = require('nvimawscli.ui.views.listview')
 
 
 
 ---@class MenuView: ListView
----@field buffnr number
 local M = setmetatable({}, { __index = ListView })
 
 
@@ -29,33 +26,28 @@ M.all_services_header = {
 
 M.name = 'menu'
 
-function M.get_lines()
+function M.fetch_lines(callback)
     local lines = {}
-
     for _, header in ipairs(M.header) do
         lines[#lines+1] = { text = header, selectable = false }
     end
-
     for _, preferred_services_header in ipairs(M.preferred_services_header) do
         lines[#lines+1] = { text = preferred_services_header, selectable = false }
     end
-
     for _, preferred_service in ipairs(config.preferred_services) do
         lines[#lines+1] = { text = preferred_service, selectable = true }
     end
-
     for _, all_services_header in ipairs(M.all_services_header) do
         lines[#lines+1] = { text = all_services_header, selectable = false }
     end
-
-    return lines
-
+    callback(lines)
 end
 
 function M:did_select_item(item)
     if item.selectable then
         local service_name = item.text
         local status, service = pcall(require, 'nvimawscli.services.' .. service_name)
+        ---@cast service View
         if status then
             service:show(config.menu.split)
             vim.api.nvim_win_set_width(self.winnr, config.menu.width)

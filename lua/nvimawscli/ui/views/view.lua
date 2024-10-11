@@ -8,6 +8,9 @@ local M = {}
 
 M.name = 'view'
 
+---Initialize the view with special data
+---usualy it is sent by the caller that launches the view
+---@param _ table? special data based on view, can be nil
 function M:init(_)
 end
 
@@ -17,6 +20,9 @@ end
 function M:load_content()
 end
 
+---Launch the view with a specific split
+---@param split Split
+---@param extra_data table? special data based on view, can be nil
 function M:show(split, extra_data)
     self:init(extra_data)
 

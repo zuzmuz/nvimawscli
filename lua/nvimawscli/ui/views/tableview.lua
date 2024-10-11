@@ -9,14 +9,34 @@ local View = require('nvimawscli.ui.views.view')
 local M = setmetatable({}, { __index = View })
 
 M.name = 'tableview'
+
+---@class Attribute
+---@field name string: The name of the attribute
+---@field value string: The aws query function for the attribute
+---
+---The table column headers titles
+---@type Attribute[]
 M.column_headers = {}
 
-M.get_rows = nil
-M.fetch_rows = nil
 M.loading_text = 'Loading...'
+function M:fetch_rows(callback)
+    callback(nil, 'Nothing to display')
+end
 
+
+---@class ActionManager
+---List of actions to perform on the table rows
+---@field get fun(row: table): string[]: returns list of legal actions on the row
+---@field actions table<string, Action>: list of actions to perform on the row
 M.actions = {}
 
+---@class Action
+---@field ask_for_confirmation boolean if true the user should be prompted for confirmation
+---@field action fun(row: table) the action to be executed
+
+---Show text describing the table row
+---@param row table the data representing the row
+---@return string the text describing the row
 function M:describe(row)
     return vim.inspect(row)
 end
@@ -84,27 +104,23 @@ function M:handle_sort_event(column_number)
 end
 
 function M:load_content()
-    if self.get_rows then
-        self.rows = self:get_rows()
-        self.ready = true
-        local allowed_positions = self:render()
-        utils.set_allowed_positions(self.bufnr, allowed_positions)
-    elseif self.fetch_rows then
-        self.ready = false
-        utils.write_lines(self.bufnr, { self.loading_text })
-        self:fetch_rows(function(rows, error)
-            if error then
-                utils.write_lines(self.bufnr, { error })
-            elseif rows then
-                self.rows = rows
-                self.ready = true
-                local allowed_positions = self:render()
-                utils.set_allowed_positions(self.bufnr, allowed_positions)
-            end
-        end)
-    end
+    self.ready = false
+    utils.write_lines(self.bufnr, { self.loading_text })
+    self:fetch_rows(function(rows, error)
+        if error then
+            utils.write_lines(self.bufnr, { error })
+        elseif rows then
+            self.rows = rows
+            self.ready = true
+            local allowed_positions = self:render()
+            utils.set_allowed_positions(self.bufnr, allowed_positions)
+        end
+    end)
 end
 
+
+---Render the rows in self onto the buffer in a table
+---@return number[][][]: The cursor's allowed positions
 function M:render()
     local column_names = itertools.imap_values(self.column_headers, function(attribute)
         return attribute.name

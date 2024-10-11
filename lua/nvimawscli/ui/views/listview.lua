@@ -5,14 +5,22 @@ local View = require('nvimawscli.ui.views.view')
 ---@class ListView: View
 local M = setmetatable({}, { __index = View })
 
+---@class Line
+---@field text string The text to display as a list item
+---@field selectable boolean Whether the item can be selected
+
 M.name = 'listview'
 
 function M:did_select_item(_)
 end
 
-M.get_lines = nil
-M.fetch_lines = nil
 M.loading_text = 'Loading...'
+---Function to be implemented by subclasses
+---returns the content of that should be displayed in the list, asynchronously
+---@param callback fun(lines: Line[]) a callback function that will be called with the lines to display
+function M:fetch_lines(callback)
+    callback({ text = 'Nothing to display', selectable = false })
+end
 
 function M:set_keymaps()
     vim.api.nvim_buf_set_keymap(self.bufnr, 'n', '<CR>', '', {
@@ -28,22 +36,19 @@ function M:set_keymaps()
 end
 
 function M:load_content()
-    if self.get_lines then
-        self.lines = self:get_lines()
+    self.ready = false
+    utils.write_lines(self.bufnr, { self.loading_text })
+    self:fetch_lines(function(lines)
+        self.lines = lines
         self.ready = true
-        self:render()
-    elseif self.fetch_lines then
-        self.ready = false
-        utils.write_lines(self.bufnr, { self.loading_text })
-        self:fetch_lines(function(lines)
-            self.lines = lines
-            print(vim.inspect(lines))
-            self.ready = true
-            self:render()
-        end)
-    end
+        local allowed_positions = self:render()
+        utils.set_allowed_positions(self.bufnr, allowed_positions)
+    end)
 end
 
+
+---Render the rows in self onto the buffer in a simple list
+---@return number[][][]: The cursor's allowed positions
 function M:render()
     local drawables = itertools.imap_values(self.lines, function(line)
         return line.text
@@ -55,7 +60,7 @@ function M:render()
             allowed_positions[#allowed_positions + 1] = { { i, 1 } }
         end
     end
-    utils.set_allowed_positions(self.bufnr, allowed_positions)
+    return allowed_positions
 end
 
 return M
