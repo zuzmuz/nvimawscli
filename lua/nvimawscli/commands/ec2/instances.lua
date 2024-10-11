@@ -2,7 +2,7 @@ local config = require("nvimawscli.config")
 local itertools = require("nvimawscli.utils.itertools")
 local handler = require("nvimawscli.commands")
 
----@class Ec2Handler
+---@class Ec2Command
 local M = {}
 
 ---Fecth ec2 instances details

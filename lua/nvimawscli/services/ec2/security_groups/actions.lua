@@ -6,13 +6,8 @@ local ui = require('nvimawscli.utils.ui')
 ---@class SecurityGroupActionsManage
 local M = {}
 
----@param security_group_item 'security_group' | 'security_group_rule'
-function M.get(security_group_item)
-    if security_group_item == 'security_group' then
-        return { "rules" }
-    elseif security_group_item == 'security_group_rule' then
-        return { "modify" }
-    end
+function M.get(_)
+    return { "rules" }
 end
 
 M.rules = {
