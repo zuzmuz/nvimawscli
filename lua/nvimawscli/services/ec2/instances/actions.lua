@@ -18,7 +18,9 @@ return {
             ask_for_confirmation = false,
             action = function(instance)
                 local details = require('nvimawscli.services.ec2.instances.details')
-                details.show(instance.InstanceId, config.details.split)
+                details:show(config.details.split, {
+                    instance_id = instance.InstanceId
+                })
             end,
         },
 
