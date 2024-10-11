@@ -35,26 +35,35 @@ function M.describe_security_group_rules(group_id, on_result)
                   "}'", on_result)
 end
 
+---Fetch security group rule
+function M.describe_security_group_rule(group_id, rule_id, on_result)
+    handler.async("aws ec2 describe-security-group-rules" ..
+                  " --filters 'Name=group-id,Values=" .. group_id .. "'" ..
+                  " --security-group-rule-ids " .. rule_id ..
+                  " --query 'SecurityGroupRules[0]'", on_result)
+end
+
 ---Modify security group rules
 ---@param group_id string
 ---@param rule_id string
----@param source string?
----@param description string?
+---@param rule_details table
 ---@param on_result OnResult
-function M.modify_security_group_rule(group_id, rule_id, source, on_result)
-    local security_group_rule = ""
-    if source then
-        if regex.valid_ipv4(source) then
-            security_group_rule = security_group_rule .. "CidrIpv4=" .. source
+function M.modify_security_group_rule(group_id, rule_id, rule_details, on_result)
+    if rule_details.Source then
+        if regex.valid_ipv4(rule_details.Source) then
+            rule_details.CidrIpv4 = rule_details.Source
         else
             -- NOTE: maybe I need to verify
-            security_group_rule = security_group_rule .. "ReferenceGroupId=" .. source
+            rule_details.ReferenceGroupId = rule_details.Source
         end
     end
-    -- if description then
-    --     security_group_rule.Description = description
-    -- end
+    rule_details.Source = nil
 
+    local security_group_rules = itertools.map(rule_details,
+        function(key, value)
+            return key .. '=' .. value
+        end)
+    local security_group_rule = table.concat(security_group_rules, ',')
     local command = "aws ec2 modify-security-group-rules " ..
                     "--group-id " .. group_id .. " " ..
                     "--security-group-rules " .. "'SecurityGroupRuleId=" .. rule_id ..

@@ -9,6 +9,8 @@ local command = require(config.commands .. '.ec2.instances')
 ---@class InstanceDetailsView: View
 local M = setmetatable({}, { __index = View })
 
+M.name = 'ec2.instances.details'
+
 function M:load_content()
     utils.write_lines_string(self.bufnr, 'Fetching details...')
     command.describe_instance_details(self.data.instance_id,

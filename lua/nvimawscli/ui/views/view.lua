@@ -7,6 +7,7 @@ local utils = require('nvimawscli.utils.buffer')
 local M = {}
 
 M.name = 'view'
+M.editable = false
 
 ---Initialize the view with special data
 ---usualy it is sent by the caller that launches the view
@@ -41,7 +42,7 @@ function M:show(split, extra_data)
 end
 
 function M:load()
-    self.bufnr = utils.create_buffer(self.name)
+    self.bufnr = utils.create_buffer(self.name, nil, self.editable)
     self:set_keymaps()
 end
 
