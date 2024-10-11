@@ -40,9 +40,9 @@ end
 function M.describe_instance_monitoring(instance_id, current_time, hours, interval, on_result)
 
     ---@type table<string>
-    local preferred_metrics = config.ec2.instances.preferred_metrics
+    local metrics = config.ec2.instances.metrics
 
-    local metric_data_queries = itertools.imap_values(preferred_metrics,
+    local metric_data_queries = itertools.imap_values(metrics,
         function(metric)
             return '{"Id":"' .. string.lower(metric) .. '", "MetricStat":{' ..
             '"Metric":{"Namespace":"AWS/EC2", ' ..

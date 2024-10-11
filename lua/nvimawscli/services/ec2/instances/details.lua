@@ -1,12 +1,13 @@
 local utils = require('nvimawscli.utils.buffer')
 local config = require('nvimawscli.config')
----@type Ec2Handler
+---@type Ec2Command
 local command = require(config.commands .. '.ec2.instances')
 local display = require('nvimawscli.utils.display')
 
 ---@class InstanceDetailsManager
 local M = {}
 
+-- NOTE: this will be refactored
 
 function M.show(instance_id, split)
     M.instance_id = instance_id
