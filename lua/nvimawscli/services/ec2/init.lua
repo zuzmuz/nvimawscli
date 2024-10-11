@@ -1,48 +1,30 @@
-local utils = require('nvimawscli.utils.buffer')
 local config = require('nvimawscli.config')
+local ListView = require('nvimawscli.ui.views.listview')
 
----@class Ec2
-local M = {}
+---@class Ec2View: ListView
+local M = setmetatable({}, { __index = ListView })
 
+M.name = 'ec2'
 
-function M.show(split)
-    if not M.bufnr then
-        M.load()
+function M:get_lines()
+    local lines = {}
+    for _, header in ipairs(config.ec2.preferred_services) do
+        lines[#lines + 1] = { text = header, selectable = true }
     end
-    if not M.winnr or not utils.check_if_window_exists(M.winnr) then
-        M.winnr = utils.create_window(M.bufnr, split)
-    end
-
-    vim.api.nvim_set_current_win(M.winnr)
+    return lines
 end
 
-function M.load()
-    M.bufnr = utils.create_buffer('submenu')
-
-    vim.api.nvim_buf_set_keymap(M.bufnr, 'n', '<CR>', '', {
-        callback = function()
-            local position = vim.api.nvim_win_get_cursor(M.winnr)
-
-            local subservice_name = utils.get_line(M.bufnr, position[1])
-
-
-            local status, subservice = pcall(require, 'nvimawscli.services.ec2.' .. subservice_name)
-
-            if status then
-                subservice.show(config.menu.split)
-                vim.api.nvim_win_set_width(M.winnr, config.menu.width)
-            else
-                vim.api.nvim_err_writeln('Subservice not found: ' .. subservice_name)
-            end
+function M:did_select_item(item)
+    if item.selectable then
+        local subservice_name = item.text
+        local status, subservice = pcall(require, 'nvimawscli.services.ec2.' .. subservice_name)
+        if status then
+            subservice:show(config.menu.split)
+            vim.api.nvim_win_set_width(M.winnr, config.menu.width)
+        else
+            vim.api.nvim_err_writeln('Ec2 subservice not found: ' .. subservice_name)
         end
-    })
-
-    utils.write_lines(M.bufnr, config.ec2.preferred_services)
-    local allowed_positions = {}
-    for i, _ in ipairs(config.ec2.preferred_services) do
-        allowed_positions[#allowed_positions+1] = { { i, 1 } }
     end
-    utils.set_allowed_positions(M.bufnr, allowed_positions)
 end
 
 return M

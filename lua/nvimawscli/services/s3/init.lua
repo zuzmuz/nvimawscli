@@ -2,69 +2,40 @@ local utils = require('nvimawscli.utils.buffer')
 local itertools = require("nvimawscli.utils.itertools")
 local config = require('nvimawscli.config')
 local bucket = require('nvimawscli.services.s3.bucket')
+local ListView = require('nvimawscli.ui.views.listview')
 
 ---@type S3Handler
 local command = require(config.commands .. '.s3')
 
----@class S3
-local M = {}
+---@class S3: ListView
+local M = setmetatable({}, { __index = ListView })
 
-function M.show(split)
-    if not M.bufnr then
-        M.load()
-    end
-    if not M.winnr or not utils.check_if_window_exists(M.winnr) then
-        M.winnr = utils.create_window(M.bufnr, split)
-    end
+M.name = 's3'
 
-    vim.api.nvim_set_current_win(M.winnr)
-    M.fetch()
-end
+M.loading_text = 'Loading buckets...'
 
-function M.load()
-    M.bufnr = utils.create_buffer('s3')
-
-    vim.api.nvim_buf_set_keymap(M.bufnr, 'n', '<CR>', '', {
-        callback = function()
-            if not M.ready then
-                return
-            end
-            local position = vim.api.nvim_win_get_cursor(M.winnr)
-
-            local bucket_name = utils.get_line(M.bufnr, position[1])
-
-            if not bucket_name then
-                return
-            end
-            print('Bucket name: ' .. bucket_name)
-            bucket.show(bucket_name, config.menu.split)
-            vim.api.nvim_win_set_width(M.winnr, config.menu.width)
-        end
-    })
-end
-
-function M.fetch()
-    M.ready = false
-    utils.write_lines(M.bufnr, { 'Fetching buckets...' })
+function M:fetch_lines(callback)
     command.list_buckets(function(result, error)
         if error then
-            utils.write_lines_string(M.bufnr, error)
+            callback({ { text = error, selectable = false } })
         elseif result then
-            M.rows = vim.json.decode(result)
-            local allowed_positions = M.render(M.rows)
-            utils.set_allowed_positions(M.bufnr, allowed_positions)
+            local buckets = vim.json.decode(result)
+            local lines = itertools.imap_values(buckets, function(bucket_name)
+                return { text = bucket_name, selectable = true }
+            end)
+            callback(lines)
         else
-            utils.write_lines_string(M.bufnr, 'Result was nil')
+            callback({ { text = 'Result was nil', selectable = false } })
         end
-        M.ready = true
     end)
 end
 
-function M.render(rows)
-    utils.write_lines(M.bufnr, rows)
-    return itertools.imap(rows, function(i, _)
-        return { { i, 1 } }
-    end)
+function M:did_select_item(item)
+    if item.selectable then
+        local bucket_name = item.text
+        bucket.show(bucket_name, config.menu.split)
+        vim.api.nvim_win_set_width(self.winnr, config.menu.width)
+    end
 end
 
 
