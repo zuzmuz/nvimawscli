@@ -28,8 +28,7 @@ function M.launch(command_service)
 
         local status, service = pcall(require, "nvimawscli." .. command_service)
         if status then
-            -- TODO: services location should be based on its type, like menu alwyas top left but other services can be in place
-            service.show("topleft")
+            service:show("topleft")
             return
         else
             vim.api.nvim_err_writeln("service " .. command_service .. " not supported")
@@ -38,13 +37,13 @@ function M.launch(command_service)
         local status, service = pcall(require, "nvimawscli.services." .. config.startup_service)
         if status then
 
-            service.show("inplace")
+            service:show("inplace")
             return
         else
             vim.api.nvim_err_writeln("startup service " .. config.startup_service .. " not supported")
         end
     end
-    require("nvimawscli.menu").show("inplace")
+    require("nvimawscli.menu"):show("inplace")
 end
 
 return M

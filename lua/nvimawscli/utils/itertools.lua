@@ -25,7 +25,23 @@ function M.extend(t, other)
     return t
 end
 
----Returns new array by performing th callback on the items of the original array
+---Filters and return new array by performing the callback on the keys of the original array
+---@generic T
+---@generic U
+---@param t `T`[]: the input array
+---@param callback fun(t: `T`): `U`: the transformation function
+---@return `U`[]: the new array
+function M.ifilter_values(t, callback)
+    local new = {}
+    for _, value in ipairs(t) do
+        if callback(value) then
+            new[#new+1] = value
+        end
+    end
+    return new
+end
+
+---Returns new array by performing the callback on the keys of the original array
 ---@generic T
 ---@generic U
 ---@param t `T`[]: the input array
@@ -39,7 +55,7 @@ function M.map_keys(t, callback)
     return new
 end
 
----Returns new array by performing the callback on the items of the original array
+---Returns new array by performing the callback on the values of the original array
 ---@generic T
 ---@generic U
 ---@param t `T`[]: the input array
