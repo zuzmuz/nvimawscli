@@ -32,7 +32,7 @@ M.action_manager = {}
 
 ---@class Action
 ---@field ask_for_confirmation boolean if true the user should be prompted for confirmation
----@field action fun(row: table) the action to be executed
+---@field action fun(row: table, data: table) the action to be executed
 
 ---Show text describing the table row
 ---@param row table the data representing the row
@@ -68,11 +68,11 @@ function M:set_keymaps()
                                 config.table,
                                 function(confirmation)
                                     if confirmation == 1 then -- yes selected
-                                        self.action_manager.actions[action].action(row)
+                                        self.action_manager.actions[action].action(row, self.data)
                                     end
                                 end)
                         else
-                            self.action_manager.actions[action].action(row)
+                            self.action_manager.actions[action].action(row, self.data)
                         end
                     end)
             else -- perform sorting based on column selection
