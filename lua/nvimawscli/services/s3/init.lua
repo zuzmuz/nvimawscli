@@ -12,15 +12,6 @@ local M = setmetatable({}, { __index = ListView })
 
 M.name = 's3'
 
-
-            -- local bucket_name = utils.get_line(M.bufnr, position[1])
-            --
-            -- if not bucket_name then
-            --     return
-            -- end
-            -- print('Bucket name: ' .. bucket_name)
-            -- bucket.show(bucket_name, config.menu.split)
-            -- vim.api.nvim_win_set_width(M.winnr, config.menu.width)
 M.loading_text = 'Loading buckets...'
 
 function M:fetch_lines(callback)
