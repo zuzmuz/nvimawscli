@@ -68,21 +68,39 @@ function M.get_line(bufnr, line_number)
     return nil
 end
 
+---Get the lines from the buffer
+---@param bufnr number: The buffer number
+---@param start_line number?: The start line number
+---@param end_line number?: The end line number
+---@return string[]: The lines content
+function M.get_lines(bufnr, start_line, end_line)
+    start_line = start_line or 0
+    end_line = end_line or -1
+    return vim.api.nvim_buf_get_lines(bufnr,
+                                      start_line,
+                                      end_line,
+                                      false)
+end
+
 ---Overwrite the buffer with the given lines
 ---@param bufnr number: The buffer number
 ---@param lines string: The lines to write, the lines are split by '\n'
-function M.write_lines_string(bufnr, lines)
+---@param editable boolean?: If the buffer should be modifiable
+function M.write_lines_string(bufnr, lines, editable)
     local table_lines = vim.split(lines, "\n")
-    M.write_lines(bufnr, table_lines)
+    M.write_lines(bufnr, table_lines, editable)
 end
 
 ---Overwrite the buffer with the given lines
 ---@param bufnr number: The buffer number
 ---@param lines string[]: The lines to write
-function M.write_lines(bufnr, lines)
+---@param editable boolean?: If the buffer should be modifiable
+function M.write_lines(bufnr, lines, editable)
     vim.api.nvim_set_option_value('modifiable', true, { buf = bufnr })
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
-    vim.api.nvim_set_option_value('modifiable', false, { buf = bufnr })
+    if not editable then
+        vim.api.nvim_set_option_value('modifiable', false, { buf = bufnr })
+    end
 end
 
 
@@ -90,10 +108,13 @@ end
 ---@param bufnr number: The buffer number
 ---@param lines string[]: The lines to write
 ---@param at_line number: The line number to insert the lines
-function M.write_lines_at(bufnr, lines, at_line)
+---@param editable boolean?: If the buffer should be modifiable
+function M.write_lines_at(bufnr, lines, at_line, editable)
     vim.api.nvim_set_option_value('modifiable', true, { buf = bufnr })
     vim.api.nvim_buf_set_lines(bufnr, at_line, at_line + #lines, false, lines)
-    vim.api.nvim_set_option_value('modifiable', false, { buf = bufnr })
+    if not editable then
+        vim.api.nvim_set_option_value('modifiable', false, { buf = bufnr })
+    end
 end
 
 ---Set the allowed cursor positions of the buffer.

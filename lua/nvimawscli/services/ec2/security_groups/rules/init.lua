@@ -35,8 +35,6 @@ function M:fetch_rows(callback)
     end)
 end
 
-M.action_manager = require('nvimawscli.services.ec2.security_groups.rules_actions')
+M.action_manager = require('nvimawscli.services.ec2.security_groups.rules.actions')
 
 return M
-
-
