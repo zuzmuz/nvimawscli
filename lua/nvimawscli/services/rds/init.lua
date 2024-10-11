@@ -67,7 +67,7 @@ end
 ---@param rows Instance[]
 ---@return number[][][]: The positions the cursor is allowed to be at
 function M.render(rows)
-    local column_names = itertools.imap_values(config.rds.preferred_attributes,
+    local column_names = itertools.imap_values(config.rds.attributes,
         function(attribute)
             return attribute.name
         end)

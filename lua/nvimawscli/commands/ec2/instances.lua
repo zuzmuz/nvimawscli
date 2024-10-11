@@ -8,7 +8,7 @@ local M = {}
 ---Fecth ec2 instances details
 ---@param on_result OnResult
 function M.describe_instances(on_result)
-    local query_strings = itertools.imap_values(config.ec2.instances.preferred_attributes,
+    local query_strings = itertools.imap_values(config.ec2.instances.attributes,
         function(value)
             return value.name .. ': ' .. value.value
         end)

@@ -6,12 +6,42 @@ local M = setmetatable({}, { __index = ListView })
 
 M.name = 'ec2'
 
-function M:get_lines()
+M.preferred_services_header = {
+    "Preferred Services",
+    "---------------------",
+}
+
+M.all_services_header = {
+    "All       Services",
+    "---------------------",
+}
+
+M.all_services = {
+    "instances",
+    "security_groups",
+    "create_instances",
+    "elastic_ips",
+}
+
+function M:fetch_lines(callback)
     local lines = {}
-    for _, header in ipairs(config.ec2.preferred_services) do
+    if config.ec2.preferred_services then
+        for _, header in ipairs(M.preferred_services_header) do
+            lines[#lines + 1] = { text = header, selectable = false }
+        end
+        for _, header in ipairs(config.ec2.preferred_services) do
+            lines[#lines + 1] = { text = header, selectable = true }
+        end
+        lines[#lines+1] = { text = "                  ", selectable = false }
+        lines[#lines+1] = { text = "------------------", selectable = false }
+    end
+    for _, header in ipairs(M.all_services_header) do
+        lines[#lines + 1] = { text = header, selectable = false }
+    end
+    for _, header in ipairs(self.all_services) do
         lines[#lines + 1] = { text = header, selectable = true }
     end
-    return lines
+    callback(lines)
 end
 
 function M:did_select_item(item)

@@ -9,7 +9,7 @@ local M = {}
 ---Fetch the list of security groups
 ---@param on_result OnResult
 function M.describe_security_groups(on_result)
-    local query_strings = itertools.imap_values(config.ec2.security_groups.preferred_attributes,
+    local query_strings = itertools.imap_values(config.ec2.security_groups.attributes,
         function(value)
             return value.name .. ': ' .. value.value
         end)
@@ -23,7 +23,7 @@ end
 ---@param group_id string
 ---@param on_result OnResult
 function M.describe_security_group_rules(group_id, on_result)
-    local query_strings = itertools.imap_values(config.ec2.security_group_rules.preferred_attributes,
+    local query_strings = itertools.imap_values(config.ec2.security_group_rules.attributes,
         function(value)
             return value.name .. ': ' .. value.value
         end)

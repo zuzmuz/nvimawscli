@@ -86,7 +86,7 @@ function M.handle_sort_event(column_number)
         M.sorted_direction = 1
     end
     if column_index then
-        local column_value = config.ec2.security_group_rules.preferred_attributes[column_index].name
+        local column_value = config.ec2.security_group_rules.attributes[column_index].name
         table.sort(M.rows, function(a, b)
             if M.sorted_direction == 1 then
                 return tostring(a[column_value]) < tostring(b[column_value])
@@ -121,7 +121,7 @@ end
 ---@param rows Instance[]
 ---@return number[][][]: The positions the cursor is allowed to be at
 function M.render(rows)
-    local column_names = itertools.imap_values(config.ec2.security_group_rules.preferred_attributes,
+    local column_names = itertools.imap_values(config.ec2.security_group_rules.attributes,
         function(attribute)
             return attribute.name
         end)

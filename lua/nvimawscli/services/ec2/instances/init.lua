@@ -18,7 +18,7 @@ local M = setmetatable({}, { __index = TableView })
 ---@field InstanceType string
 ---@field KeyName string
 
-M.column_headers = config.ec2.instances.preferred_attributes
+M.column_headers = config.ec2.instances.attributes
 M.loading_text = 'Loading ec2 instances...'
 
 function M:describe(row)
