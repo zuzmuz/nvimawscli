@@ -27,6 +27,13 @@ return {
                 value = "KeyName",
             },
         },
+        metrics = {
+            "CPUUtilization",
+            "CPUCreditUsage",
+            "CPUCreditBalance",
+            "NetworkIn",
+            "NetworkOut",
+        },
     },
     security_groups = {
         attributes = {

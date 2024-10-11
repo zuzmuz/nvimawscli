@@ -1,7 +1,7 @@
----@class CommandHandler
+---@class Command
 local M = {}
 
----@alias OnResult fun(result: string|nil, error: string|nil): nil
+---@alias OnResult fun(result: string?, error: string?)
 
 ---Execute a terminal command asynchronously
 ---@param command string: The command to execute

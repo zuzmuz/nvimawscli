@@ -28,8 +28,11 @@ function M.render(headers, rows, sorted_by_column_index, sorted_direction, confi
 
     for _, row in ipairs(rows) do
         for i, header in ipairs(headers) do
-            if vim.fn.strdisplaywidth(row[header]) > widths[i] then
-                widths[i] = vim.fn.strdisplaywidth(row[header])
+            if row[header] == nil or row[header] == vim.NIL then
+                row[header] = ''
+            end
+            if vim.fn.strdisplaywidth(tostring(row[header])) > widths[i] then
+                widths[i] = vim.fn.strdisplaywidth(tostring(row[header]))
             end
         end
     end

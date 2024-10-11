@@ -3,7 +3,7 @@ local regex = require('nvimawscli.utils.regex')
 local itertools = require('nvimawscli.utils.itertools')
 local handler = require('nvimawscli.commands')
 
----@class SecurityGroupsHandler
+---@class SecurityGroupsCommand
 local M = {}
 
 ---Fetch the list of security groups

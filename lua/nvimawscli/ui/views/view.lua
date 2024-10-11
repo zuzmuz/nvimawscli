@@ -10,8 +10,9 @@ M.name = 'view'
 
 ---Initialize the view with special data
 ---usualy it is sent by the caller that launches the view
----@param _ table? special data based on view, can be nil
-function M:init(_)
+---@param extra_data table? special data based on view, can be nil
+function M:init(extra_data)
+    self.data = extra_data
 end
 
 function M:set_keymaps()

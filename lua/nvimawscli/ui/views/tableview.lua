@@ -28,11 +28,11 @@ end
 ---List of actions to perform on the table rows
 ---@field get fun(row: table): string[]: returns list of legal actions on the row
 ---@field actions table<string, Action>: list of actions to perform on the row
-M.actions = {}
+M.action_manager = {}
 
 ---@class Action
 ---@field ask_for_confirmation boolean if true the user should be prompted for confirmation
----@field action fun(row: table) the action to be executed
+---@field action fun(row: table, data: table) the action to be executed
 
 ---Show text describing the table row
 ---@param row table the data representing the row
@@ -56,23 +56,23 @@ function M:set_keymaps()
             if item_number > 0 and item_number <= #self.rows then
                 -- open floating window for instance functions
                 local row = self.rows[item_number]
-                local available_actions = self.actions.get(row)
+                local available_actions = self.action_manager.get(row)
 
                 ui.create_floating_select_popup(nil, available_actions, config.table,
                     function(selected_action)
                         local action = available_actions[selected_action]
-                        if self.actions[action].ask_for_confirmation then
+                        if self.action_manager.actions[action].ask_for_confirmation then
                             ui.create_floating_select_popup(
                                 action .. ' instance ' .. self:describe(row),
                                 { 'yes', 'no' },
                                 config.table,
                                 function(confirmation)
                                     if confirmation == 1 then -- yes selected
-                                        self.actions[action].action(row)
+                                        self.action_manager.actions[action].action(row, self.data)
                                     end
                                 end)
                         else
-                            self.actions[action].action(row)
+                            self.action_manager.actions[action].action(row, self.data)
                         end
                     end)
             else -- perform sorting based on column selection
