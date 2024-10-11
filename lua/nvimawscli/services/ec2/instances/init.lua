@@ -8,6 +8,8 @@ local command = require(config.commands .. '.ec2.instances')
 ---@class Ec2InstanceView: TableView
 local M = setmetatable({}, { __index = TableView })
 
+M.name = 'ec2.instances'
+
 ---@class Instance
 ---@field InstanceId string
 ---@field Name string

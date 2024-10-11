@@ -1,9 +1,13 @@
 local config = require('nvimawscli.config')
----@type SecurityGroupsHandler
+local TableView = require('nvimawscli.ui.views.tableview')
+
+---@type SecurityGroupsCommand
 local command = require(config.commands .. '.ec2.security_groups')
 
----@class SecurityGroupsManager
-local M = {}
+---@class SecurityGroupsView: TableView
+local M = setmetatable({}, { __index = TableView })
+
+M.name = 'ec2.security_groups'
 
 ---@class SecurityGroup
 ---@field Name string
@@ -18,7 +22,7 @@ function M:describe(row)
 end
 
 ---Fetch the ec2 instances from aws cli and parse the result
-function M:fetch(callback)
+function M:fetch_rows(callback)
     command.describe_security_groups(function(result, error)
         if error then
             callback(nil, error)
