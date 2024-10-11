@@ -8,7 +8,7 @@ local M = {}
 ---Fetch the list of rds databases insances
 ---@param on_result OnResult
 function M.list_databases(on_result)
-    local query_strings = itertools.imap_values(config.rds.preferred_attributes,
+    local query_strings = itertools.imap_values(config.rds.attributes,
         function(value)
             return value.name .. ': ' .. value.value
         end)

@@ -63,7 +63,7 @@ function M.load()
 
                 if column_index then
                     local column_value = config.ec2.get_attribute_name(
-                        config.ec2.target_groups.preferred_attributes[column_index]
+                        config.ec2.target_groups.attributes[column_index]
                     )
                     M.sort_rows(column_value, M.sorted_direction)
                     M.render(M.rows)
@@ -99,7 +99,7 @@ end
 function M.parse(target_groups)
     return itertools.imap_values(target_groups,
         function(target_group)
-            return itertools.associate_values(config.ec2.target_groups.preferred_attributes,
+            return itertools.associate_values(config.ec2.target_groups.attributes,
                 function(attribute)
                     return config.ec2.get_attribute_name_and_value(attribute, target_group)
                 end
@@ -112,7 +112,7 @@ end
 ---Render the table containing ec2 target groups into the buffer
 ---@return number[][][]: the position the cursor is allows to be at
 function M.render(rows)
-    local column_names = itertools.imap_values(config.ec2.target_groups.preferred_attributes,
+    local column_names = itertools.imap_values(config.ec2.target_groups.attributes,
         function(attribute)
             return config.ec2.get_attribute_name(attribute)
         end
