@@ -1,4 +1,5 @@
 local utils = require("nvimawscli.utils.buffer")
+local itertools = require("nvimawscli.utils.itertools")
 
 local M = {}
 
@@ -15,14 +16,15 @@ local M = {}
 
 
 ---Create a floating popup with a title and a list of selectable actions
----@param title string|nil: title of flowing popup, can be nil if no title needed
----@param lines table<string>: the list of selectable options in the buffer of the popup
+---@param title string?: title of flowing popup, can be nil if no title needed
+---@param message string[]?: the message to display below the title
+---@param actions string[]: the list of selectable options in the buffer of the popup
 ---@param config floating_popup_config: the popup ui config
 ---@param selected fun(line_number: number): nil callback function when an option is selected
 ---@return floating_popup
-function M.create_floating_select_popup(title, lines, config, selected)
+function M.create_floating_select(title, message, actions, config, selected)
     local winnr = 0
-    local height = #lines
+    local height = #actions
 
     local bufnr = utils.create_buffer("floating_window", true)
 
@@ -30,7 +32,7 @@ function M.create_floating_select_popup(title, lines, config, selected)
     if title then
         width = vim.fn.strdisplaywidth(title)
     end
-    for _, value in ipairs(lines) do
+    for _, value in ipairs(actions) do
         if vim.fn.strdisplaywidth(value) > width then
             width = vim.fn.strdisplaywidth(value)
         end
@@ -64,7 +66,20 @@ function M.create_floating_select_popup(title, lines, config, selected)
         end
     })
 
-    utils.write_lines(bufnr, lines)
+
+    if message then
+        utils.write_lines(bufnr, itertools.extend(message, actions))
+        local allowed_positions = itertools.imap(actions, function(index, _)
+            return { { index + #message, 1 } }
+        end)
+        utils.set_allowed_positions(bufnr, allowed_positions)
+    else
+        utils.write_lines(bufnr, actions)
+        local allowed_positions = itertools.imap(actions, function(index, _)
+            return { { index, 1 } }
+        end)
+        utils.set_allowed_positions(bufnr, allowed_positions)
+    end
 
     return { winnr = winnr, bufnr = bufnr }
 end
@@ -75,7 +90,7 @@ end
 ---@param height number: height of the popup
 ---@param config floating_popup_config: the popup ui config
 ---@param input fun(text: string): nil callback function when the text is entered
-function M.create_floating_input_popup(title, width, height, config, input)
+function M.create_floating_input(title, width, height, config, input)
     local winnr = 0
     local bufnr = utils.create_buffer("floating_window", true, true)
 

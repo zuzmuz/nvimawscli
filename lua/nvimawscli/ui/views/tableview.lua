@@ -2,7 +2,7 @@ local utils = require('nvimawscli.utils.buffer')
 local config = require('nvimawscli.config')
 local itertools = require("nvimawscli.utils.itertools")
 local table_renderer = require('nvimawscli.utils.tables')
-local ui = require('nvimawscli.utils.ui')
+local popup = require('nvimawscli.ui.popup')
 local View = require('nvimawscli.ui.views.view')
 
 ---@class TableView: View
@@ -58,12 +58,13 @@ function M:set_keymaps()
                 local row = self.rows[item_number]
                 local available_actions = self.action_manager.get(row)
 
-                ui.create_floating_select_popup(nil, available_actions, config.table,
+                popup.create_floating_select(nil, nil, available_actions, config.table,
                     function(selected_action)
                         local action = available_actions[selected_action]
                         if self.action_manager.actions[action].ask_for_confirmation then
-                            ui.create_floating_select_popup(
+                            popup.create_floating_select(
                                 action .. ' instance ' .. self:describe(row),
+                                nil,
                                 { 'yes', 'no' },
                                 config.table,
                                 function(confirmation)
