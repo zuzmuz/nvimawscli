@@ -25,6 +25,9 @@ local M = {}
 function M.create_floating_select(title, message, actions, config, selected)
     local winnr = 0
     local height = #actions
+    if message then
+        height = height + #message
+    end
 
     local bufnr = utils.create_buffer("floating_window", true)
 
@@ -35,6 +38,14 @@ function M.create_floating_select(title, message, actions, config, selected)
     for _, value in ipairs(actions) do
         if vim.fn.strdisplaywidth(value) > width then
             width = vim.fn.strdisplaywidth(value)
+        end
+    end
+
+    if message then
+        for _, value in ipairs(message) do
+            if vim.fn.strdisplaywidth(value) > width then
+                width = vim.fn.strdisplaywidth(value)
+            end
         end
     end
 
@@ -62,16 +73,22 @@ function M.create_floating_select(title, message, actions, config, selected)
         callback = function ()
             local position = vim.api.nvim_win_get_cursor(0)
             vim.api.nvim_win_close(0, true)
-            selected(position[1])
+            if message then
+                selected(position[1] - #message)
+            else
+                selected(position[1])
+            end
         end
     })
 
 
     if message then
-        utils.write_lines(bufnr, itertools.extend(message, actions))
+        local content = itertools.iextend(message, actions)
+        utils.write_lines(bufnr, content)
         local allowed_positions = itertools.imap(actions, function(index, _)
             return { { index + #message, 1 } }
         end)
+        print(vim.inspect(allowed_positions))
         utils.set_allowed_positions(bufnr, allowed_positions)
     else
         utils.write_lines(bufnr, actions)

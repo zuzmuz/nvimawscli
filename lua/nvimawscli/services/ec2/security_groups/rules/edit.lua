@@ -1,5 +1,6 @@
 local config = require('nvimawscli.config')
 local utils = require('nvimawscli.utils.buffer')
+local popup = require('nvimawscli.ui.popup')
 local View = require('nvimawscli.ui.views.view')
 
 ---@type SecurityGroupsCommand
@@ -33,13 +34,35 @@ function M:set_keymaps()
             if not self.ready then
                 return
             end
-            self:submit()
+            local popup_message = {}
+            for i, line in ipairs(self.lines) do
+                local buffer_line = utils.get_line(self.bufnr, i)
+                if line ~= buffer_line then
+                    if buffer_line then
+                        buffer_line = buffer_line:match('[^:]*: (.*)')
+                    else
+                        -- WARN: this should never happen sanitize the buffer before
+                        buffer_line = ''
+                    end
+                    popup_message[#popup_message+1] = line .. ' -> ' .. buffer_line
+                end
+            end
+            popup.create_floating_select(
+                'Edit security group rule',
+                popup_message,
+                { 'submit', 'cancel' },
+                config.table,
+                function(confirmation)
+                    if confirmation == 1 then
+                        self:submit()
+                    end
+                end)
         end
     })
 end
 
 function M:render()
-    local lines = {
+    self.lines = {
         "IpProtocol : " .. tostring(self.rule_details.IpProtocol),
         "FromPort : " .. tostring(self.rule_details.FromPort),
         "ToPort : " .. tostring(self.rule_details.ToPort),
@@ -49,7 +72,7 @@ function M:render()
                                 self.rule_details.PrefixListId),
         "Description : " .. tostring(self.rule_details.Description),
     }
-    utils.write_lines(self.bufnr, lines, true)
+    utils.write_lines(self.bufnr, self.lines, true)
 end
 
 function M:submit()

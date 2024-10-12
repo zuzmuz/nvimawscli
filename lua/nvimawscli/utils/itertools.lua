@@ -19,10 +19,29 @@ end
 ---@param other any[]: the table to extend with
 ---@return table: the extended table
 function M.extend(t, other)
-    for _, value in pairs(other) do
-        t[#t+1] = value
+    local new = {}
+    for _, value in pairs(t) do
+        new[#new+1] = value
     end
-    return t
+    for _, value in pairs(other) do
+        new[#new+1] = value
+    end
+    return new
+end
+
+---Extends a list with the values of another list
+---@param t any[]: the table to extend
+---@param other any[]: the table to extend with
+---@return table: the extended table
+function M.iextend(t, other)
+    local new = {}
+    for _, value in ipairs(t) do
+        new[#new+1] = value
+    end
+    for _, value in ipairs(other) do
+        new[#new+1] = value
+    end
+    return new
 end
 
 ---Filters and return new array by performing the callback on the keys of the original array
