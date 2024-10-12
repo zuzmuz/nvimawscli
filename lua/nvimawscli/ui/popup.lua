@@ -88,7 +88,6 @@ function M.create_floating_select(title, message, actions, config, selected)
         local allowed_positions = itertools.imap(actions, function(index, _)
             return { { index + #message, 1 } }
         end)
-        print(vim.inspect(allowed_positions))
         utils.set_allowed_positions(bufnr, allowed_positions)
     else
         utils.write_lines(bufnr, actions)
