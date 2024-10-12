@@ -3,8 +3,8 @@ local command = require('nvimawscli.commands.s3')
 local table_renderer = require('nvimawscli.utils.tables')
 local config = require('nvimawscli.config')
 local bucket_actions = require('nvimawscli.services.s3.actions')
-local ui = require('nvimawscli.utils.ui')
-local itertools = require('nvimawscli.utils.itertools')
+local popup = require('nvimawscli.ui.popup')
+
 ---@class S3Bucket
 local M = {}
 
@@ -48,12 +48,13 @@ function M.load()
                 local bucket_object = M.rows[item_number]
                 local available_actions = bucket_actions.actions
 
-                ui.create_floating_select_popup(nil, available_actions, config.table,
+                popup.create_floating_select(nil, nil, available_actions, config.table,
                     function (selected_action)
                         local action = available_actions[selected_action]
                         if bucket_actions[action].ask_for_confirmation then
-                            ui.create_floating_select_popup(
+                            popup.create_floating_select(
                                 action .. ' bucket object ' .. bucket_object.Key,
+                                nil,
                                 { 'yes', 'no' },
                                 config.table,
                                 function (confirmation)
@@ -69,12 +70,13 @@ function M.load()
                 M.handle_sort_event(column_number)
             elseif item_number == #M.rows + 3 then
                 local available_actions = bucket_actions.actions
-                ui.create_floating_select_popup(nil, available_actions, config.table,
+                popup.create_floating_select(nil, nil, available_actions, config.table,
                     function (selected_action)
                         local action = available_actions[selected_action]
                         if bucket_actions[action].ask_for_confirmation then
-                            ui.create_floating_select_popup(
+                            popup.create_floating_select(
                                 action .. ' all',
+                                nil,
                                 { 'yes', 'no' },
                                 config.table,
                                 function (confirmation)

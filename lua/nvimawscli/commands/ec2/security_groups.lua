@@ -53,8 +53,7 @@ function M.modify_security_group_rule(group_id, rule_id, rule_details, on_result
         if regex.valid_ipv4(rule_details.Source) then
             rule_details.CidrIpv4 = rule_details.Source
         else
-            -- NOTE: maybe I need to verify
-            rule_details.ReferenceGroupId = rule_details.Source
+            rule_details.ReferencedGroupId = rule_details.Source
         end
     end
     rule_details.Source = nil
@@ -68,7 +67,6 @@ function M.modify_security_group_rule(group_id, rule_id, rule_details, on_result
                     "--group-id " .. group_id .. " " ..
                     "--security-group-rules " .. "'SecurityGroupRuleId=" .. rule_id ..
                     ",SecurityGroupRule={" .. security_group_rule .. "}'"
-    print(command)
     handler.async(command, on_result)
 end
 
