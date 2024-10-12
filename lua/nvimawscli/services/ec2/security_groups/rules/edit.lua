@@ -2,6 +2,7 @@ local config = require('nvimawscli.config')
 local utils = require('nvimawscli.utils.buffer')
 local popup = require('nvimawscli.ui.popup')
 local View = require('nvimawscli.ui.views.view')
+local itertools = require('nvimawscli.utils.itertools')
 
 ---@type SecurityGroupsCommand
 local command = require(config.commands .. '.ec2.security_groups')
@@ -34,31 +35,50 @@ function M:set_keymaps()
             if not self.ready then
                 return
             end
-            local popup_message = {}
-            for i, line in ipairs(self.lines) do
-                local buffer_line = utils.get_line(self.bufnr, i)
-                if line ~= buffer_line then
-                    if buffer_line then
-                        buffer_line = buffer_line:match('[^:]*: (.*)')
-                    else
-                        -- WARN: this should never happen sanitize the buffer before
-                        buffer_line = ''
-                    end
-                    popup_message[#popup_message+1] = line .. ' -> ' .. buffer_line
-                end
-            end
+            local title, message, actions, new_rule = self:sanitize()
             popup.create_floating_select(
-                'Edit security group rule',
-                popup_message,
-                { 'submit', 'cancel' },
+                title,
+                message,
+                actions,
                 config.table,
                 function(confirmation)
-                    if confirmation == 1 then
-                        self:submit()
+                    if confirmation == 1 and new_rule then
+                        self:submit(new_rule)
                     end
                 end)
         end
     })
+end
+
+---@return string, string[], string[], table?
+function M:sanitize()
+    local buffer_lines = utils.get_lines(self.bufnr)
+    local diffs = {}
+    local new_rule = {}
+
+    if #buffer_lines ~= #self.lines then
+        return 'Error', { 'Invalid data', 'Some params were removed' }, { 'ok' }, nil
+    end
+    for i, line in ipairs(self.lines) do
+        local new_line = buffer_lines[i]
+
+        local line_key = line:match('([^:]*) :')
+        local line_value = line:match('[^:]* : (.*)')
+        local new_line_key = new_line:match('([^:]*) :')
+        local new_line_value = new_line:match('[^:]* : (.*)')
+
+        if line_key ~= new_line_key then
+            return 'error',
+                    { 'invalid data', 'key mismatch line ' .. i .. ' expected ' .. line_key },
+                    { 'ok' }, nil
+        end
+
+        if line_value ~= new_line_value then
+            diffs[#diffs+1] = line_key .. ' : ' .. line_value .. ' -> ' .. new_line_value
+        end
+        new_rule[line_key] = new_line_value
+    end
+    return 'submit changes', diffs,  { 'submit', 'cancel' }, new_rule
 end
 
 function M:render()
@@ -67,27 +87,15 @@ function M:render()
         "FromPort : " .. tostring(self.rule_details.FromPort),
         "ToPort : " .. tostring(self.rule_details.ToPort),
         "Source : " .. tostring(self.rule_details.CidrIpv4 or
-                                self.rule_details.CidrIpv6 or
-                                self.rule_details.ReferencedGroupId or
-                                self.rule_details.PrefixListId),
+            self.rule_details.CidrIpv6 or
+            self.rule_details.ReferencedGroupId or
+            self.rule_details.PrefixListId),
         "Description : " .. tostring(self.rule_details.Description),
     }
     utils.write_lines(self.bufnr, self.lines, true)
 end
 
-function M:submit()
-    -- read content of buffer
-    local lines = utils.get_lines(self.bufnr)
-    print(vim.inspect(lines))
-    -- WARN: should do sanity checks here
-    local new_rule = {
-        IpProtocol = lines[1]:match('IpProtocol : (.*)'),
-        FromPort = tonumber(lines[2]:match('FromPort : (.*)')),
-        ToPort = tonumber(lines[3]:match('ToPort : (.*)')),
-        Source = lines[4]:match('Source : (.*)'),
-        Description = lines[5]:match('Description : (.*)'),
-    }
-
+function M:submit(new_rule)
     command.modify_security_group_rule(self.data.group_id, self.data.rule.Id, new_rule,
         function(result, error)
             if error then
