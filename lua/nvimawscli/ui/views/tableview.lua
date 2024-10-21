@@ -109,7 +109,7 @@ function M:load_content()
     utils.write_lines(self.bufnr, { self.loading_text })
     self:fetch_rows(function(rows, error)
         if error then
-            utils.write_lines(self.bufnr, { error })
+            utils.write_lines_string(self.bufnr, error)
         elseif rows then
             self.rows = rows
             self.ready = true
