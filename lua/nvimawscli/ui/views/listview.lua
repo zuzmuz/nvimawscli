@@ -9,12 +9,13 @@ local border = require('nvimawscli.utils.borders')
 local M = setmetatable({}, { __index = View })
 
 ---@class Content
----@field title string The text to display as a list item
----@field sections Section[]? Whether the item can be selected
+---@field title string? The title of the list view
+---@field sections Section[]? the list view sections
 
 ---@class Section
----@field title string
+---@field title string?
 ---@field lines string[]
+---@field unselectable boolean?
 
 ---@class Line
 ---@field text string
@@ -60,35 +61,43 @@ function M:load_content()
     end)
 end
 
-
 ---Render the rows in self onto the buffer in a simple list
 ---@return number[][][]: The cursor's allowed positions
 function M:render()
     self.lines = {}
 
-    self.lines[#self.lines+1] = { text = self.content.title, selectable = false }
-    local width = vim.fn.strdisplaywidth(self.content.title)
-    self.lines[#self.lines+1] = {
-        text = string.rep(border.double.horizontal, width),
-        selectable = false
-    }
-
-    for section_index, section in ipairs(self.content.sections) do
-        self.lines[#self.lines+1] = { text = section.title, selectable = false }
-        width = vim.fn.strdisplaywidth(section.title)
-        self.lines[#self.lines+1] = {
-            text = string.rep(border.rounded.horizontal, width),
+    if self.content.title then
+        self.lines[#self.lines + 1] = { text = self.content.title, selectable = false }
+        local width = vim.fn.strdisplaywidth(self.content.title)
+        self.lines[#self.lines + 1] = {
+            text = string.rep(border.double.horizontal, width),
             selectable = false
         }
+    end
 
+    for section_index, section in ipairs(self.content.sections) do
+        if section.title then
+            self.lines[#self.lines + 1] = { text = section.title, selectable = false }
+            local width = vim.fn.strdisplaywidth(section.title)
+            self.lines[#self.lines + 1] = {
+                text = string.rep(border.rounded.horizontal, width),
+                selectable = false
+            }
+        end
         for line_index, line in ipairs(section.lines) do
-            self.lines[#self.lines+1] = {
+            self.lines[#self.lines + 1] = {
                 text = line,
-                selectable = true,
+                selectable = section.unselectable or true,
                 position = { section_index, line_index }
             }
         end
+        self.lines[#self.lines + 1] = {
+            text = ' ',
+            selectable = false
+        }
     end
+
+    -- vim.api.nvim_out_write(vim.inspect(self.lines))
 
     local drawables = itertools.imap_values(self.lines, function(line)
         return line.text

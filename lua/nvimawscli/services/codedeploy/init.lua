@@ -8,9 +8,13 @@ M.name = 'codedeploy'
 
 function M:fetch_lines(callback)
     callback {
-        { text = "applications", selectable = true },
-        { text = "deployment_groups", selectable = true },
-        { text = "deployments", selectable = true },
+        sections = {{
+            lines = {
+                "applications",
+                "deployment_groups",
+                "deployments",
+            }}
+        }
     }
 end
 

@@ -1,5 +1,3 @@
-local utils = require('nvimawscli.utils.buffer')
-local itertools = require("nvimawscli.utils.itertools")
 local config = require('nvimawscli.config')
 local bucket = require('nvimawscli.services.s3.bucket')
 local ListView = require('nvimawscli.ui.views.listview')
@@ -17,15 +15,27 @@ M.loading_text = 'Loading buckets...'
 function M:fetch_lines(callback)
     command.list_buckets(function(result, error)
         if error then
-            callback({ { text = error, selectable = false } })
+            callback {
+                sections = {{
+                    unselectable = true,
+                    lines = { error },
+                }}
+            }
         elseif result then
             local buckets = vim.json.decode(result)
-            local lines = itertools.imap_values(buckets, function(bucket_name)
-                return { text = bucket_name, selectable = true }
-            end)
-            callback(lines)
+            callback {
+                sections = {{
+                    title = "Buckets",
+                    lines = buckets,
+                }}
+            }
         else
-            callback({ { text = 'Result was nil', selectable = false } })
+            callback {
+                sections = {{
+                    lines = { 'Result was nil' },
+                    unselectable = true
+                }}
+            }
         end
     end)
 end

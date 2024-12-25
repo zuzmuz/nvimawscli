@@ -124,6 +124,9 @@ end
 ---@param allowed_positions number[][][]: The allowed positions, a matrix of 2 dimensional points
 function M.set_allowed_positions(bufnr, allowed_positions)
     local current_position = { 1, 1 }
+    if #allowed_positions == 0 then
+        return
+    end
     local new_cursor_position = allowed_positions[current_position[1]][current_position[2]]
     vim.fn.setcursorcharpos(new_cursor_position[1],
                             new_cursor_position[2])
