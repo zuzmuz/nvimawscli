@@ -7,20 +7,11 @@ local ListView = require('nvimawscli.ui.views.listview')
 local M = setmetatable({}, { __index = ListView })
 
 
-M.header = {
-    "AWS            CLI",
-    "==================",
-}
+M.header                    = "AWS            CLI"
 
-M.preferred_services_header = {
-    "Preferred Services",
-    "------------------",
-}
+M.preferred_services_header = "Preferred Services"
 
-M.all_services_header = {
-    "All       Services",
-    "------------------",
-}
+M.all_services_header       = "All       Services"
 
 M.all_services = {
     "ec2",
@@ -31,41 +22,34 @@ M.all_services = {
 M.name = 'menu'
 
 function M:fetch_lines(callback)
-    local lines = {}
-    for _, header in ipairs(M.header) do
-        lines[#lines+1] = { text = header, selectable = false }
-    end
-    if config.preferred_services then
-        for _, preferred_services_header in ipairs(self.preferred_services_header) do
-            lines[#lines+1] = { text = preferred_services_header, selectable = false }
-        end
-        for _, preferred_service in ipairs(config.preferred_services) do
-            lines[#lines+1] = { text = preferred_service, selectable = true }
-        end
-        lines[#lines+1] = { text = "                  ", selectable = false }
-        lines[#lines+1] = { text = "------------------", selectable = false }
-    end
-    for _, all_services_header in ipairs(self.all_services_header) do
-        lines[#lines+1] = { text = all_services_header, selectable = false }
-    end
-    for _, all_services_header in ipairs(self.all_services) do
-        lines[#lines+1] = { text = all_services_header, selectable = true }
-    end
+    ---@type Content
+    local content = {
+        title = M.header
+    }
 
-    callback(lines)
+    content.sections = {}
+    if config.preferred_services then
+        content.sections[#content.sections+1] = {
+            title = M.preferred_services_header,
+            lines = config.preferred_services
+        }
+    end
+    content.sections[#content.sections+1] = {
+        title = M.all_services_header,
+        lines = M.all_services
+    }
+    callback(content)
 end
 
 function M:did_select_item(item)
-    if item.selectable then
-        local service_name = item.text
-        local status, service = pcall(require, 'nvimawscli.services.' .. service_name)
-        ---@cast service View
-        if status then
-            service:show(config.menu.split)
-            vim.api.nvim_win_set_width(self.winnr, config.menu.width)
-        else
-            vim.api.nvim_err_writeln("Service not implemented yet: " .. service_name)
-        end
+    local service_name = item.text
+    local status, service = pcall(require, 'nvimawscli.services.' .. service_name)
+    ---@cast service View
+    if status then
+        service:show(config.menu.split)
+        vim.api.nvim_win_set_width(self.winnr, config.menu.width)
+    else
+        vim.api.nvim_err_writeln("Service not implemented yet: " .. service_name)
     end
 end
 
