@@ -37,6 +37,8 @@ function M:show(split, extra_data)
     end
 
     vim.api.nvim_set_current_win(self.winnr)
+    vim.opt_local.number = false
+    vim.opt_local.relativenumber = false
 
     self:load_content()
 end
