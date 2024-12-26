@@ -1,5 +1,5 @@
 local utils = require('nvimawscli.utils.buffer')
-local itertools = require("nvimawscli.utils.itertools")
+local Iterable = require("nvimawscli.utils.itertools").Iterable
 local config = require('nvimawscli.config')
 ---@type Ec2Command
 local command = require(config.commands .. '.ec2.instances')
@@ -41,15 +41,15 @@ function M.fetch()
         end)
 end
 
-
 function M.render(response)
-    local lines = itertools.flatten(itertools.map_values(response.MetricDataResults,
+    local lines = Iterable(response.MetricDataResults):map_values(
         function(metric)
             local graph = graphs.render(metric.Values, 10, 0, 'block', 1)
             table.insert(graph, 1, metric.Label)
             table.insert(graph, 2, tostring(math.max(unpack(metric.Values))))
             return graph
-        end))
+        end
+    ):flatten().table
     utils.write_lines(M.bufnr, lines)
 end
 

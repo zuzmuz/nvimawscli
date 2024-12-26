@@ -10,6 +10,8 @@ local command = require(config.commands .. '.rds')
 ---@class Rds
 local M = {}
 
+-- TODO: this should inherit from tableview
+
 function M.show(split)
     if not M.bufnr then
         M.load()
@@ -67,10 +69,10 @@ end
 ---@param rows Instance[]
 ---@return number[][][]: The positions the cursor is allowed to be at
 function M.render(rows)
-    local column_names = itertools.imap_values(config.rds.attributes,
+    local column_names = itertools.Iterable(config.rds.attributes):imap_values(
         function(attribute)
             return attribute.name
-        end)
+        end).table
     local lines, allowed_positions, widths = table_renderer.render(
         column_names,
         rows,

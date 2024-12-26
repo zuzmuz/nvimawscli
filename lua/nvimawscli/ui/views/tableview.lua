@@ -1,6 +1,6 @@
 local utils = require('nvimawscli.utils.buffer')
 local config = require('nvimawscli.config')
-local itertools = require("nvimawscli.utils.itertools")
+local Iterable = require("nvimawscli.utils.itertools").Iterable
 local table_renderer = require('nvimawscli.utils.tables')
 local popup = require('nvimawscli.ui.popup')
 local View = require('nvimawscli.ui.views.view')
@@ -123,9 +123,9 @@ end
 ---Render the rows in self onto the buffer in a table
 ---@return number[][][]: The cursor's allowed positions
 function M:render()
-    local column_names = itertools.imap_values(self.column_headers, function(attribute)
+    local column_names = Iterable(self.column_headers):imap_values(function(attribute)
         return attribute.name
-    end)
+    end).table
 
     local lines, allowed_positions, widths = table_renderer.render(
         column_names,
