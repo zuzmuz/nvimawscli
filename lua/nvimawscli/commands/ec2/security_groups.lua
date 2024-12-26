@@ -1,6 +1,6 @@
 local config = require('nvimawscli.config')
 local regex = require('nvimawscli.utils.regex')
-local itertools = require('nvimawscli.utils.itertools')
+local Iterable = require('nvimawscli.utils.itertools').Iterable
 local handler = require('nvimawscli.commands')
 
 ---@class SecurityGroupsCommand
@@ -9,11 +9,11 @@ local M = {}
 ---Fetch the list of security groups
 ---@param on_result OnResult
 function M.describe_security_groups(on_result)
-    local query_strings = itertools.imap_values(config.ec2.security_groups.attributes,
+    local query_string = Iterable(config.ec2.security_groups.attributes):imap_values(
         function(value)
             return value.name .. ': ' .. value.value
-        end)
-    local query_string = table.concat(query_strings, ', ')
+        end):join(', ')
+
     handler.async("aws ec2 describe-security-groups --query 'SecurityGroups[].{" ..
                   query_string ..
                   "}'", on_result)
@@ -23,11 +23,11 @@ end
 ---@param group_id string
 ---@param on_result OnResult
 function M.describe_security_group_rules(group_id, on_result)
-    local query_strings = itertools.imap_values(config.ec2.security_group_rules.attributes,
+    local query_string = Iterable(config.ec2.security_group_rules.attributes):imap_values(
         function(value)
             return value.name .. ': ' .. value.value
-        end)
-    local query_string = table.concat(query_strings, ', ')
+        end):join(', ')
+
     handler.async("aws ec2 describe-security-group-rules " ..
                   "--filters 'Name=group-id,Values=" .. group_id .. "' " ..
                   "--query 'SecurityGroupRules[].{" ..
@@ -58,11 +58,11 @@ function M.modify_security_group_rule(group_id, rule_id, rule_details, on_result
     end
     rule_details.Source = nil
 
-    local security_group_rules = itertools.map(rule_details,
+    local security_group_rule = Iterable(rule_details):map(
         function(key, value)
             return key .. '=' .. value
-        end)
-    local security_group_rule = table.concat(security_group_rules, ',')
+        end):join(',')
+
     local command = "aws ec2 modify-security-group-rules " ..
                     "--group-id " .. group_id .. " " ..
                     "--security-group-rules " .. "'SecurityGroupRuleId=" .. rule_id ..

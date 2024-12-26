@@ -1,5 +1,5 @@
 local config = require("nvimawscli.config")
-local itertools = require("nvimawscli.utils.itertools")
+local Iterable = require("nvimawscli.utils.itertools").Iterable
 local handler = require("nvimawscli.commands")
 
 ---@class Ec2Command
@@ -8,11 +8,10 @@ local M = {}
 ---Fecth ec2 instances details
 ---@param on_result OnResult
 function M.describe_instances(on_result)
-    local query_strings = itertools.imap_values(config.ec2.instances.attributes,
+    local query_string = Iterable(config.ec2.instances.attributes):imap_values(
         function(value)
             return value.name .. ': ' .. value.value
-        end)
-    local query_string = table.concat(query_strings, ', ')
+        end):join(', ')
     handler.async("aws ec2 describe-instances " ..
                   "--query 'Reservations[].Instances[].{" ..
                   query_string ..
@@ -42,7 +41,7 @@ function M.describe_instance_monitoring(instance_id, current_time, hours, interv
     ---@type table<string>
     local metrics = config.ec2.instances.metrics
 
-    local metric_data_queries = itertools.imap_values(metrics,
+    local metric_data_queries = Iterable(metrics):imap_values(
         function(metric)
             return '{"Id":"' .. string.lower(metric) .. '", "MetricStat":{' ..
             '"Metric":{"Namespace":"AWS/EC2", ' ..
@@ -51,8 +50,8 @@ function M.describe_instance_monitoring(instance_id, current_time, hours, interv
             '"Value": "' .. instance_id .. '"' ..
             '}]},"Period":' .. interval ..
             ',"Stat":"Average"}}'
-        end)
-    local metric_data_queries_string = '[' .. table.concat(metric_data_queries, ', ') .. ']'
+        end):join(', ')
+    local metric_data_queries_string = '[' .. metric_data_queries .. ']'
     local end_time = os.date("!%Y-%m-%dT%H:%M:%S", current_time)
     local start_time = os.date("!%Y-%m-%dT%H:%M:%S", current_time - (hours * 3600))
     ---@cast end_time string

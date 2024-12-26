@@ -1,4 +1,4 @@
-local itertools = require("nvimawscli.utils.itertools")
+local Iterable = require("nvimawscli.utils.itertools").Iterable
 
 ---@class DisplayRenderer
 local M = {}
@@ -17,15 +17,13 @@ local function represent(t, nesting_level)
         separator = {" "}
     end
 
-    local nested_lines = itertools.map(t, function(key, value)
+    return Iterable(t):map(function(key, value)
         if type(value) == "table" then
             return { indent .. tostring(key) .. ":", unpack(represent(value, nesting_level+1)) }
         else
             return { indent .. tostring(key) .. ": " .. tostring(value) }
         end
-    end)
-
-    return itertools.flatten_with_separator(nested_lines, separator)
+    end):flatten_with_separator(separator).table
 end
 
 

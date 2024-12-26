@@ -1,5 +1,5 @@
 local utils = require('nvimawscli.utils.buffer')
-local itertools = require("nvimawscli.utils.itertools")
+local Iterable = require("nvimawscli.utils.itertools").Iterable
 local View = require('nvimawscli.ui.views.view')
 local border = require('nvimawscli.utils.borders')
 
@@ -99,9 +99,9 @@ function M:render()
 
     -- vim.api.nvim_out_write(vim.inspect(self.lines))
 
-    local drawables = itertools.imap_values(self.lines, function(line)
+    local drawables = Iterable(self.lines):imap_values(function(line)
         return line.text
-    end)
+    end).table
 
     utils.write_lines(self.bufnr, drawables)
     local allowed_positions = {}

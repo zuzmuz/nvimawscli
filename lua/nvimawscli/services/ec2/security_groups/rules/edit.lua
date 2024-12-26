@@ -2,7 +2,6 @@ local config = require('nvimawscli.config')
 local utils = require('nvimawscli.utils.buffer')
 local popup = require('nvimawscli.ui.popup')
 local View = require('nvimawscli.ui.views.view')
-local itertools = require('nvimawscli.utils.itertools')
 
 ---@type SecurityGroupsCommand
 local command = require(config.commands .. '.ec2.security_groups')

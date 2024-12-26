@@ -1,4 +1,4 @@
-local itertools = require('nvimawscli.utils.itertools')
+local Iterable = require('nvimawscli.utils.itertools').Iterable
 
 ---@class GraphRenderer
 local M = {}
@@ -93,13 +93,13 @@ function M.render(values, height, scale, graph_type, resolution)
         return {}
     end
 
-    local _, max = itertools.max_with_index(values)
+    local _, max = Iterable(values):max_with_index()
     if scale and scale > max then
         max = scale
     end
     local columns = nil
     if resolution == 1 then
-        columns = itertools.imap_values(values,
+        columns = Iterable(values):imap_values(
             function (value)
                 local ratio = value/max
                 local ratio_height = ratio * height
@@ -108,9 +108,9 @@ function M.render(values, height, scale, graph_type, resolution)
                     blocks[i] = symbol_mapping[1].get_symbol(ratio_height + i - height, graph_type)
                 end
                 return blocks
-            end)
+            end).table
     elseif resolution == 2 then
-        columns = itertools.imap_values_grouped(values, resolution, 0,
+        columns = Iterable(values):imap_values_grouped(resolution, 0,
             function (value1, value2)
                 local ratio1 = value1/max
                 local ratio2 = value2/max
@@ -123,18 +123,18 @@ function M.render(values, height, scale, graph_type, resolution)
                                                              graph_type)
                 end
                 return blocks
-            end)
+            end).table
     else
         return {}
     end
 
-    local rows = itertools.imap(columns[1],
+    local rows = Iterable(columns[1]):imap(
         function (index, _)
-            return table.concat(itertools.imap_values(columns,
+            return Iterable(columns):imap_values(
                 function (column)
                     return column[index]
-                end), '')
-        end)
+                end):join('')
+        end).table
     return rows
 end
 

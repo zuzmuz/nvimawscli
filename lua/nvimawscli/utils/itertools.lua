@@ -54,7 +54,7 @@ end
 ---Filters and return new array by performing the callback on the keys of the original array
 ---@generic T
 ---@param callback fun(t: `T`): boolean the filtering function
----@return Iterable<`T`>: the new iterable
+---@return Iterable: the new iterable
 function M:filter(callback)
     local new = {}
     for _, value in pairs(self.table) do
@@ -68,7 +68,7 @@ end
 ---Filters and return new array by performing the callback on the keys of the original array
 ---@generic T
 ---@param callback fun(t: `T`): boolean the filtering function
----@return Iterable<`T`>: the new iterable
+---@return Iterable: the new iterable
 function M:ifilter(callback)
     local new = {}
     for _, value in ipairs(self.table) do
@@ -83,7 +83,7 @@ end
 ---@generic T the original key type
 ---@generic U the mapped key type
 ---@param callback fun(t: `T`): `U`: the transformation function
----@return Iterable<`U`, any>: the new mapped iterable
+---@return Iterable: the new mapped iterable
 function M:map_keys(callback)
     local new = {}
     for key, value in pairs(self.table) do
@@ -96,7 +96,7 @@ end
 ---@generic T the original values type
 ---@generic U the mapped valued type
 ---@param callback fun(t: `T`): `U`: the transformation function
----@return Iterable<`U`>: the new iterable
+---@return Iterable: the new iterable
 function M:map_values(callback)
     local new = {}
     for key, value in pairs(self.table) do
@@ -109,7 +109,7 @@ end
 ---@generic T the original values type
 ---@generic U the mapped valued type
 ---@param callback fun(t: `T`): `U`: the transformation function
----@return Iterable<`U`>: the new iterable
+---@return Iterable: the new iterable
 function M:imap_values(callback)
     local new = {}
     for key, value in ipairs(self.table) do
@@ -120,15 +120,15 @@ end
 
 
 
----Transforms a collection into a list of collections
+---Transforms a collection into a list of objects
 ---grouping the sublists based on a step
 ---@generic T
 ---@generic U
----@param step number the size of the subgroups
+---@param step integer the size of the subgroups
 ---@param padding `T` the element to insert at the last group in case step does not divide
 ---the original collection
----@param callback fun(t: `T`): `U`: the transformation function
----@return `U`[]: the new array
+---@param callback fun(...): `U`: the transformation function, size of argument should be equal to step
+---@return Iterable: the new array
 function M:imap_values_grouped(step, padding, callback)
     if step == 1 then
         return self:imap_values(callback)
@@ -150,12 +150,18 @@ function M:imap_values_grouped(step, padding, callback)
     return M.Iterable(new)
 end
 
+---Joins iterable into string
+---@param separator string?: the separator to join the elements with
+function M:join(separator)
+    return table.concat(self.table, separator)
+end
+
 ---Returns new array from a table performing the callback on each entry in the original table
 ---@generic K
 ---@generic V
 ---@generic U
 ---@param callback fun(k: `K`, v: `V`): `U`: the transformation function
----@return `U`[]: the new array
+---@return Iterable: the new array
 function M:map(callback)
     local new = {}
     for key, value in pairs(self.table) do
@@ -169,7 +175,7 @@ end
 ---@generic V
 ---@generic U
 ---@param callback fun(k: `K`, v: `V`): `U`: the transformation function
----@return `U`[]: the new array
+---@return Iterable: the new array
 function M:imap(callback)
     local new = {}
     for key, value in ipairs(self.table) do
@@ -183,7 +189,7 @@ end
 ---@generic U
 ---@generic V
 ---@param callback fun(t: `T`): `U`, `V`: the transformation function
----@return table<`U`, `V`>: the new array
+---@return Iterable: the new array
 function M:associate_values(callback)
     local new = {}
     for _, value in pairs(self.table) do
@@ -199,7 +205,7 @@ end
 ---@generic R
 ---@generic S
 ---@param callback fun(k: `K`, v: `V`): `R`, `S`: the transformation function
----@return table<`R`, `S`>: the new array
+---@return Iterable: the new array
 function M:associate(callback)
     local new = {}
     for key, value in pairs(self.table) do

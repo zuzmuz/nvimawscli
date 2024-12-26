@@ -1,5 +1,5 @@
 local utils = require("nvimawscli.utils.buffer")
-local itertools = require("nvimawscli.utils.itertools")
+local Iterable = require("nvimawscli.utils.itertools").Iterable
 
 local M = {}
 
@@ -83,18 +83,18 @@ function M.create_floating_select(title, message, actions, config, selected)
 
 
     if message then
-        local content = itertools.iextend(message, actions)
+        local content = Iterable(message):iextend(actions).table
         utils.write_lines(bufnr, content)
-        local allowed_positions = itertools.imap(actions, function(index, _)
+        local allowed_positions = Iterable(actions):imap(function(index, _)
             return { { index + #message, 1 } }
-        end)
+        end).table
         print(vim.inspect(allowed_positions))
         utils.set_allowed_positions(bufnr, allowed_positions)
     else
         utils.write_lines(bufnr, actions)
-        local allowed_positions = itertools.imap(actions, function(index, _)
+        local allowed_positions = Iterable(actions):imap(function(index, _)
             return { { index, 1 } }
-        end)
+        end).table
         utils.set_allowed_positions(bufnr, allowed_positions)
     end
 
