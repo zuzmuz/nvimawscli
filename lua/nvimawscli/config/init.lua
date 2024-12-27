@@ -14,7 +14,7 @@ local M = {
         relative = 'cursor',
         spacing = 5,
     },
-    commands = "nvimawscli.commands",
+    commands = "nvimawscli.config",
     ec2 = require('nvimawscli.config.ec2'),
     s3 = require('nvimawscli.config.s3'),
     rds = require('nvimawscli.config.rds'),
