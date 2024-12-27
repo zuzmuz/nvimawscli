@@ -42,6 +42,6 @@ local instances = {
 ---Fecth ec2 instances details
 ---@param on_result OnResult
 function M.describe_instances(on_result)
-    on_result(vim.encode(instances), nil)
+    on_result(vim.json.encode(instances), nil)
 end
 return M
