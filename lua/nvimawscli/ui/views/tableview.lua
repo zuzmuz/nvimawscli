@@ -19,6 +19,7 @@ M.name = 'tableview'
 M.column_headers = {}
 
 M.loading_text = 'Loading...'
+M.filter_fields = {}
 function M:fetch_rows(callback)
     callback(nil, 'Nothing to display')
 end
@@ -123,6 +124,15 @@ end
 ---Render the rows in self onto the buffer in a table
 ---@return number[][][]: The cursor's allowed positions
 function M:render()
+
+    local filter_line = {}
+    local allowed_filter_line_position = {}
+    if self.filter_fields and #self.filter_fields > 0 then
+        local filter_text = "filter :"
+        filter_line = { filter_text }
+        allowed_filter_line_position = {{1, 1}}
+    end
+
     local column_names = Iterable(self.column_headers):imap_values(function(attribute)
         return attribute.name
     end).table
@@ -132,8 +142,13 @@ function M:render()
         self.rows,
         self.sorted_by_column_index,
         self.sorted_direction,
-        config.table)
+        config.table,
+        #filter_line)
     self.widths = widths
+
+    local action_lines = {}
+
+    lines = Iterable(filter_line):extend(lines):extend(action_lines).table
     utils.write_lines(self.bufnr, lines)
     return allowed_positions
 end
