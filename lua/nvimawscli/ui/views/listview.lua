@@ -1,4 +1,5 @@
 local utils = require('nvimawscli.utils.buffer')
+local legal_grid = require('nvimawscli.utils.legal_grid')
 local Iterable = require("nvimawscli.utils.itertools").Iterable
 local View = require('nvimawscli.ui.views.view')
 local border = require('nvimawscli.utils.borders')
@@ -56,13 +57,14 @@ function M:load_content()
     self:fetch_lines(function(content)
         self.content = content
         self.ready = true
-        local allowed_positions = self:render()
-        utils.set_allowed_positions(self.bufnr, allowed_positions)
+        local legal_lines = self:render()
+        self.legal_grid = legal_grid.new(self.bufnr)
+        self.legal_grid:set_legal_lines(legal_lines)
     end)
 end
 
 ---Render the rows in self onto the buffer in a simple list
----@return number[][][]: The cursor's allowed positions
+---@return LegalLine: The cursor's legal lines
 function M:render()
     self.lines = {}
 
@@ -107,7 +109,9 @@ function M:render()
     local allowed_positions = {}
     for i, line in ipairs(self.lines) do
         if line.selectable then
-            allowed_positions[#allowed_positions + 1] = { { i, 1 } }
+            allowed_positions[i] = { 1 }
+        else
+            allowed_positions[i] = {}
         end
     end
     return allowed_positions
