@@ -26,7 +26,7 @@ function M.launch(command_service)
     print("launching dashbord", command_service)
     if command_service then
 
-        local status, service = pcall(require, "nvimawscli." .. command_service)
+        local status, service = pcall(require, "nvimawscli.services." .. command_service)
         if status then
             service:show("topleft")
             return

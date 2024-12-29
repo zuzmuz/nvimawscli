@@ -4,6 +4,7 @@ local utils = require('nvimawscli.utils.buffer')
 ---@field bufnr integer?
 ---@field winnr integer?
 ---@field name string
+---@field legal_grid LegalGrid
 local M = {}
 
 M.name = 'view'
@@ -37,6 +38,8 @@ function M:show(split, extra_data)
     end
 
     vim.api.nvim_set_current_win(self.winnr)
+    vim.opt_local.number = false
+    vim.opt_local.relativenumber = false
 
     self:load_content()
 end
@@ -44,6 +47,17 @@ end
 function M:load()
     self.bufnr = utils.create_buffer(self.name, nil, self.editable)
     self:set_keymaps()
+
+    self.last_cursor_position = vim.insp
+
+    vim.api.nvim_create_autocmd({'CursorMoved'}, {
+        buffer = self.bufnr,
+        callback = function ()
+            local cursor_position = vim.fn.getcursorcharpos(0)
+            local legal_position = self.legal_grid:get_legal_position({ cursor_position[2], cursor_position[3] })
+            vim.fn.setcursorcharpos(legal_position[1], legal_position[2])
+        end,
+    })
 end
 
 return M
