@@ -46,6 +46,15 @@ end
 function M:load()
     self.bufnr = utils.create_buffer(self.name, nil, self.editable)
     self:set_keymaps()
+
+    self.last_cursor_position = vim.insp
+
+    vim.api.nvim_create_autocmd({'CursorMoved'}, {
+        buffer = self.bufnr,
+        callback = function ()
+            print('we are here' .. vim.inspect(vim.fn.getcursorcharpos()))
+        end,
+    })
 end
 
 return M

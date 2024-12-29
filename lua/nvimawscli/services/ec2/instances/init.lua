@@ -21,6 +21,8 @@ M.name = 'ec2.instances'
 M.column_headers = config.ec2.instances.attributes
 M.loading_text = 'Loading ec2 instances...'
 
+M.filter_fields = { 'Name' }
+
 function M:describe(row)
     return row.Name
 end

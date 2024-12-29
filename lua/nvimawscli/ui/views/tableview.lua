@@ -130,7 +130,7 @@ function M:render()
     if self.filter_fields and #self.filter_fields > 0 then
         local filter_text = "filter :"
         filter_line = { filter_text }
-        allowed_filter_line_position = {{1, 1}}
+        allowed_filter_line_position = {{{1, 1}}}
     end
 
     local column_names = Iterable(self.column_headers):imap_values(function(attribute)
@@ -149,6 +149,8 @@ function M:render()
     local action_lines = {}
 
     lines = Iterable(filter_line):extend(lines):extend(action_lines).table
+    allowed_positions = Iterable(allowed_filter_line_position):extend(
+        allowed_positions).table
     utils.write_lines(self.bufnr, lines)
     return allowed_positions
 end
