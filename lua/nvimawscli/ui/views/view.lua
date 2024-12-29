@@ -56,10 +56,10 @@ function M:load()
             -- print('we are here ' .. vim.inspect(vim.fn.getcursorcharpos(0)))
             local cursor_position = vim.fn.getcursorcharpos(0)
 
-            local legal_line, legal_column = self.legal_grid:get_legal_position({ cursor_position[2], cursor_position[3] })
+            local legal_position = self.legal_grid:get_legal_position({ cursor_position[2], cursor_position[3] })
 
-            print('these are the positions ' .. legal_line .. ' ' .. legal_column)
-            vim.fn.setcursorcharpos(legal_line, legal_column)
+            print('these are the positions ' .. vim.inspect(legal_position))
+            vim.fn.setcursorcharpos(legal_position[1], legal_position[2])
         end,
     })
 end

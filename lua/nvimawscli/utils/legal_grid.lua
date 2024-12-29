@@ -68,7 +68,8 @@ function M:get_legal_position(current_position)
         return current_position
     end
 
-    print('current position ' .. vim.inspect(current_position) .. ' ' .. 'last position ' .. vim.inspect(self.last_position))
+    print('current position ' ..
+        vim.inspect(current_position) .. ' ' .. 'last position ' .. vim.inspect(self.last_position))
 
     self.last_position = self.last_position or current_position
 
@@ -80,7 +81,7 @@ function M:get_legal_position(current_position)
             find_allowed_column(allowed_line, current_position, self.last_position)
         }
         return self.last_position
-    else                                       -- current line is not valid
+    else -- current line is not valid
         for i, line in ipairs(self.legal_line_indices) do
             if line > current_position[1] then
                 if i > 1 then
@@ -93,38 +94,48 @@ function M:get_legal_position(current_position)
                                 self.legal_lines[self.legal_line_indices[i - 1]],
                                 current_position,
                                 self.last_position)
-                            }
+                        }
                         return self.last_position
                     elseif line_same and current_position[1] - self.legal_line_indices[i - 1] <
                         line - current_position[1] then
-
                         self.last_position = {
-                            self.legal_lines[self.legal_line_indices[i - 1]],
+                            self.legal_line_indices[i - 1],
                             find_allowed_column(
-                                self.legal_lines[line],
+                                self.legal_lines[self.legal_line_indices[i - 1]],
                                 current_position,
                                 self.last_position)
-                            }
+                        }
                         return self.last_position
                     end
                 end
-                return line,
+                self.last_position = {
+                    line,
                     find_allowed_column(
                         self.legal_lines[line],
                         current_position,
-                        last_position)
+                        self.last_position)
+                }
+                return self.last_position
             elseif line == current_position[1] then
-                return line, find_allowed_column(
-                    self.legal_lines[line],
-                    current_position,
-                    last_position)
+                self.last_position = {
+                    line,
+                    find_allowed_column(
+                        self.legal_lines[line],
+                        current_position,
+                        self.last_position)
+                }
+                return self.last_position
             end
         end
         local line = self.legal_line_indices[#self.legal_line_indices]
-        return line, find_allowed_column(
-            self.legal_lines[line],
-            current_position,
-            last_position)
+        self.last_position = {
+            line,
+            find_allowed_column(
+                self.legal_lines[line],
+                current_position,
+                self.last_position)
+        }
+        return self.last_position
     end
 end
 
