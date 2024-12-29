@@ -53,12 +53,8 @@ function M:load()
     vim.api.nvim_create_autocmd({'CursorMoved'}, {
         buffer = self.bufnr,
         callback = function ()
-            -- print('we are here ' .. vim.inspect(vim.fn.getcursorcharpos(0)))
             local cursor_position = vim.fn.getcursorcharpos(0)
-
             local legal_position = self.legal_grid:get_legal_position({ cursor_position[2], cursor_position[3] })
-
-            print('these are the positions ' .. vim.inspect(legal_position))
             vim.fn.setcursorcharpos(legal_position[1], legal_position[2])
         end,
     })

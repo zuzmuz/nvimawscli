@@ -1,4 +1,5 @@
 local utils = require('nvimawscli.utils.buffer')
+local legal_grid = require('nvimawscli.utils.legal_grid')
 local config = require('nvimawscli.config')
 local Iterable = require("nvimawscli.utils.itertools").Iterable
 local table_renderer = require('nvimawscli.utils.tables')
@@ -114,8 +115,9 @@ function M:load_content()
         elseif rows then
             self.rows = rows
             self.ready = true
-            local allowed_positions = self:render()
-            utils.set_allowed_positions(self.bufnr, allowed_positions)
+            local legal_lines = self:render()
+            self.legal_grid = legal_grid.new()
+            self.legal_grid:set_legal_lines(legal_lines)
         end
     end)
 end
@@ -130,29 +132,28 @@ function M:render()
     if self.filter_fields and #self.filter_fields > 0 then
         local filter_text = "filter :"
         filter_line = { filter_text }
-        allowed_filter_line_position = {{{1, 1}}}
+        allowed_filter_line_position = { { 1 } }
     end
 
     local column_names = Iterable(self.column_headers):imap_values(function(attribute)
         return attribute.name
     end).table
 
-    local lines, allowed_positions, widths = table_renderer.render(
+    local lines, legal_lines, widths = table_renderer.render(
         column_names,
         self.rows,
         self.sorted_by_column_index,
         self.sorted_direction,
-        config.table,
-        #filter_line)
+        config.table)
     self.widths = widths
 
     local action_lines = {}
 
     lines = Iterable(filter_line):extend(lines):extend(action_lines).table
-    allowed_positions = Iterable(allowed_filter_line_position):extend(
-        allowed_positions).table
+    legal_lines = Iterable(allowed_filter_line_position):extend(
+        legal_lines).table
     utils.write_lines(self.bufnr, lines)
-    return allowed_positions
+    return legal_lines
 end
 
 return M

@@ -36,9 +36,6 @@ function M:set_legal_lines(legal_lines)
             return value, key
         end
     ).table
-
-    print('legal line indices', vim.inspect(self.legal_line_indices))
-    print('legal line lookup table', vim.inspect(self.legal_line_lookup_table))
 end
 
 local function find_allowed_column(allowed_line, current_position, last_position)
@@ -67,9 +64,6 @@ function M:get_legal_position(current_position)
     if not self.legal_lines or #self.legal_lines == 0 then
         return current_position
     end
-
-    print('current position ' ..
-        vim.inspect(current_position) .. ' ' .. 'last position ' .. vim.inspect(self.last_position))
 
     self.last_position = self.last_position or current_position
 

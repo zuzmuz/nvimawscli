@@ -14,9 +14,8 @@ local M = {}
 ---@param sorted_by_column_index number|nil: The index of the column that is sorted, nil if no column is sorted
 ---@param sorted_direction number: The direction of the sort, 1 for ascending, -1 for descending
 ---@param config table_config: The configuration of the table
----@param line_offset integer: The offset at witch the table will be rendered, needed to adjust the allowed positions
----@return string[], number[][][], number[]: The lines of the table, the allowed positions in the window, the widths of the column
-function M.render(headers, rows, sorted_by_column_index, sorted_direction, config, line_offset)
+---@return string[], LegalGrid, number[]: The lines of the table, the allowed positions in the window, the widths of the column
+function M.render(headers, rows, sorted_by_column_index, sorted_direction, config)
     if #rows == 0 then
         return {}, {}, {}
     end
@@ -44,8 +43,6 @@ function M.render(headers, rows, sorted_by_column_index, sorted_direction, confi
         widths[i] = widths[i] + config.spacing
     end
 
-    local lines = {}
-    local allowed_positions = {}
 
     if config.border then
         local border = require('nvimawscli.utils.borders')[config.border]
@@ -53,12 +50,16 @@ function M.render(headers, rows, sorted_by_column_index, sorted_direction, confi
             vim.api.nvim_err_writeln("Invalid table style: " .. config.border)
             return {}, {}, {}
         end
+        local lines = {}
+        local allowed_positions = {}
+        allowed_positions[1] = {}
 
         lines[1] = border.top_left
         lines[2] = border.vertical
         lines[3] = border.left_tee
 
-        allowed_positions[#allowed_positions + 1] = {}
+        allowed_positions[2] = {}
+
         local accumulated_width = 2
 
         for j, header in ipairs(headers) do
@@ -74,7 +75,8 @@ function M.render(headers, rows, sorted_by_column_index, sorted_direction, confi
 
             lines[2] = lines[2] .. header .. header_suffix .. border.vertical
 
-            allowed_positions[#allowed_positions][j] = { 2 + line_offset, accumulated_width }
+            table.insert(allowed_positions[2], accumulated_width)
+
             accumulated_width = accumulated_width + widths[j] + 1
 
             lines[3] = lines[3] ..
@@ -82,11 +84,13 @@ function M.render(headers, rows, sorted_by_column_index, sorted_direction, confi
                 (j == #headers and border.right_tee or border.cross)
         end
 
-        for _, row in pairs(rows) do
+        allowed_positions[3] = {}
+
+        for i, row in pairs(rows) do
             local line_index = #lines + 1
             lines[line_index] = border.vertical
 
-            allowed_positions[#allowed_positions + 1] = {}
+            allowed_positions[i + 3] = {}
             accumulated_width = 2
 
             for j, header in ipairs(headers) do
@@ -95,7 +99,7 @@ function M.render(headers, rows, sorted_by_column_index, sorted_direction, confi
                         widths[j] - vim.fn.strdisplaywidth(tostring(row[header]))) ..
                     tostring(border.vertical)
 
-                allowed_positions[#allowed_positions][j] = { line_index + line_offset, accumulated_width }
+                table.insert(allowed_positions[i + 3], accumulated_width)
                 accumulated_width = accumulated_width + widths[j] + 1
             end
         end
@@ -105,12 +109,11 @@ function M.render(headers, rows, sorted_by_column_index, sorted_direction, confi
                 string.rep(border.horizontal, widths[j]) ..
                 (j == #headers and border.bottom_right or border.bottom_tee)
         end
+        return lines, allowed_positions, widths
     else
         vim.api.nvim_err_writeln("Table style not found")
         return {}, {}, {}
     end
-
-    return lines, allowed_positions, widths
 end
 
 ---Get the index of the row disregarding the header from the line number in the rendered table

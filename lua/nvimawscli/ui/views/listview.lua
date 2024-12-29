@@ -58,7 +58,7 @@ function M:load_content()
         self.content = content
         self.ready = true
         local legal_lines = self:render()
-        self.legal_grid = legal_grid.new(self.bufnr)
+        self.legal_grid = legal_grid.new()
         self.legal_grid:set_legal_lines(legal_lines)
     end)
 end
