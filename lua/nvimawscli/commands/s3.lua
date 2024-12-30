@@ -1,7 +1,7 @@
 local config = require('nvimawscli.config')
 local handler = require('nvimawscli.commands')
 
----@class S3Handler
+---@class S3Command
 local M = {}
 
 ---Fetch the list of s3 buckets
