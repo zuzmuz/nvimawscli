@@ -104,11 +104,13 @@ end
 ---@param title string: title of flowing popup
 ---@param width number: width of the popup
 ---@param height number: height of the popup
+---@param placeholder string: the placeholder text
 ---@param config floating_popup_config: the popup ui config
 ---@param input fun(text: string): nil callback function when the text is entered
-function M.create_floating_input(title, width, height, config, input)
+function M.create_floating_input(title, width, height, placeholder, config, input)
     local winnr = 0
     local bufnr = utils.create_buffer("floating_window", true, true)
+    utils.write_lines(bufnr, { placeholder }, true)
 
     local options = {
         relative = config.relative or 'cursor',
