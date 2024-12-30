@@ -53,7 +53,7 @@ function M:set_keymaps()
             local line_number = position[2]
             local column_number = position[3]
 
-            local item_number = table_renderer.get_item_number_from_row(line_number)
+            local item_number = table_renderer.get_item_number_from_row(line_number) -- TODO: should check for line_offset when filter appears
 
             if item_number > 0 and item_number <= #self.rows then
                 -- open floating window for instance functions
