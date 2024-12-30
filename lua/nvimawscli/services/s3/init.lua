@@ -2,7 +2,7 @@ local config = require('nvimawscli.config')
 local bucket = require('nvimawscli.services.s3.bucket')
 local ListView = require('nvimawscli.ui.views.listview')
 
----@type S3Handler
+---@type S3Command
 local command = require(config.commands .. '.s3')
 
 ---@class S3: ListView
@@ -43,7 +43,9 @@ end
 function M:did_select_item(item)
     if item.selectable then
         local bucket_name = item.text
-        bucket.show(bucket_name, config.menu.split)
+        bucket:show(config.menu.split, {
+            bucket_name = bucket_name
+        })
         vim.api.nvim_win_set_width(self.winnr, config.menu.width)
     end
 end

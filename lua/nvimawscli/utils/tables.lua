@@ -20,8 +20,6 @@ function M.render(headers, rows, sorted_by_column_index, sorted_direction, confi
         return {}, {}, {}
     end
 
-    line_offset = line_offset or 0
-
     local widths = {}
 
     for i, header in ipairs(headers) do
@@ -90,7 +88,7 @@ function M.render(headers, rows, sorted_by_column_index, sorted_direction, confi
             local line_index = #lines + 1
             lines[line_index] = border.vertical
 
-            allowed_positions[i + 3] = {}
+            allowed_positions[line_index] = {}
             accumulated_width = 2
 
             for j, header in ipairs(headers) do
@@ -104,6 +102,8 @@ function M.render(headers, rows, sorted_by_column_index, sorted_direction, confi
             end
         end
         lines[#lines + 1] = border.bottom_left
+
+        allowed_positions[#lines] = {}
         for j, _ in ipairs(headers) do
             lines[#lines] = lines[#lines] ..
                 string.rep(border.horizontal, widths[j]) ..

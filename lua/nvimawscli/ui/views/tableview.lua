@@ -21,6 +21,7 @@ M.column_headers = {}
 
 M.loading_text = 'Loading...'
 M.filter_fields = {}
+M.action_fields = {}
 M.filter_text = nil
 function M:fetch_rows(callback)
     callback(nil, 'Nothing to display')
@@ -159,10 +160,24 @@ function M:render()
     self.widths = widths
 
     local action_lines = {}
+    local allowed_action_lines = {}
+    if self.action_fields and #self.action_fields > 0 then
+        local action_fields_iterable = Iterable(self.action_fields)
+        action_lines = action_fields_iterable:imap_values(
+            function (value)
+                return value.label
+            end
+        ).table
+        allowed_action_lines = action_fields_iterable:imap_values(
+            function (_)
+                return { 1 }
+            end
+        ).table
+    end
 
     lines = Iterable(filter_line):extend(lines):extend(action_lines).table
     legal_lines = Iterable(allowed_filter_line_position):extend(
-        legal_lines).table
+        legal_lines):extend(allowed_action_lines).table
     utils.write_lines(self.bufnr, lines)
     return legal_lines
 end

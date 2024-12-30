@@ -4,10 +4,9 @@ local bucket_actions = require('nvimawscli.services.s3.actions')
 
 
 ---@type S3Command
-local command = require(config.commands .. 's3')
+local command = require(config.commands .. '.s3')
 
 ---@class S3BucketView: TableView
----@field bucket_name string
 local M = setmetatable({}, { __index = TableView })
 
 M.name = 's3.bucket'
@@ -19,7 +18,12 @@ M.name = 's3.bucket'
 ---@field LastModified string
 
 
-M.column_headers = { 'Key', 'Size', 'Last Modified' }
+M.column_headers = {
+    { name = 'Key' },
+    { name = 'Size' },
+    { name = 'LastModified' }
+}
+
 M.loading_text = 'Loading Bucket content ...'
 
 M.filter_fields = { 'Key' }
@@ -29,7 +33,7 @@ function M:describe(row)
 end
 
 function M:fetch_rows(callback)
-    command.list_bucket_objects(self.bucket_name, function (result, error)
+    command.list_bucket_objects(self.data.bucket_name, function (result, error)
         if error then
             callback(nil, error)
         elseif result then
@@ -67,17 +71,15 @@ function M:fetch_rows(callback)
 end
 
 M.action_manager = require('nvimawscli.services.s3.actions')
-
-    -- lines[#lines + 1] = '---'
-    -- lines[#lines + 1] = 'Action on all objects'
-    -- allowed_positions[#allowed_positions + 1] = {}
-    -- allowed_positions[#allowed_positions][1] = { #lines, 1 }
-    --
-    -- if next_token then
-    --     lines[#lines + 1] = '---'
-    --     lines[#lines + 1] = 'Press <Enter> to fetch more content'
-    --     allowed_positions[#allowed_positions + 1] = {}
-    --     allowed_positions[#allowed_positions][1] = { #lines, 1 }
-    -- end
+M.action_fields = {
+    {
+        label = 'actions on selected field',
+        action = nil,
+    },
+    {
+        label = 'fetch next page',
+        action = nil,
+    },
+}
 
 return M
