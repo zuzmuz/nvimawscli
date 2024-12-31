@@ -44,30 +44,6 @@ function M:fetch_rows(callback)
             callback(nil, 'Result was nil')
         end
     end)
-
-            --     local available_actions = bucket_actions.actions
-            --     popup.create_floating_select(nil, nil, available_actions, config.table,
-            --         function (selected_action)
-            --             local action = available_actions[selected_action]
-            --             if bucket_actions[action].ask_for_confirmation then
-            --                 popup.create_floating_select(
-            --                     action .. ' all',
-            --                     nil,
-            --                     { 'yes', 'no' },
-            --                     config.table,
-            --                     function (confirmation)
-            --                         if confirmation == 1 then
-            --                             bucket_actions[action].action(M.bucket_name, M.rows)
-            --                         end
-            --                     end)
-            --             else
-            --                 bucket_actions[action].action(M.bucket_name, M.rows)
-            --             end
-            --         end)
-            -- elseif M.next_token then
-            --     print('get more content')
-            -- end
-            -- TODO: add footers to table view
 end
 
 M.action_manager = require('nvimawscli.services.s3.actions')
