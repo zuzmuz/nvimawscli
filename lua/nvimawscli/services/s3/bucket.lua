@@ -33,17 +33,20 @@ function M:describe(row)
 end
 
 function M:fetch_rows(callback)
-    command.list_bucket_objects(self.data.bucket_name, function (result, error)
-        if error then
-            callback(nil, error)
-        elseif result then
-            local response = vim.json.decode(result)
-            self.next_token = response.NextToken
-            callback(response.Contents, nil)
-        else
-            callback(nil, 'Result was nil')
+    self.filter_text = self.filter_text or ''
+    command.list_bucket_objects(self.data.bucket_name, self.filter_text,
+        function(result, error)
+            if error then
+                callback(nil, error)
+            elseif result then
+                local response = vim.json.decode(result)
+                self.next_token = response.NextToken
+                callback(response.Contents, nil)
+            else
+                callback(nil, 'Result was nil')
+            end
         end
-    end)
+    )
 end
 
 M.action_manager = require('nvimawscli.services.s3.actions')

@@ -53,7 +53,7 @@ function M:load()
         buffer = self.bufnr,
         callback = function()
             local mode = vim.api.nvim_get_mode()['mode']
-            if mode == 'n' then
+            if mode == 'n' and self.legal_grid then
                 local cursor_position = vim.fn.getcursorcharpos(0)
                 local legal_position = self.legal_grid:get_legal_position({
                     cursor_position[2], cursor_position[3]

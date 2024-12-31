@@ -12,9 +12,16 @@ end
 
 ---Fetch the list of objects in a bucket
 ---@param bucket_name string
+---@param prefix string
 ---@param on_result OnResult
-function M.list_bucket_objects(bucket_name, on_result)
+function M.list_bucket_objects(bucket_name, prefix, on_result)
+    local prefix_predicate = ""
+    if prefix and prefix ~= "" then
+        prefix_predicate = " --prefix " .. prefix
+    end
+
     handler.async("aws s3api list-objects-v2 --bucket " .. bucket_name ..
+                  prefix_predicate ..
     -- " --query 'Contents[].[Key, Size, LastModified]
                   " --max-items " .. config.s3.max_items, on_result)
 end
