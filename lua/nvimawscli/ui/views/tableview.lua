@@ -21,10 +21,11 @@ M.column_headers = {}
 
 M.loading_text = 'Loading...'
 M.filter_fields = {}
+M.action_fields = {}
+M.filter_text = nil
 function M:fetch_rows(callback)
     callback(nil, 'Nothing to display')
 end
-
 
 ---@class ActionManager
 ---List of actions to perform on the table rows
@@ -53,9 +54,23 @@ function M:set_keymaps()
             local line_number = position[2]
             local column_number = position[3]
 
-            local item_number = table_renderer.get_item_number_from_row(line_number)
+            local line_offset = 0
+            if self.filter_fields and #self.filter_fields > 0 then
+                line_offset = 1
+            end
 
-            if item_number > 0 and item_number <= #self.rows then
+            local item_number = table_renderer.get_item_number_from_row(line_number - line_offset)
+
+            if line_offset == 1 and line_number == 1 then -- filter
+                popup.create_floating_input("input filter text", 20, 1, self.filter_text or '', config.table,
+                    function(text)
+                        self.filter_text = text
+                        self:load_content()
+                    end
+                )
+            elseif item_number == 0 then -- sort
+                self:handle_sort_event(column_number)
+            elseif item_number <= #self.rows then
                 -- open floating window for instance functions
                 local row = self.rows[item_number]
                 local available_actions = self.action_manager.get(row)
@@ -77,9 +92,8 @@ function M:set_keymaps()
                         else
                             self.action_manager.actions[action].action(row, self.data)
                         end
-                    end)
-            else -- perform sorting based on column selection
-                self:handle_sort_event(column_number)
+                    end
+                )
             end
         end
     })
@@ -122,17 +136,15 @@ function M:load_content()
     end)
 end
 
-
 ---Render the rows in self onto the buffer in a table
 ---@return number[][][]: The cursor's allowed positions
 function M:render()
-
     local filter_line = {}
     local allowed_filter_line_position = {}
     if self.filter_fields and #self.filter_fields > 0 then
-        local filter_text = "filter :"
-        filter_line = { filter_text }
-        allowed_filter_line_position = { { 1 } }
+        local filter_text = "filter : "
+        allowed_filter_line_position = { { vim.fn.strdisplaywidth(filter_text) } }
+        filter_line = { filter_text .. (self.filter_text or '') }
     end
 
     local column_names = Iterable(self.column_headers):imap_values(function(attribute)
@@ -148,10 +160,24 @@ function M:render()
     self.widths = widths
 
     local action_lines = {}
+    local allowed_action_lines = {}
+    if self.action_fields and #self.action_fields > 0 then
+        local action_fields_iterable = Iterable(self.action_fields)
+        action_lines = action_fields_iterable:imap_values(
+            function (value)
+                return value.label
+            end
+        ).table
+        allowed_action_lines = action_fields_iterable:imap_values(
+            function (_)
+                return { 1 }
+            end
+        ).table
+    end
 
     lines = Iterable(filter_line):extend(lines):extend(action_lines).table
     legal_lines = Iterable(allowed_filter_line_position):extend(
-        legal_lines).table
+        legal_lines):extend(allowed_action_lines).table
     utils.write_lines(self.bufnr, lines)
     return legal_lines
 end

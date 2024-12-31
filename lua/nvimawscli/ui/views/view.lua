@@ -40,6 +40,7 @@ function M:show(split, extra_data)
     vim.api.nvim_set_current_win(self.winnr)
     vim.opt_local.number = false
     vim.opt_local.relativenumber = false
+    vim.opt_local.signcolumn = 'no'
 
     self:load_content()
 end
@@ -48,14 +49,17 @@ function M:load()
     self.bufnr = utils.create_buffer(self.name, nil, self.editable)
     self:set_keymaps()
 
-    self.last_cursor_position = vim.insp
-
-    vim.api.nvim_create_autocmd({'CursorMoved'}, {
+    vim.api.nvim_create_autocmd({ 'CursorMoved' }, {
         buffer = self.bufnr,
-        callback = function ()
-            local cursor_position = vim.fn.getcursorcharpos(0)
-            local legal_position = self.legal_grid:get_legal_position({ cursor_position[2], cursor_position[3] })
-            vim.fn.setcursorcharpos(legal_position[1], legal_position[2])
+        callback = function()
+            local mode = vim.api.nvim_get_mode()['mode']
+            if mode == 'n' and self.legal_grid then
+                local cursor_position = vim.fn.getcursorcharpos(0)
+                local legal_position = self.legal_grid:get_legal_position({
+                    cursor_position[2], cursor_position[3]
+                })
+                vim.fn.setcursorcharpos(legal_position[1], legal_position[2])
+            end
         end,
     })
 end
