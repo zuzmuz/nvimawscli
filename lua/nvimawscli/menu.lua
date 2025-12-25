@@ -17,7 +17,7 @@ M.all_services = {
     "ec2",
     "s3",
     "rds",
-    -- "codedeploy",
+    "codedeploy",
 }
 
 M.name = 'menu'
