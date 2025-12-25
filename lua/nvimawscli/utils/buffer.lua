@@ -41,7 +41,10 @@ function M.create_window(bufnr, split)
     elseif split == "inplace" then
         -- use current window
     else
-        vim.api.nvim_err_writeln("Invalid split direction: " .. (split or 'nil'))
+        vim.notify(
+            "Invalid split direction: " .. (split or 'nil'),
+            vim.log.levels.WARN
+        )
         return
     end
     winnr = vim.api.nvim_get_current_win()

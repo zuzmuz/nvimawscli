@@ -25,9 +25,12 @@ M.download = {
             command.download_bucket_object(bucket_name, bucktet_object.Key,
                 function(result, error)
                     if error then
-                        vim.api.nvim_err_writeln(error)
+                        vim.notify(
+                            error,
+                            vim.log.levels.WARN
+                        )
                     elseif result then
-                        vim.api.nvim_out_write(result)
+                        vim.notify(result)
                     end
                 end)
         end
@@ -42,9 +45,12 @@ M.delete = {
             command.delete_bucket_object(bucket_name, bucktet_object.Key,
                 function(result, error)
                     if error then
-                        vim.api.nvim_err_writeln(error)
+                        vim.notify(
+                            error,
+                            vim.log.levels.WARN
+                        )
                     elseif result then
-                        vim.api.nvim_out_write(result)
+                        vim.notify(result)
                     end
                 end)
         end
@@ -56,16 +62,22 @@ M["download+delete"] = {
     ask_for_confirmation = true,
     action = function(bucket_name, bucket_objects)
         for _, bucktet_object in ipairs(bucket_objects) do
-            command.download_bucket_object(bucket_name, bucktet_object.Key, function (copy_result, copy_error)
+            command.download_bucket_object(bucket_name, bucktet_object.Key, function(copy_result, copy_error)
                 if copy_error then
-                    vim.api.nvim_err_writeln(copy_error)
+                    vim.notify(
+                        copy_error,
+                        vim.log.levels.WARN
+                    )
                 elseif copy_result then
-                    vim.api.nvim_out_write(copy_result)
-                    command.delete_bucket_object(bucket_name, bucktet_object.Key, function (result, error)
+                    vim.notify(copy_result)
+                    command.delete_bucket_object(bucket_name, bucktet_object.Key, function(result, error)
                         if error then
-                            vim.api.nvim_err_writeln(error)
+                            vim.notify(
+                                error,
+                                vim.log.levels.WARN
+                            )
                         elseif result then
-                            vim.api.nvim_out_write(result)
+                            vim.notify(result)
                         end
                     end)
                 end

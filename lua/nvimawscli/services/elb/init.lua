@@ -41,7 +41,10 @@ function M:did_select_item(item)
     subservice:show(config.menu.split)
     vim.api.nvim_win_set_width(M.winnr, config.menu.width)
   else
-    vim.api.nvim_err_writeln('Elb subservice not found: ' .. subservice_name)
+    vim.notify(
+        'Elb subservice not found: ' .. subservice_name,
+        vim.log.levels.WARN
+    )
   end
 end
 
