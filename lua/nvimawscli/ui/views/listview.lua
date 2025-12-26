@@ -21,10 +21,11 @@ local M = setmetatable({}, { __index = View })
 ---@class Line
 ---@field text string
 ---@field selectable boolean
----@field item integer[]? position in original content, size 2, index 1 is section index 2 is line number, nil if selectable is false
+---@field position integer[]? position in original content, size 2, index 1 is section index 2 is line number, nil if selectable is false
 
 M.name = 'listview'
 
+---Function to be implemented by subclasses
 function M:did_select_item(_)
 end
 

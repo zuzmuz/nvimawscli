@@ -1,6 +1,7 @@
 local config = require('nvimawscli.config')
 local data = require('nvimawscli.utils.data')
 local ListView = require('nvimawscli.ui.views.listview')
+local popup = require('nvimawscli.ui.popup')
 
 ---@class MenuView: ListView
 local M = setmetatable({}, { __index = ListView })
@@ -28,7 +29,7 @@ function M:fetch_lines(callback)
     local content = {
         title = M.header
     }
-    
+
     content.sections = {}
 
     if data.store.current_profile then
@@ -56,7 +57,31 @@ function M:fetch_lines(callback)
     callback(content)
 end
 
+---@param item Line
 function M:did_select_item(item)
+    if item.position[1] == 1 then
+        popup.create_floating_input(
+            "Enter Profile Name:",
+            20, 1,
+            data.store.current_profile or 'default',
+            config.table,
+            function(input)
+                if input and input ~= "" then
+                    data.store.current_profile = input
+                    data.save()
+                    vim.notify(
+                        "Profile set to: " .. input,
+                        vim.log.levels.INFO
+                    )
+                    self:load_content()
+                else
+                    vim.notify(
+                        "Profile not changed.",
+                        vim.log.levels.WARN
+                    )
+                end
+            end)
+    end
     local service_name = item.text
     local status, service = pcall(require, 'nvimawscli.services.' .. service_name)
     ---@cast service View

@@ -21,6 +21,7 @@ end
 function M.save()
     local file = io.open(data_path, 'w')
     if file then
+        print(vim.inspect(M.store))
         file:write(vim.json.encode(M.store))
         file:close()
     end

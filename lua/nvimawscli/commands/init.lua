@@ -1,3 +1,6 @@
+local Iterable = require('nvimawscli.utils.itertools').Iterable
+local profile = require('nvimawscli.utils.data').store.current_profile or 'default'
+
 ---@class Command
 local M = {}
 
@@ -55,5 +58,27 @@ function M.interactive(command)
     vim.fn.termopen(command)
 end
 
+function M.aws_command(command, arguments, on_result)
+    local cmd_string = ''
+    if profile == 'default' then
+        cmd_string = command .. ' ' .. arguments
+    else
+        cmd_string = command .. ' --profile ' .. profile .. ' ' .. arguments
+    end
+    M.async(cmd_string, on_result)
+end
 
+
+function M.aws_group_command(commands, on_result)
+    local cmd_strings = Iterable(commands):imap_values(
+        function (command_argument)
+            if profile == 'default' then
+                return command_argument[1] .. ' ' .. command_argument[2]
+            else
+                return command_argument[1] .. ' --profile ' .. profile .. ' ' .. command_argument[2]
+            end
+        end
+    ).table
+    M.group_async(cmd_strings, on_result)
+end
 return M
