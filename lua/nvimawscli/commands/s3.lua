@@ -42,7 +42,7 @@ function M.download_bucket_object(bucket_name, object_key, on_result)
 
     vim.fn.mkdir(folder, "p")
 
-    local arguments = "cp \"s3://" .. bucket_name .. "/" .. object_key .. "\" " .. folder
+    local arguments = 'cp "s3://' .. bucket_name .. '/' .. object_key .. '" ' .. folder
     handler.aws_command("s3", arguments, on_result)
 end
 
@@ -51,7 +51,7 @@ end
 ---@param object_key string
 ---@param on_result OnResult
 function M.delete_bucket_object(bucket_name, object_key, on_result)
-    local arguments = "s3 rm \"s3://" .. bucket_name .. "/" .. object_key .. "\""
+    local arguments = 'rm "s3://' .. bucket_name .. '/' .. object_key .. '"'
     handler.aws_command("s3", arguments, on_result)
 end
 
