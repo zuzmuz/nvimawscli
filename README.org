@@ -4,6 +4,14 @@ This plugin is a wrapper around the aws cli. It allows you to run aws commands f
 It assumes you have the aws cli version 2 installed.
 This plugin is still in its infancy and only supports a few commands.
 
+** Quick Start
+
+1. Install the plugin using your favorite plugin manager
+2. Ensure AWS CLI v2 is installed and configured with your credentials
+3. Open Neovim and run =:Aws=
+4. Select a service (e.g., =ec2= or =s3=) from the menu
+5. Navigate using =j/k= keys and press =<CR>= to select items
+
 ** Installation
 
 Use your favorite plugin manager to install this plugin. For example, with lazy
@@ -30,17 +38,47 @@ vim.opt.equalalways = false
 
 ** Usage
 
-You can pass by config to tinker with the default settings. A full list of the default settings will be provided soon
+*** Prerequisites
 
-To launch the aws dashboard run the command :Aws
+Before using this plugin, ensure you have:
+- AWS CLI v2 installed on your system
+- AWS credentials configured (run =aws configure= or set up your credentials file)
+- Neovim with the plugin installed and configured
 
-The plugin expects to find the find aws cli tool installed and configured correctly on the machine, it currenlty doesn't provide any method for installing and authenticating with aws.
+*** Basic Usage
 
-The first buffer is the menu where a list of available aws services will be shown, preferred services can be set in config to appear on top.
+**** Launching the Dashboard
 
-Selecting any service will open a submenu for specific actions to perform in chosen service.
+Run the following command in Neovim to open the AWS dashboard:
 
-If you want a specific service to be opened by default you can pass the service in the config.
+#+BEGIN_SRC
+:Aws
+#+END_SRC
+
+**** Navigation
+
+The plugin uses a menu-based interface:
+
+1. *Main Menu*: When you first launch =:Aws=, you'll see a list of available AWS services
+   - Use standard Vim navigation keys (=j=/=k= or arrow keys) to move between services
+   - Press =<CR>= (Enter) to select a service
+   - Preferred services can be configured to appear at the top
+
+2. *Service Menu*: After selecting a service, you'll see available actions
+   - Navigate through the action list
+   - Press =<CR>= (Enter) to execute an action
+
+3. *Resource View*: Actions will display resources (instances, buckets, etc.)
+   - Select resources to view details or perform operations
+   - Available operations depend on the selected resource type
+
+**** Configuration
+
+You can customize the plugin behavior by passing options during setup:
+
+***** Set a Default Startup Service
+
+To open a specific service automatically when launching =:Aws=:
 
 #+BEGIN_SRC lua
 return {
@@ -51,29 +89,71 @@ return {
 }
 #+END_SRC
 
+***** Set Preferred Services
+
+Configure which services appear at the top of the main menu:
+
+#+BEGIN_SRC lua
+require('nvimawscli').setup({
+    preferred_services = {'ec2', 's3'}
+})
+#+END_SRC
+
 ** Services
 
-*** Ec2
+*** EC2 (Elastic Compute Cloud)
 
-Supported actions:
-- List all available launched instances
-- Show general details and statuses about selected instance
-- Start/Stop instances
-- View basic instance monitoring
-- Ssh connection
+Select *ec2* from the main menu to manage your EC2 instances.
 
-**** Ssh connect
+**** Available Actions
 
-To connect to ssh the plugin expects to find the ssh private key file in the current directory where nvim is launched. The name of the key is taken from the instance details.
+- *List Instances*: View all your launched EC2 instances
+- *Instance Details*: Select an instance to view its general details and status
+- *Start/Stop Instances*: Control instance state directly from Neovim
+- *Monitoring*: View basic instance monitoring metrics
+- *SSH Connection*: Connect to instances via SSH
 
-If the key name provided with the instance details is no longer supported (the public key has been manually removed from the instance) the automatic connection will not work.
+**** SSH Connection Setup
 
-*** S3
+To use the SSH connection feature:
 
-Supported actions:
-- List all available buckets
-- List objects in selected bucket, up to the first 1000 objects
-- Download and delete objects
+1. Ensure the SSH private key file is in the current directory where Neovim is launched
+2. The key filename must match the key name specified in the instance details
+3. The public key must be present in the instance's =~/.ssh/authorized_keys=
+
+*Note*: If the key name in instance details doesn't match your local key file, or if the public key has been manually removed from the instance, automatic SSH connection will not work.
+
+**** How to Use
+
+1. Launch =:Aws= and select *ec2*
+2. Choose *List Instances* to see all instances
+3. Navigate to an instance and press =<CR>= to view details
+4. From the instance details view, you can:
+   - Start or stop the instance
+   - View monitoring data
+   - Initiate an SSH connection
+
+*** S3 (Simple Storage Service)
+
+Select *s3* from the main menu to manage your S3 buckets and objects.
+
+**** Available Actions
+
+- *List Buckets*: View all your S3 buckets
+- *Browse Objects*: Navigate through objects in a selected bucket (displays up to 1000 objects)
+- *Download Objects*: Download files from S3 to your local machine
+- *Delete Objects*: Remove objects from your buckets
+
+**** How to Use
+
+1. Launch =:Aws= and select *s3*
+2. Choose *List Buckets* to see all available buckets
+3. Select a bucket to view its contents
+4. Navigate to an object and choose an action:
+   - Download the object to your local system
+   - Delete the object from the bucket
+
+*Note*: Object listing is currently limited to the first 1000 objects in a bucket.
 
 ** And now what?
 
