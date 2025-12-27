@@ -13,9 +13,10 @@ function M.describe_databases(on_result)
             return value.name .. ': ' .. value.value
         end):join(', ')
 
-    handler.async("aws rds describe-db-instances --query 'DBInstances[].{" ..
-                  query_string ..
-                  "}'", on_result)
+    handler.aws_command("rds",
+        "describe-db-instances --query 'DBInstances[].{" ..
+        query_string ..
+        "}'", on_result)
 end
 
 return M

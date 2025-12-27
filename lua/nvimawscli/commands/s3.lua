@@ -7,7 +7,7 @@ local M = {}
 ---Fetch the list of s3 buckets
 ---@param on_result OnResult
 function M.list_buckets(on_result)
-    handler.async("aws s3api list-buckets --query 'Buckets[].Name'", on_result)
+    handler.aws_command("s3api", "list-buckets --query 'Buckets[].Name'", on_result)
 end
 
 ---Fetch the list of objects in a bucket
@@ -20,7 +20,7 @@ function M.list_bucket_objects(bucket_name, prefix, on_result)
         prefix_predicate = " --prefix " .. prefix
     end
 
-    handler.async("aws s3api list-objects-v2 --bucket " .. bucket_name ..
+    handler.aws_command("s3api", "list-objects-v2 --bucket " .. bucket_name ..
                   prefix_predicate ..
     -- " --query 'Contents[].[Key, Size, LastModified]
                   " --max-items " .. config.s3.max_items, on_result)
@@ -42,8 +42,8 @@ function M.download_bucket_object(bucket_name, object_key, on_result)
 
     vim.fn.mkdir(folder, "p")
 
-    local command = "aws s3 cp \"s3://" .. bucket_name .. "/" .. object_key .. "\" " .. folder
-    handler.async(command, on_result)
+    local arguments = 'cp "s3://' .. bucket_name .. '/' .. object_key .. '" ' .. folder
+    handler.aws_command("s3", arguments, on_result)
 end
 
 ---Delete an object from a bucket
@@ -51,8 +51,8 @@ end
 ---@param object_key string
 ---@param on_result OnResult
 function M.delete_bucket_object(bucket_name, object_key, on_result)
-    local command = "aws s3 rm \"s3://" .. bucket_name .. "/" .. object_key .. "\""
-    handler.async(command, on_result)
+    local arguments = 'rm "s3://' .. bucket_name .. '/' .. object_key .. '"'
+    handler.aws_command("s3", arguments, on_result)
 end
 
 return M

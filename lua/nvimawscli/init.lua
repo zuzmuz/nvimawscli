@@ -1,4 +1,5 @@
 local config = require("nvimawscli.config")
+local data = require("nvimawscli.utils.data")
 
 ---@class Dashboard
 local M = {}
@@ -23,7 +24,7 @@ function M.launch(command_service)
         config.setup({})
     end
 
-    print("launching dashbord", command_service)
+    vim.notify("launching dashbord", command_service)
     if command_service then
 
         local status, service = pcall(require, "nvimawscli.services." .. command_service)
@@ -31,7 +32,10 @@ function M.launch(command_service)
             service:show("topleft")
             return
         else
-            vim.api.nvim_err_writeln("service " .. command_service .. " not supported")
+            vim.notify(
+                "service " .. command_service .. " not supported",
+                vim.log.levels.WARN
+            )
         end
     elseif config.startup_service then
         local status, service = pcall(require, "nvimawscli.services." .. config.startup_service)
@@ -40,9 +44,13 @@ function M.launch(command_service)
             service:show("inplace")
             return
         else
-            vim.api.nvim_err_writeln("startup service " .. config.startup_service .. " not supported")
+            vim.notify(
+                "startup service " .. config.startup_service .. " not supported",
+                vim.log.levelss.WARN
+            )
         end
     end
+    data.load()
     require("nvimawscli.menu"):show("inplace")
 end
 

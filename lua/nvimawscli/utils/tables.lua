@@ -45,7 +45,10 @@ function M.render(headers, rows, sorted_by_column_index, sorted_direction, confi
     if config.border then
         local border = require('nvimawscli.utils.borders')[config.border]
         if not border then
-            vim.api.nvim_err_writeln("Invalid table style: " .. config.border)
+            vim.notify(
+                "Invalid table style: " .. config.border,
+                vim.log.levels.WARN
+            )
             return {}, {}, {}
         end
         local lines = {}
@@ -111,7 +114,10 @@ function M.render(headers, rows, sorted_by_column_index, sorted_direction, confi
         end
         return lines, allowed_positions, widths
     else
-        vim.api.nvim_err_writeln("Table style not found")
+        vim.notify(
+            "Table style not found",
+            vim.log.levels.WARN
+        )
         return {}, {}, {}
     end
 end

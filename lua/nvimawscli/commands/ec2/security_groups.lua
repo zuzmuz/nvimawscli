@@ -14,9 +14,10 @@ function M.describe_security_groups(on_result)
             return value.name .. ': ' .. value.value
         end):join(', ')
 
-    handler.async("aws ec2 describe-security-groups --query 'SecurityGroups[].{" ..
-                  query_string ..
-                  "}'", on_result)
+    handler.aws_command("ec2",
+        "describe-security-groups --query 'SecurityGroups[].{" ..
+        query_string ..
+        "}'", on_result)
 end
 
 ---Fetch security group rules
@@ -28,19 +29,21 @@ function M.describe_security_group_rules(group_id, on_result)
             return value.name .. ': ' .. value.value
         end):join(', ')
 
-    handler.async("aws ec2 describe-security-group-rules " ..
-                  "--filters 'Name=group-id,Values=" .. group_id .. "' " ..
-                  "--query 'SecurityGroupRules[].{" ..
-                  query_string ..
-                  "}'", on_result)
+    handler.aws_command("ec2",  
+        "describe-security-group-rules " ..
+        "--filters 'Name=group-id,Values=" .. group_id .. "' " ..
+        "--query 'SecurityGroupRules[].{" ..
+        query_string ..
+        "}'", on_result)
 end
 
 ---Fetch security group rule
 function M.describe_security_group_rule(group_id, rule_id, on_result)
-    handler.async("aws ec2 describe-security-group-rules" ..
-                  " --filters 'Name=group-id,Values=" .. group_id .. "'" ..
-                  " --security-group-rule-ids " .. rule_id ..
-                  " --query 'SecurityGroupRules[0]'", on_result)
+    handler.aws_command("ec2",
+        "describe-security-group-rules" ..
+        " --filters 'Name=group-id,Values=" .. group_id .. "'" ..
+        " --security-group-rule-ids " .. rule_id ..
+        " --query 'SecurityGroupRules[0]'", on_result)
 end
 
 ---Modify security group rules
@@ -63,11 +66,11 @@ function M.modify_security_group_rule(group_id, rule_id, rule_details, on_result
             return key .. '=' .. value
         end):join(',')
 
-    local command = "aws ec2 modify-security-group-rules " ..
-                    "--group-id " .. group_id .. " " ..
-                    "--security-group-rules " .. "'SecurityGroupRuleId=" .. rule_id ..
-                    ",SecurityGroupRule={" .. security_group_rule .. "}'"
-    handler.async(command, on_result)
+    local arguments = "modify-security-group-rules " ..
+        "--group-id " .. group_id .. " " ..
+        "--security-group-rules " .. "'SecurityGroupRuleId=" .. rule_id ..
+        ",SecurityGroupRule={" .. security_group_rule .. "}'"
+    handler.aws_command("ec2", arguments, on_result)
 end
 
 return M
